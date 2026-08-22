@@ -1,12 +1,12 @@
 {
+  "/_not-found/page": "/_not-found",
   "/api/chat/route": "/api/chat",
   "/api/fortune/route": "/api/fortune",
-  "/_not-found/page": "/_not-found",
   "/ai/page": "/ai",
   "/compatibility/page": "/compatibility",
-  "/fortune/business/page": "/fortune/business",
   "/fortune/2026/page": "/fortune/2026",
-  "/page": "/",
+  "/fortune/business/page": "/fortune/business",
   "/mypage/page": "/mypage",
+  "/page": "/",
   "/saju/page": "/saju"
 }

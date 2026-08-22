@@ -12,7 +12,11 @@ const cards=[
 export default function Home(){
  const [form,setForm]=useState({name:"",birth:"",time:"",gender:"남성",calendar:"양력"}); const [loading,setLoading]=useState(false); const [result,setResult]=useState<Result|null>(null);
  const update=(k:string,v:string)=>setForm(f=>({...f,[k]:v}));
- async function submit(e:React.FormEvent){e.preventDefault();setLoading(true);setResult(null);try{const r=await fetch("/api/fortune",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});const d=await r.json();if(!r.ok)throw new Error(d.error||"분석 중 오류가 발생했습니다.");setResult(d);}catch(e:any){alert(e.message)}finally{setLoading(false)}}
+ async function submit(e:React.FormEvent){e.preventDefault();setLoading(true);setResult(null);try{const r=await fetch("/api/fortune",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});const d=await r.json();if(!r.ok)throw new Error(d.error||"분석 중 오류가 발생했습니다.");setResult({
+  title: "명운 AI 분석 결과",
+  summary: d.result ?? "",
+  sections: []
+});}catch(e:any){alert(e.message)}finally{setLoading(false)}}
  return <main>
   <section className="heroHome"><div className="heroCopy"><div className="eyebrow">✦ AI 사주 · 운세 종합 플랫폼</div><h1>태어난 순간부터 시작된<br/><em>나만의 운명</em>을 읽다</h1><p>생년월일시를 바탕으로 성향, 재물, 사업, 인연과 앞으로의 흐름을 알기 쉽게 풀어드립니다.</p><div className="heroActions"><Link href="/saju" className="primaryBtn">내 사주 무료로 보기</Link><Link href="/ai" className="ghostBtn">명운 AI 상담 →</Link></div><div className="trust">🔒 입력 정보는 운세 분석에만 사용됩니다 · 참고용 콘텐츠</div></div>
    <div className="heroOrb"><span>明</span><i>命運</i><small>YOUR FLOW · YOUR STORY</small></div>
