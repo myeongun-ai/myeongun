@@ -12,5 +12,13 @@ export async function POST(req: Request) {
     const response = await client.responses.create({model:"gpt-5.6", input:prompt});
     const raw = response.output_text.trim().replace(/^```json\s*/,"").replace(/```$/i,"");
     return NextResponse.json(JSON.parse(raw));
-  } catch (e) { return NextResponse.json({error:"사주 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."},{status:500}); }
-}
+} catch (e) {
+  console.error("FORTUNE_ERROR:", e);
+  return NextResponse.json(
+    {
+      error: "사주 분석 중 오류가 발생했습니다.",
+      detail: String(e),
+    },
+    { status: 500 }
+  );
+}  
