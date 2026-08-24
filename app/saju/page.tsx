@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type SajuForm = {
@@ -11,8 +11,24 @@ type SajuForm = {
   calendar: string;
 };
 
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+function parseBirth(value: string) {
+  const [y, m, d] = value.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return { year: y, month: m, day: d };
+}
+
 export default function SajuPage() {
   const router = useRouter();
+  const today = new Date();
+  const currentYear = today.getFullYear();
 
   const [form, setForm] = useState<SajuForm>({
     name: "",
@@ -21,20 +37,59 @@ export default function SajuPage() {
     gender: "남성",
     calendar: "양력",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(currentYear);
+  const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
 
   useEffect(() => {
-    // 새 입력 화면에 들어오면 이전 방문자의 활성 세션을 종료합니다.
     sessionStorage.removeItem("myeongun_session_active");
   }, []);
 
   function update<K extends keyof SajuForm>(key: K, value: SajuForm[K]) {
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  const years = useMemo(
+    () => Array.from({ length: currentYear - 1930 + 1 }, (_, i) => currentYear - i),
+    [currentYear]
+  );
+
+  const parsedBirth = parseBirth(form.birth);
+  const monthDays = daysInMonth(pickerYear, pickerMonth);
+  const firstDay = new Date(pickerYear, pickerMonth - 1, 1).getDay();
+
+  function openPicker() {
+    const parsed = parseBirth(form.birth);
+    if (parsed) {
+      setPickerYear(parsed.year);
+      setPickerMonth(parsed.month);
+    }
+    setPickerOpen(true);
+  }
+
+  function moveMonth(delta: number) {
+    let year = pickerYear;
+    let month = pickerMonth + delta;
+
+    if (month < 1) {
+      month = 12;
+      year -= 1;
+    }
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+    if (year < 1930 || year > currentYear) return;
+
+    setPickerYear(year);
+    setPickerMonth(month);
+  }
+
+  function selectDay(day: number) {
+    update("birth", `${pickerYear}-${pad2(pickerMonth)}-${pad2(day)}`);
+    setPickerOpen(false);
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -42,7 +97,6 @@ export default function SajuPage() {
     setError("");
 
     const data = new FormData(e.currentTarget);
-
     const payload: SajuForm = {
       name: String(data.get("name") || "").trim(),
       birth: String(data.get("birth") || ""),
@@ -61,31 +115,21 @@ export default function SajuPage() {
     try {
       const response = await fetch("/api/fortune", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const parsed = await response.json();
-
       if (!response.ok) {
         throw new Error(parsed?.error || "사주 분석에 실패했습니다.");
       }
 
       localStorage.setItem("myeongun_saju", JSON.stringify(payload));
       localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
-
-      // 현재 탭에서 직접 사주 입력을 완료한 경우에만 개인정보를 다른 페이지에서 사용합니다.
       sessionStorage.setItem("myeongun_session_active", "1");
-
       router.push("/payment");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "사주 분석 중 오류가 발생했습니다."
-      );
+      setError(err instanceof Error ? err.message : "사주 분석 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -123,25 +167,129 @@ export default function SajuPage() {
         </p>
       </section>
 
-      <section style={{ maxWidth: "820px", margin: "0 auto", background: "#fffdf8", border: "1px solid #dccfbf", borderRadius: "18px", padding: "28px", boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)" }}>
+      <section style={{ maxWidth: "820px", margin: "0 auto", background: "#fffdf8", border: "1px solid #dccfbf", borderRadius: "18px", padding: "28px", boxShadow: "0 10px 30px rgba(0,0,0,.04)" }}>
         <form onSubmit={handleSubmit}>
           <label style={labelStyle}>
             이름
-            <input name="name" type="text" value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="이름을 입력해주세요" autoComplete="name" style={fieldStyle} />
+            <input
+              name="name"
+              type="text"
+              value={form.name}
+              onChange={(e) => update("name", e.target.value)}
+              placeholder="이름을 입력해주세요"
+              autoComplete="name"
+              style={fieldStyle}
+            />
           </label>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "16px", marginTop: "18px" }}>
+          <div className="twoCol" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "16px", marginTop: "18px" }}>
             <label style={labelStyle}>
               생년월일
-              <input name="birth" type="date" value={form.birth} onChange={(e) => update("birth", e.target.value)} required style={fieldStyle} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
+                <input
+                  name="birth"
+                  type="text"
+                  readOnly
+                  required
+                  value={form.birth}
+                  placeholder="년-월-일"
+                  onClick={openPicker}
+                  style={{ ...fieldStyle, cursor: "pointer" }}
+                />
+                <button
+                  type="button"
+                  onClick={openPicker}
+                  style={{ border: "none", borderRadius: "10px", padding: "0 16px", background: "#20251f", color: "#fff", fontWeight: 700 }}
+                >
+                  달력
+                </button>
+              </div>
             </label>
+
             <label style={labelStyle}>
               출생시간
-              <input name="time" type="time" value={form.time} onChange={(e) => update("time", e.target.value)} required style={fieldStyle} />
+              <input
+                name="time"
+                type="time"
+                value={form.time}
+                onChange={(e) => update("time", e.target.value)}
+                required
+                style={fieldStyle}
+              />
             </label>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "16px", marginTop: "18px" }}>
+          {pickerOpen && (
+            <section style={{ marginTop: "16px", border: "1px solid #d8cdbc", borderRadius: "16px", padding: "16px", background: "#fff" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "44px 1fr 1fr 44px", gap: "8px", alignItems: "center" }}>
+                <button type="button" onClick={() => moveMonth(-1)} aria-label="이전 달">‹</button>
+
+                <select
+                  aria-label="연도 선택"
+                  value={pickerYear}
+                  onChange={(e) => setPickerYear(Number(e.target.value))}
+                  style={fieldStyle}
+                >
+                  {years.map((year) => (
+                    <option key={year} value={year}>{year}년</option>
+                  ))}
+                </select>
+
+                <select
+                  aria-label="월 선택"
+                  value={pickerMonth}
+                  onChange={(e) => setPickerMonth(Number(e.target.value))}
+                  style={fieldStyle}
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                    <option key={month} value={month}>{month}월</option>
+                  ))}
+                </select>
+
+                <button type="button" onClick={() => moveMonth(1)} aria-label="다음 달">›</button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7,minmax(0,1fr))", gap: "7px", marginTop: "14px", textAlign: "center" }}>
+                {["일","월","화","수","목","금","토"].map((d) => (
+                  <div key={d} style={{ padding: "8px 0", color: "#b08a3e", fontSize: "12px", fontWeight: 700 }}>{d}</div>
+                ))}
+
+                {Array.from({ length: firstDay }).map((_, i) => <div key={`blank-${i}`} />)}
+
+                {Array.from({ length: monthDays }, (_, i) => i + 1).map((day) => {
+                  const selected =
+                    parsedBirth?.year === pickerYear &&
+                    parsedBirth?.month === pickerMonth &&
+                    parsedBirth?.day === day;
+
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => selectDay(day)}
+                      style={{
+                        minHeight: "42px",
+                        border: "none",
+                        borderRadius: "10px",
+                        background: selected ? "#20251f" : "#f5f1ea",
+                        color: selected ? "#fff" : "#2d312b",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "14px" }}>
+                <button type="button" onClick={() => { update("birth", ""); setPickerOpen(false); }}>삭제</button>
+                <button type="button" onClick={() => setPickerOpen(false)}>닫기</button>
+              </div>
+            </section>
+          )}
+
+          <div className="twoCol" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "16px", marginTop: "18px" }}>
             <label style={labelStyle}>
               성별
               <select name="gender" value={form.gender} onChange={(e) => update("gender", e.target.value)} style={fieldStyle}>
@@ -149,6 +297,7 @@ export default function SajuPage() {
                 <option value="여성">여성</option>
               </select>
             </label>
+
             <label style={labelStyle}>
               달력 기준
               <select name="calendar" value={form.calendar} onChange={(e) => update("calendar", e.target.value)} style={fieldStyle}>
@@ -158,9 +307,9 @@ export default function SajuPage() {
             </label>
           </div>
 
-          {error && <p style={{ margin: "18px 0 0", color: "#b42318", fontSize: "13px", lineHeight: 1.6 }}>{error}</p>}
+          {error && <p style={{ margin: "18px 0 0", color: "#b42318", fontSize: "13px" }}>{error}</p>}
 
-          <button type="submit" disabled={loading} style={{ width: "100%", marginTop: "22px", border: "none", borderRadius: "10px", padding: "16px", background: "#20251f", color: "#fff", fontSize: "15px", fontWeight: 700, cursor: loading ? "wait" : "pointer" }}>
+          <button type="submit" disabled={loading} style={{ width: "100%", marginTop: "22px", border: "none", borderRadius: "10px", padding: "16px", background: "#20251f", color: "#fff", fontSize: "15px", fontWeight: 700 }}>
             {loading ? "사주 분석 중..." : "사주 분석 시작"}
           </button>
         </form>
@@ -169,6 +318,14 @@ export default function SajuPage() {
       <p style={{ textAlign: "center", color: "#9a9388", marginTop: "20px", fontSize: "12px" }}>
         입력한 정보는 현재 이용 흐름을 이어보기 위해 저장됩니다.
       </p>
+
+      <style jsx>{`
+        @media (max-width: 640px) {
+          .twoCol {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
