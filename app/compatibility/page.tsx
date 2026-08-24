@@ -1,2 +1,109 @@
+"use client";
+
 import Link from "next/link";
-export default function Compatibility(){return <main className="inner"><div className="pageIntro"><span className="eyebrow">LOVE · PARTNERSHIP</span><h1>두 사람의 궁합</h1><p>연애·결혼·재물·사업 관점에서 관계의 강점과 주의점을 살펴봅니다.</p></div><section className="pairCard"><div className="person"><span>나</span><strong>생년월일 입력</strong></div><div className="heart">＋</div><div className="person"><span>상대</span><strong>생년월일 입력</strong></div></section><button className="primaryBtn wide">궁합 분석 시작</button><section className="contentCard preview"><h2>궁합 리포트 미리보기</h2><div className="compatScores"><b>종합 87</b><span>❤️ 애정 92</span><span>💬 대화 84</span><span>💰 재물 79</span><span>🏠 결혼 91</span></div><p>실제 입력 후 두 사람의 출생정보를 기준으로 상세 해석이 생성됩니다.</p></section><Link className="textLink" href="/">← 홈으로</Link></main>}
+import { useMemo, useState } from "react";
+
+function seed(date: string) {
+  return [...date].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+}
+
+export default function CompatibilityPage() {
+  const [me, setMe] = useState("");
+  const [partner, setPartner] = useState("");
+  const [result, setResult] = useState<number | null>(null);
+
+  const canAnalyze = Boolean(me && partner);
+
+  const scores = useMemo(() => {
+    if (!me || !partner) return null;
+    const a = seed(me);
+    const b = seed(partner);
+    return {
+      total: 72 + ((a + b) % 23),
+      affection: 74 + ((a * 3 + b) % 21),
+      conversation: 70 + ((a + b * 2) % 25),
+      finance: 68 + ((a * 2 + b * 3) % 27),
+      marriage: 71 + ((a * 5 + b * 2) % 24),
+    };
+  }, [me, partner]);
+
+  function analyze() {
+    if (!canAnalyze || !scores) return;
+    setResult(scores.total);
+  }
+
+  return (
+    <main className="inner">
+      <section className="pageIntro">
+        <span className="eyebrow">LOVE · PARTNERSHIP</span>
+        <h1>두 사람의 궁합</h1>
+        <p>두 사람의 생년월일을 직접 입력해 관계의 흐름을 확인해보세요.</p>
+      </section>
+
+      <section className="pairCard">
+        <div className="person">
+          <span>나</span>
+          <label style={{ width: "80%" }}>
+            <input
+              aria-label="나의 생년월일"
+              type="date"
+              value={me}
+              onChange={(e) => { setMe(e.target.value); setResult(null); }}
+              style={{ width: "100%" }}
+            />
+          </label>
+        </div>
+
+        <div className="heart">＋</div>
+
+        <div className="person">
+          <span>상대</span>
+          <label style={{ width: "80%" }}>
+            <input
+              aria-label="상대의 생년월일"
+              type="date"
+              value={partner}
+              onChange={(e) => { setPartner(e.target.value); setResult(null); }}
+              style={{ width: "100%" }}
+            />
+          </label>
+        </div>
+      </section>
+
+      <button
+        type="button"
+        className="primaryBtn wide"
+        onClick={analyze}
+        disabled={!canAnalyze}
+      >
+        궁합 분석 시작
+      </button>
+
+      {result === null ? (
+        <section className="contentCard">
+          <h2>궁합 리포트</h2>
+          <p>
+            두 사람의 생년월일을 입력하면 이곳에 궁합 결과가 표시됩니다.
+            입력 전에는 샘플 점수를 보여주지 않습니다.
+          </p>
+        </section>
+      ) : (
+        <section className="contentCard">
+          <h2>궁합 리포트</h2>
+          <div className="compatScores">
+            <span>종합 {scores?.total}</span>
+            <span>❤️ 애정 {scores?.affection}</span>
+            <span>💬 대화 {scores?.conversation}</span>
+            <span>💰 재물 {scores?.finance}</span>
+            <span>🏠 결혼 {scores?.marriage}</span>
+          </div>
+          <p style={{ marginTop: 20 }}>
+            두 사람의 입력값을 기준으로 표시한 참고 지수입니다.
+          </p>
+        </section>
+      )}
+
+      <Link href="/" className="textLink">← 홈으로</Link>
+    </main>
+  );
+}
