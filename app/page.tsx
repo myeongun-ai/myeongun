@@ -394,16 +394,22 @@ export default function Home() {
 
             <div style={{ position: "relative" }}>
               <input
-                name="birth"
-                value={form.birth}
-                onChange={handleChange}
-                type="date"
-                style={inputStyle}
-              />
+                  name="birth"
+                  value={form.birth}
+                  type="text"
+                  readOnly
+                  placeholder="년-월-일"
+                  onClick={() => setCalendarOpen(true)}
+                  style={{
+                    ...inputStyle,
+                    cursor: "pointer",
+                    paddingRight: "86px",
+                  }}
+                />
 
               <button
                 type="button"
-                onClick={() => setCalendarOpen(!calendarOpen)}
+                onClick={() => setCalendarOpen(true)}
                 style={{
                   position: "absolute",
                   right: "10px",
@@ -448,9 +454,76 @@ export default function Home() {
                     ‹
                   </button>
 
-                  <strong>
-                    {year}년 {month + 1}월
-                  </strong>
+                  <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "8px",
+                        minWidth: "210px",
+                      }}
+                    >
+                      <select
+                        aria-label="연도 선택"
+                        value={year}
+                        onChange={(e) =>
+                          setViewDate(
+                            new Date(Number(e.target.value), month, 1)
+                          )
+                        }
+                        style={{
+                          minWidth: 0,
+                          height: "38px",
+                          border: "1px solid rgba(255,255,255,0.14)",
+                          borderRadius: "9px",
+                          background: "#171a24",
+                          color: "#fff",
+                          padding: "0 8px",
+                          fontSize: "14px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {Array.from(
+                          {
+                            length:
+                              new Date().getFullYear() - 1930 + 1,
+                          },
+                          (_, i) => new Date().getFullYear() - i
+                        ).map((itemYear) => (
+                          <option key={itemYear} value={itemYear}>
+                            {itemYear}년
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        aria-label="월 선택"
+                        value={month}
+                        onChange={(e) =>
+                          setViewDate(
+                            new Date(year, Number(e.target.value), 1)
+                          )
+                        }
+                        style={{
+                          minWidth: 0,
+                          height: "38px",
+                          border: "1px solid rgba(255,255,255,0.14)",
+                          borderRadius: "9px",
+                          background: "#171a24",
+                          color: "#fff",
+                          padding: "0 8px",
+                          fontSize: "14px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {Array.from({ length: 12 }, (_, i) => i).map(
+                          (itemMonth) => (
+                            <option key={itemMonth} value={itemMonth}>
+                              {itemMonth + 1}월
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </div>
 
                   <button
                     type="button"
