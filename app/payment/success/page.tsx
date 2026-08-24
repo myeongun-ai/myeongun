@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-function PaymentSuccessContent() {`r`n  useEffect(() => {`r`n    document.cookie = "myeongun_paid=1; Path=/; Max-Age=86400; SameSite=Lax";`r`n  }, []);
+function PaymentSuccessContent() {`r`n  useEffect(() => {`r`n    document.cookie = "myeongun_paid=true; Path=/; Max-Age=86400; SameSite=Lax";`r`n  }, []);
   const searchParams = useSearchParams();
 
   const [orderId, setOrderId] = useState("");
@@ -373,3 +373,4 @@ export default function PaymentSuccessPage() {
     </Suspense>
   );
 }
+
