@@ -10,14 +10,16 @@ function seed(date: string) {
 export default function CompatibilityPage() {
   const [me, setMe] = useState("");
   const [partner, setPartner] = useState("");
-  const [result, setResult] = useState<number | null>(null);
+  const [analyzed, setAnalyzed] = useState(false);
 
   const canAnalyze = Boolean(me && partner);
 
   const scores = useMemo(() => {
     if (!me || !partner) return null;
+
     const a = seed(me);
     const b = seed(partner);
+
     return {
       total: 72 + ((a + b) % 23),
       affection: 74 + ((a * 3 + b) % 21),
@@ -27,9 +29,13 @@ export default function CompatibilityPage() {
     };
   }, [me, partner]);
 
+  function resetResult() {
+    setAnalyzed(false);
+  }
+
   function analyze() {
     if (!canAnalyze || !scores) return;
-    setResult(scores.total);
+    setAnalyzed(true);
   }
 
   return (
@@ -37,7 +43,9 @@ export default function CompatibilityPage() {
       <section className="pageIntro">
         <span className="eyebrow">LOVE · PARTNERSHIP</span>
         <h1>두 사람의 궁합</h1>
-        <p>두 사람의 생년월일을 직접 입력해 관계의 흐름을 확인해보세요.</p>
+        <p>
+          나와 상대의 생년월일을 직접 입력하면 관계의 흐름과 참고 점수를 확인할 수 있습니다.
+        </p>
       </section>
 
       <section className="pairCard">
@@ -48,7 +56,10 @@ export default function CompatibilityPage() {
               aria-label="나의 생년월일"
               type="date"
               value={me}
-              onChange={(e) => { setMe(e.target.value); setResult(null); }}
+              onChange={(e) => {
+                setMe(e.target.value);
+                resetResult();
+              }}
               style={{ width: "100%" }}
             />
           </label>
@@ -63,7 +74,10 @@ export default function CompatibilityPage() {
               aria-label="상대의 생년월일"
               type="date"
               value={partner}
-              onChange={(e) => { setPartner(e.target.value); setResult(null); }}
+              onChange={(e) => {
+                setPartner(e.target.value);
+                resetResult();
+              }}
               style={{ width: "100%" }}
             />
           </label>
@@ -79,31 +93,38 @@ export default function CompatibilityPage() {
         궁합 분석 시작
       </button>
 
-      {result === null ? (
+      {!analyzed ? (
         <section className="contentCard">
           <h2>궁합 리포트</h2>
           <p>
-            두 사람의 생년월일을 입력하면 이곳에 궁합 결과가 표시됩니다.
-            입력 전에는 샘플 점수를 보여주지 않습니다.
+            두 사람의 생년월일을 모두 입력한 뒤 궁합 분석을 시작하면 결과가 표시됩니다.
+            입력 전에는 임의의 점수나 미리보기 결과를 보여주지 않습니다.
           </p>
         </section>
       ) : (
         <section className="contentCard">
           <h2>궁합 리포트</h2>
+
           <div className="compatScores">
             <span>종합 {scores?.total}</span>
-            <span>❤️ 애정 {scores?.affection}</span>
-            <span>💬 대화 {scores?.conversation}</span>
-            <span>💰 재물 {scores?.finance}</span>
-            <span>🏠 결혼 {scores?.marriage}</span>
+            <span>애정 {scores?.affection}</span>
+            <span>대화 {scores?.conversation}</span>
+            <span>재물 {scores?.finance}</span>
+            <span>결혼 {scores?.marriage}</span>
           </div>
+
           <p style={{ marginTop: 20 }}>
-            두 사람의 입력값을 기준으로 표시한 참고 지수입니다.
+            이 점수는 두 사람이 입력한 생년월일을 기준으로 만든 참고 지표입니다.
+            실제 관계는 서로의 대화, 신뢰, 생활 방식과 선택에 따라 달라질 수 있습니다.
           </p>
         </section>
       )}
 
-      <Link href="/" className="textLink">← 홈으로</Link>
+      <div style={{ textAlign: "center", marginTop: 24 }}>
+        <Link href="/" className="textLink">
+          홈으로
+        </Link>
+      </div>
     </main>
   );
 }

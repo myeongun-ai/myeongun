@@ -1,60 +1,100 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Saju = {
   name?: string;
   birth?: string;
-  birthTime?: string;
+  time?: string;
   gender?: string;
   calendar?: string;
 };
 
-function seedFromBirth(birth: string) {
-  return [...birth].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-}
+function collectBusinessTexts(data: unknown): string[] {
+  const keywords = ["재물", "사업", "직업", "커리어", "돈", "wealth", "business", "career", "money"];
+  const results: string[] = [];
 
-function score(seed: number, offset: number) {
-  return 70 + ((seed * 17 + offset * 13) % 27);
+  function walk(value: unknown, parentKey = "") {
+    if (value == null) return;
+
+    if (typeof value === "string") {
+      const keyMatched = keywords.some((keyword) =>
+        parentKey.toLowerCase().includes(keyword.toLowerCase())
+      );
+      const valueMatched = keywords.some((keyword) =>
+        value.toLowerCase().includes(keyword.toLowerCase())
+      );
+
+      if (keyMatched || valueMatched) {
+        const cleaned = value.trim();
+        if (cleaned.length >= 8 && !results.includes(cleaned)) {
+          results.push(cleaned);
+        }
+      }
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => walk(item, parentKey));
+      return;
+    }
+
+    if (typeof value === "object") {
+      Object.entries(value as Record<string, unknown>).forEach(([key, item]) => {
+        walk(item, key);
+      });
+    }
+  }
+
+  walk(data);
+  return results.slice(0, 8);
 }
 
 export default function BusinessFortunePage() {
   const [saju, setSaju] = useState<Saju | null>(null);
+  const [analysis, setAnalysis] = useState<unknown>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("myeongun_saju");
-      if (saved) setSaju(JSON.parse(saved));
+      const savedSaju = localStorage.getItem("myeongun_saju");
+      const savedResult = localStorage.getItem("myeongun_saju_result");
+
+      setSaju(savedSaju ? JSON.parse(savedSaju) : null);
+      setAnalysis(savedResult ? JSON.parse(savedResult) : null);
     } catch {
       setSaju(null);
+      setAnalysis(null);
+    } finally {
+      setReady(true);
     }
   }, []);
 
-  const scores = useMemo(() => {
-    if (!saju?.birth) return null;
-    const seed = seedFromBirth(saju.birth);
-    return {
-      wealth: score(seed, 1),
-      business: score(seed, 2),
-      career: score(seed, 3),
-      execution: score(seed, 4),
-    };
-  }, [saju]);
+  if (!ready) {
+    return (
+      <main className="inner">
+        <section className="contentCard" style={{ textAlign: "center" }}>
+          <p>사주 정보를 확인하고 있습니다...</p>
+        </section>
+      </main>
+    );
+  }
 
-  if (!saju || !scores) {
+  if (!saju?.birth || !saju?.time) {
     return (
       <main className="inner">
         <section className="pageIntro">
           <span className="eyebrow">WEALTH · BUSINESS</span>
           <h1>재물·사업운</h1>
-          <p>먼저 나의 사주를 입력해야 개인화된 흐름을 확인할 수 있습니다.</p>
+          <p>사주를 입력하지 않은 상태에서는 임의의 점수나 결과를 표시하지 않습니다.</p>
         </section>
+
         <section className="contentCard" style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <h2>사주 입력이 필요합니다</h2>
+          <h2>먼저 나의 사주를 입력해주세요</h2>
           <p>
-            사주 입력 없이 임의의 점수를 보여주지 않습니다. 생년월일과 출생시간을
-            입력하면 이 페이지에서 입력된 사주를 기준으로 표시합니다.
+            생년월일, 출생시간, 성별, 달력 기준을 입력하고 사주 분석을 완료하면
+            저장된 분석 결과를 바탕으로 재물·사업 관련 내용을 확인할 수 있습니다.
           </p>
           <Link href="/saju" className="primaryBtn inline">
             사주 입력하러 가기
@@ -64,34 +104,71 @@ export default function BusinessFortunePage() {
     );
   }
 
+  const businessTexts = collectBusinessTexts(analysis);
+
   return (
     <main className="inner">
       <section className="pageIntro">
         <span className="eyebrow">WEALTH · BUSINESS</span>
-        <h1>{saju.name || "고객님"}의 재물·사업운</h1>
-        <p>입력하신 사주 정보를 기준으로 현재 흐름을 확인합니다.</p>
-      </section>
-
-      <section className="scoreStrip">
-        <div><span>재물운</span><b>{scores.wealth}</b></div>
-        <div><span>사업운</span><b>{scores.business}</b></div>
-        <div><span>직업운</span><b>{scores.career}</b></div>
-        <div><span>실행운</span><b>{scores.execution}</b></div>
+        <h1>{saju.name ? `${saju.name}님의 재물·사업운` : "나의 재물·사업운"}</h1>
+        <p>저장된 사주 정보와 AI 분석 결과를 기준으로 재물·사업 관련 내용을 보여드립니다.</p>
       </section>
 
       <section className="contentCard">
-        <h2>나의 사업 흐름</h2>
-        <p>
-          입력된 생년월일을 기준으로 개인화된 흐름을 표시합니다. 이 페이지의 점수는
-          서비스 화면용 참고 지수이며 투자·사업의 성공을 보장하는 수치가 아닙니다.
-        </p>
+        <h2>입력된 사주 정보</h2>
         <div className="featureList">
-          <div><strong>재물 흐름</strong><span>수입과 지출 구조를 함께 점검하세요.</span></div>
-          <div><strong>사업 흐름</strong><span>확장보다 반복 가능한 구조를 우선하세요.</span></div>
-          <div><strong>직업 흐름</strong><span>경험과 전문성을 활용하는 방향이 유리합니다.</span></div>
-          <div><strong>실행 흐름</strong><span>작은 실행을 쌓아 결과로 연결하세요.</span></div>
+          <div><strong>생년월일</strong><span>{saju.birth}</span></div>
+          <div><strong>출생시간</strong><span>{saju.time}</span></div>
+          <div><strong>성별</strong><span>{saju.gender || "-"}</span></div>
+          <div><strong>달력 기준</strong><span>{saju.calendar || "-"}</span></div>
         </div>
-        <Link href="/saju" className="ghostBtn inline">사주 다시 입력하기</Link>
+      </section>
+
+      <section className="contentCard">
+        <h2>재물·사업 AI 분석</h2>
+
+        {businessTexts.length > 0 ? (
+          <div style={{ display: "grid", gap: 12, marginTop: 20 }}>
+            {businessTexts.map((text, index) => (
+              <div
+                key={`${index}-${text.slice(0, 20)}`}
+                style={{
+                  padding: "18px 20px",
+                  borderRadius: 14,
+                  background: "#f5f0e7",
+                  lineHeight: 1.9,
+                  color: "#5f584e",
+                }}
+              >
+                {text}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <p>
+              현재 저장된 AI 분석 결과에서 재물·사업 관련 항목을 별도로 찾지 못했습니다.
+              종합 상세 사주 결과는 아래 버튼에서 확인할 수 있습니다.
+            </p>
+            <Link href="/fortune/detail" className="primaryBtn inline">
+              종합 상세 사주 보기
+            </Link>
+          </>
+        )}
+      </section>
+
+      <section className="contentCard">
+        <h2>안내</h2>
+        <p>
+          이 페이지는 입력하지 않은 사용자에게 임의의 점수를 표시하지 않습니다.
+          향후 재물·사업운을 별도의 AI 분석 상품으로 확장하더라도 실제 입력 정보와
+          분석 결과를 기준으로 표시하도록 구성할 수 있습니다.
+        </p>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
+          <Link href="/saju" className="ghostBtn inline">사주 다시 입력하기</Link>
+          <Link href="/fortune/detail" className="ghostBtn inline">상세 사주 보기</Link>
+        </div>
       </section>
     </main>
   );
