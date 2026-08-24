@@ -1,15 +1,15 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-function PaymentSuccessContent() {
+function PaymentSuccessContent() {`r`n  useEffect(() => {`r`n    document.cookie = "myeongun_paid=1; Path=/; Max-Age=86400; SameSite=Lax";`r`n  }, []);
   const searchParams = useSearchParams();
 
   const [orderId, setOrderId] = useState("");
   const [paymentKey, setPaymentKey] = useState("");
-  const [amount, setAmount] = useState("9,900원");
+  const [amount, setAmount] = useState("9,900??);
 
   useEffect(() => {
     const urlOrderId = searchParams.get("orderId");
@@ -28,7 +28,7 @@ function PaymentSuccessContent() {
       const numericAmount = Number(urlAmount);
 
       if (!Number.isNaN(numericAmount)) {
-        setAmount(`${numericAmount.toLocaleString("ko-KR")}원`);
+        setAmount(`${numericAmount.toLocaleString("ko-KR")}??);
       }
     }
   }, [searchParams]);
@@ -80,7 +80,7 @@ function PaymentSuccessContent() {
                 fontFamily: "Georgia, serif",
               }}
             >
-              明
+              ??
             </span>
 
             <strong
@@ -89,7 +89,7 @@ function PaymentSuccessContent() {
                 letterSpacing: "-1px",
               }}
             >
-              명운
+              紐낆슫
             </strong>
 
             <span
@@ -115,7 +115,7 @@ function PaymentSuccessContent() {
               background: "#fffdf8",
             }}
           >
-            내 명운
+            ??紐낆슫
           </Link>
         </header>
 
@@ -157,7 +157,7 @@ function PaymentSuccessContent() {
               fontFamily: "Georgia, serif",
             }}
           >
-            ✓
+            ??
           </div>
 
           <h1
@@ -169,7 +169,7 @@ function PaymentSuccessContent() {
               color: "#20251f",
             }}
           >
-            결제가 완료되었습니다
+            寃곗젣媛 ?꾨즺?섏뿀?듬땲??
           </h1>
 
           <p
@@ -180,9 +180,9 @@ function PaymentSuccessContent() {
               fontSize: "14px",
             }}
           >
-            명운 상세 사주 분석 결제가
+            紐낆슫 ?곸꽭 ?ъ＜ 遺꾩꽍 寃곗젣媛
             <br />
-            정상적으로 승인되었습니다.
+            ?뺤긽?곸쑝濡??뱀씤?섏뿀?듬땲??
           </p>
 
           {/* Payment Information */}
@@ -209,7 +209,7 @@ function PaymentSuccessContent() {
                     marginBottom: "6px",
                   }}
                 >
-                  결제금액
+                  寃곗젣湲덉븸
                 </div>
 
                 <strong
@@ -230,7 +230,7 @@ function PaymentSuccessContent() {
                     marginBottom: "6px",
                   }}
                 >
-                  주문번호
+                  二쇰Ц踰덊샇
                 </div>
 
                 <div
@@ -253,7 +253,7 @@ function PaymentSuccessContent() {
                       marginBottom: "6px",
                     }}
                   >
-                    결제 승인번호
+                    寃곗젣 ?뱀씤踰덊샇
                   </div>
 
                   <div
@@ -288,7 +288,7 @@ function PaymentSuccessContent() {
               fontWeight: 800,
             }}
           >
-            상세 사주 결과 보기
+            ?곸꽭 ?ъ＜ 寃곌낵 蹂닿린
           </Link>
 
           <p
@@ -299,7 +299,7 @@ function PaymentSuccessContent() {
               color: "#a39a8e",
             }}
           >
-            결제 확인이 정상적으로 완료되었습니다.
+            寃곗젣 ?뺤씤???뺤긽?곸쑝濡??꾨즺?섏뿀?듬땲??
           </p>
         </section>
 
@@ -316,7 +316,7 @@ function PaymentSuccessContent() {
             textAlign: "center",
           }}
         >
-          결제 완료 후 상세 사주 결과를 확인하실 수 있습니다.
+          寃곗젣 ?꾨즺 ???곸꽭 ?ъ＜ 寃곌낵瑜??뺤씤?섏떎 ???덉뒿?덈떎.
         </div>
 
         {/* Footer */}
@@ -336,15 +336,15 @@ function PaymentSuccessContent() {
               marginBottom: "8px",
             }}
           >
-            明 명운
+            ??紐낆슫
           </div>
 
           <div>
-            전통 명리학을 바탕으로 한 AI 사주 분석 서비스입니다.
+            ?꾪넻 紐낅━?숈쓣 諛뷀깢?쇰줈 ??AI ?ъ＜ 遺꾩꽍 ?쒕퉬?ㅼ엯?덈떎.
           </div>
 
           <div style={{ marginTop: "8px" }}>
-            © 2026 MYEONGUN · myeongun.kr
+            짤 2026 MYEONGUN 쨌 myeongun.kr
           </div>
         </footer>
       </div>
@@ -365,7 +365,7 @@ export default function PaymentSuccessPage() {
             color: "#777",
           }}
         >
-          결제 결과를 불러오는 중입니다...
+          寃곗젣 寃곌낵瑜?遺덈윭?ㅻ뒗 以묒엯?덈떎...
         </main>
       }
     >
