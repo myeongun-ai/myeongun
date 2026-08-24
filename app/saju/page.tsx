@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
@@ -19,8 +19,8 @@ export default function SajuPage() {
     name: "",
     birth: "",
     time: "",
-    gender: "남성",
-    calendar: "양력",
+    gender: "?⑥꽦",
+    calendar: "?묐젰",
   });
 
   const [result, setResult] = useState<Result | null>(null);
@@ -34,7 +34,7 @@ export default function SajuPage() {
     setResult(null);
 
     if (!form.name || !form.birth || !form.time) {
-      setError("이름, 생년월일, 출생시간을 모두 입력해 주세요.");
+      setError("?대쫫, ?앸뀈?붿씪, 異쒖깮?쒓컙??紐⑤몢 ?낅젰??二쇱꽭??");
       return;
     }
 
@@ -52,11 +52,11 @@ export default function SajuPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "사주 분석 중 오류가 발생했습니다.");
+        throw new Error(data.error || "?ъ＜ 遺꾩꽍 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
       }
 
       if (!data.result) {
-        throw new Error("분석 결과를 받아오지 못했습니다.");
+        throw new Error("遺꾩꽍 寃곌낵瑜?諛쏆븘?ㅼ? 紐삵뻽?듬땲??");
       }
 
       let parsed: Result;
@@ -68,17 +68,18 @@ export default function SajuPage() {
             : data.result;
       } catch {
         parsed = {
-          title: `${form.name}님의 종합 사주 분석`,
+          title: `${form.name}?섏쓽 醫낇빀 ?ъ＜ 遺꾩꽍`,
           summary: data.result,
           sections: [
             {
-              name: "종합 사주 분석",
+              name: "醫낇빀 ?ъ＜ 遺꾩꽍",
               text: data.result,
             },
           ],
         };
       }
 
+      localStorage.setItem("myeongun_saju", JSON.stringify(form));
       setResult(parsed);
     } catch (err) {
       console.error(err);
@@ -86,7 +87,7 @@ export default function SajuPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "사주 분석 중 오류가 발생했습니다."
+          : "?ъ＜ 遺꾩꽍 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎."
       );
     } finally {
       setLoading(false);
@@ -135,7 +136,7 @@ export default function SajuPage() {
               letterSpacing: "-2px",
             }}
           >
-            나의 종합 사주
+            ?섏쓽 醫낇빀 ?ъ＜
           </h1>
 
           <p
@@ -146,9 +147,9 @@ export default function SajuPage() {
               lineHeight: 1.7,
             }}
           >
-            나의 기질과 재물 · 사업 · 인연 · 대운의 흐름을
+            ?섏쓽 湲곗쭏怨??щЪ 쨌 ?ъ뾽 쨌 ?몄뿰 쨌 ??댁쓽 ?먮쫫??
             <br />
-            한눈에 살펴보세요.
+            ?쒕늿???댄렣蹂댁꽭??
           </p>
         </section>
 
@@ -180,7 +181,7 @@ export default function SajuPage() {
               letterSpacing: "-1px",
             }}
           >
-            나의 사주 정보 입력
+            ?섏쓽 ?ъ＜ ?뺣낫 ?낅젰
           </h2>
 
           <p
@@ -190,7 +191,7 @@ export default function SajuPage() {
               fontSize: "13px",
             }}
           >
-            정확한 사주 분석을 위해 생년월일과 출생시간을 입력해주세요.
+            ?뺥솗???ъ＜ 遺꾩꽍???꾪빐 ?앸뀈?붿씪怨?異쒖깮?쒓컙???낅젰?댁＜?몄슂.
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -201,37 +202,28 @@ export default function SajuPage() {
                 gap: "18px",
               }}
             >
-              <label
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "7px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
-                이름
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      name: e.target.value,
-                    })
-                  }
-                  placeholder="이름을 입력하세요"
-                  style={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: "13px 12px",
-                    border: "1px solid #d9cfbf",
-                    borderRadius: "8px",
-                    background: "#fff",
-                    fontSize: "14px",
-                  }}
-                />
-              </label>
+              <label>
+  <input
+    type="text"
+    value={form.name}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        name: e.target.value,
+      })
+    }
+    placeholder="이름을 입력하세요"
+    style={{
+      width: "100%",
+      boxSizing: "border-box",
+      padding: "13px 12px",
+      border: "1px solid #d9cfbf",
+      borderRadius: "8px",
+      background: "#fff",
+      fontSize: "14px",
+    }}
+  />
+</label>
 
               <label
                 style={{
@@ -242,7 +234,7 @@ export default function SajuPage() {
                   fontWeight: 600,
                 }}
               >
-                생년월일
+                ?앸뀈?붿씪
                 <input
                   type="date"
                   value={form.birth}
@@ -273,7 +265,7 @@ export default function SajuPage() {
                   fontWeight: 600,
                 }}
               >
-                출생시간
+                異쒖깮?쒓컙
                 <input
                   type="time"
                   value={form.time}
@@ -304,7 +296,7 @@ export default function SajuPage() {
                   fontWeight: 600,
                 }}
               >
-                성별
+                ?깅퀎
                 <select
                   value={form.gender}
                   onChange={(e) =>
@@ -323,8 +315,8 @@ export default function SajuPage() {
                     fontSize: "14px",
                   }}
                 >
-                  <option value="남성">남성</option>
-                  <option value="여성">여성</option>
+                  <option value="?⑥꽦">?⑥꽦</option>
+                  <option value="?ъ꽦">?ъ꽦</option>
                 </select>
               </label>
 
@@ -337,7 +329,7 @@ export default function SajuPage() {
                   fontWeight: 600,
                 }}
               >
-                달력 기준
+                ?щ젰 湲곗?
                 <select
                   value={form.calendar}
                   onChange={(e) =>
@@ -356,30 +348,29 @@ export default function SajuPage() {
                     fontSize: "14px",
                   }}
                 >
-                  <option value="양력">양력</option>
-                  <option value="음력">음력</option>
+                  <option value="?묐젰">?묐젰</option>
+                  <option value="?뚮젰">?뚮젰</option>
                 </select>
               </label>
             </div>
 
             <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                marginTop: "24px",
-                minHeight: "56px",
-                border: "none",
-                borderRadius: "10px",
-                background: "#252b26",
-                color: "#f5e7c2",
-                fontSize: "15px",
-                fontWeight: 800,
-                cursor: loading ? "wait" : "pointer",
-              }}
-            >
-              {loading ? "분석 중입니다..." : "무료 사주 분석 시작 →"}
-            </button>
+  type="submit"
+  disabled={loading}
+  style={{
+    width: "100%",
+    border: "none",
+    borderRadius: "10px",
+    padding: "17px",
+    background: "#20251f",
+    color: "#fff",
+    fontSize: "16px",
+    fontWeight: 700,
+    cursor: loading ? "wait" : "pointer",
+  }}
+>
+  {loading ? "사주 분석 중..." : "사주 분석 시작"}
+</button>
           </form>
 
           {error && (
@@ -522,7 +513,7 @@ export default function SajuPage() {
                   color: "#f5e7c2",
                 }}
               >
-                더 깊은 사주 분석이 필요하신가요?
+                ??源딆? ?ъ＜ 遺꾩꽍???꾩슂?섏떊媛??
               </h3>
 
               <p
@@ -533,9 +524,9 @@ export default function SajuPage() {
                   fontSize: "13px",
                 }}
               >
-                평생 운세 · 재물 · 사업 · 직업 · 인간관계 · 2026년 운세를
+                ?됱깮 ?댁꽭 쨌 ?щЪ 쨌 ?ъ뾽 쨌 吏곸뾽 쨌 ?멸컙愿怨?쨌 2026???댁꽭瑜?
                 <br />
-                더 자세하게 분석해 드립니다.
+                ???먯꽭?섍쾶 遺꾩꽍???쒕┰?덈떎.
               </p>
 
               <Link
@@ -553,7 +544,7 @@ export default function SajuPage() {
                   textDecoration: "none",
                 }}
               >
-                🔒 상세 사주 분석 보기 · 9,900원 →
+                ?뵏 ?곸꽭 ?ъ＜ 遺꾩꽍 蹂닿린 쨌 9,900????
               </Link>
 
               <p
@@ -563,7 +554,7 @@ export default function SajuPage() {
                   color: "#999",
                 }}
               >
-                결제 후 프리미엄 상세 분석 결과를 확인할 수 있습니다.
+                寃곗젣 ???꾨━誘몄뾼 ?곸꽭 遺꾩꽍 寃곌낵瑜??뺤씤?????덉뒿?덈떎.
               </p>
             </div>
 
@@ -579,8 +570,8 @@ export default function SajuPage() {
                 lineHeight: 1.7,
               }}
             >
-              ※ 본 결과는 전통 사주 명리의 관점을 참고한 AI 분석이며,
-              미래를 확정적으로 예측하는 내용은 아닙니다.
+              ??蹂?寃곌낵???꾪넻 ?ъ＜ 紐낅━??愿?먯쓣 李멸퀬??AI 遺꾩꽍?대ŉ,
+              誘몃옒瑜??뺤젙?곸쑝濡??덉륫?섎뒗 ?댁슜? ?꾨떃?덈떎.
             </div>
           </section>
         )}
@@ -602,16 +593,18 @@ export default function SajuPage() {
               marginBottom: "5px",
             }}
           >
-            명운
+            紐낆슫
           </div>
 
           <div>
-            전통 명리학을 바탕으로 한 AI 사주 분석 서비스입니다.
+            ?꾪넻 紐낅━?숈쓣 諛뷀깢?쇰줈 ??AI ?ъ＜ 遺꾩꽍 ?쒕퉬?ㅼ엯?덈떎.
           </div>
 
-          <div>© 2026 MYEONGUN · myeongun.kr</div>
+          <div>짤 2026 MYEONGUN 쨌 myeongun.kr</div>
         </footer>
       </div>
     </main>
   );
 }
+
+
