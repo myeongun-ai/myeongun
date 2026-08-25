@@ -11,16 +11,18 @@ function PaymentFailContent() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const errorCode = searchParams.get("code");
-    const errorMessage = searchParams.get("message");
+    const errorCode = searchParams.get("code") || "";
+    const errorMessage = searchParams.get("message") || "";
 
-    if (errorCode) {
-      setCode(errorCode);
-    }
+    setCode(errorCode.slice(0, 100));
+    setMessage(errorMessage.slice(0, 300));
 
-    if (errorMessage) {
-      setMessage(errorMessage);
-    }
+    fetch("/api/payment/reset", {
+      method: "POST",
+      cache: "no-store",
+    }).catch((error) => {
+      console.error("결제 실패 후 이용권 초기화 오류:", error);
+    });
   }, [searchParams]);
 
   return (
@@ -32,12 +34,7 @@ function PaymentFailContent() {
         color: "#25231f",
       }}
     >
-      <div
-        style={{
-          maxWidth: "760px",
-          margin: "0 auto",
-        }}
-      >
+      <div style={{ maxWidth: "760px", margin: "0 auto" }}>
         <header
           style={{
             display: "flex",
@@ -72,12 +69,7 @@ function PaymentFailContent() {
               明
             </span>
 
-            <strong
-              style={{
-                fontSize: "20px",
-                letterSpacing: "-1px",
-              }}
-            >
+            <strong style={{ fontSize: "20px", letterSpacing: "-1px" }}>
               명운
             </strong>
 
@@ -167,9 +159,9 @@ function PaymentFailContent() {
               fontSize: "14px",
             }}
           >
-            결제 과정에서 문제가 발생했습니다.
+            결제가 취소되었거나 처리 중 문제가 발생했습니다.
             <br />
-            다시 시도하시거나 처음부터 진행해 주세요.
+            다시 결제를 진행하거나 사주 입력 화면으로 돌아가 주세요.
           </p>
 
           {(code || message) && (
@@ -199,6 +191,7 @@ function PaymentFailContent() {
                       fontSize: "14px",
                       color: "#51483b",
                       fontWeight: 700,
+                      wordBreak: "break-word",
                     }}
                   >
                     {code}
@@ -223,6 +216,7 @@ function PaymentFailContent() {
                       fontSize: "13px",
                       color: "#666",
                       lineHeight: 1.7,
+                      wordBreak: "break-word",
                     }}
                   >
                     {message}
@@ -285,7 +279,7 @@ function PaymentFailContent() {
               color: "#a39a8e",
             }}
           >
-            문제가 계속되면 잠시 후 다시 시도해 주세요.
+            결제가 완료되지 않은 경우 상세 사주 이용권은 발급되지 않습니다.
           </p>
         </section>
 
@@ -301,8 +295,7 @@ function PaymentFailContent() {
             textAlign: "center",
           }}
         >
-          결제 실패는 실제 결제가 완료되었다는 의미가 아니며,
-          승인 여부는 결제 서비스에서 최종 확인됩니다.
+          결제 성공 여부는 토스 결제 승인 결과를 기준으로 최종 확인합니다.
         </div>
 
         <footer
@@ -325,7 +318,7 @@ function PaymentFailContent() {
           </div>
 
           <div>
-            전통 명리학을 바탕으로 한 AI 사주 분석 서비스입니다.
+            전통 명리학의 관점을 참고한 AI 사주 분석 서비스입니다.
           </div>
 
           <div style={{ marginTop: "8px" }}>
