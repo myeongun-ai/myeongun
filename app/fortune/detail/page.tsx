@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type SajuForm = {
   name: string;
@@ -20,19 +21,79 @@ type Section = {
 };
 
 export default function FortuneDetailPage() {
+  const router = useRouter();
   const [saju, setSaju] = useState<SajuForm | null>(null);
+  const [accessChecked, setAccessChecked] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("myeongun_saju");
+    let cancelled = false;
 
-      if (saved) {
-        setSaju(JSON.parse(saved));
+    async function checkAccess() {
+      try {
+        const active =
+          sessionStorage.getItem("myeongun_session_active") === "1";
+
+        if (!active) {
+          router.replace("/saju");
+          return;
+        }
+
+        const response = await fetch("/api/payment/access", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          router.replace("/payment");
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!data?.paid) {
+          router.replace("/payment");
+          return;
+        }
+
+        const saved = localStorage.getItem("myeongun_saju");
+
+        if (!saved) {
+          router.replace("/saju");
+          return;
+        }
+
+        if (!cancelled) {
+          setSaju(JSON.parse(saved));
+          setAccessChecked(true);
+        }
+      } catch (error) {
+        console.error("상세 사주 접근 확인 오류:", error);
+        router.replace("/payment");
       }
-    } catch (error) {
-      console.error("사주 정보 불러오기 실패:", error);
     }
-  }, []);
+
+    checkAccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (!accessChecked || !saju) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          background: "#f5f1e8",
+          color: "#77746d",
+        }}
+      >
+        결제 및 사주 정보를 확인하고 있습니다...
+      </main>
+    );
+  }
 
   const name = saju?.name || "고객";
 

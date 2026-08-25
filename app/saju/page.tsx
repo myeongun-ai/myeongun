@@ -45,6 +45,13 @@ export default function SajuPage() {
 
   useEffect(() => {
     sessionStorage.removeItem("myeongun_session_active");
+
+    fetch("/api/payment/reset", {
+      method: "POST",
+      cache: "no-store",
+    }).catch((error) => {
+      console.error("이전 결제 이용권 초기화 오류:", error);
+    });
   }, []);
 
   function update<K extends keyof SajuForm>(key: K, value: SajuForm[K]) {
