@@ -34,13 +34,28 @@ export default function FortuneDetailPage() {
           sessionStorage.getItem("myeongun_session_active") === "1";
 
         if (!active) {
+          router.replace("/payment/reopen");
+          return;
+        }
+
+        const saved = localStorage.getItem("myeongun_saju");
+
+        if (!saved) {
           router.replace("/saju");
           return;
         }
 
+        const parsedSaju = JSON.parse(saved);
+
         const response = await fetch("/api/payment/access", {
-          method: "GET",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           cache: "no-store",
+          body: JSON.stringify({
+            saju: parsedSaju,
+          }),
         });
 
         if (!response.ok) {
@@ -55,15 +70,8 @@ export default function FortuneDetailPage() {
           return;
         }
 
-        const saved = localStorage.getItem("myeongun_saju");
-
-        if (!saved) {
-          router.replace("/saju");
-          return;
-        }
-
         if (!cancelled) {
-          setSaju(JSON.parse(saved));
+          setSaju(parsedSaju);
           setAccessChecked(true);
         }
       } catch (error) {

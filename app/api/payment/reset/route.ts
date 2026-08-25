@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
+import { entitlementCookie } from "../../../../lib/paymentAccess";
 
 export async function POST() {
   const response = NextResponse.json(
@@ -8,6 +9,14 @@ export async function POST() {
       headers: { "Cache-Control": "no-store" },
     }
   );
+
+  response.cookies.set(entitlementCookie.name, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
 
   response.cookies.set("myeongun_paid", "", {
     httpOnly: true,

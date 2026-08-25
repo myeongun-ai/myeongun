@@ -34,7 +34,19 @@ function PaymentSuccessContent() {
         const response = await fetch("/api/payment/confirm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentKey, orderId, amount }),
+          body: JSON.stringify({
+            paymentKey,
+            orderId,
+            amount,
+            saju: (() => {
+              try {
+                const saved = localStorage.getItem("myeongun_saju");
+                return saved ? JSON.parse(saved) : null;
+              } catch {
+                return null;
+              }
+            })(),
+          }),
         });
 
         const result = await response.json();
