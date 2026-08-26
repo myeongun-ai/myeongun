@@ -14,18 +14,23 @@ function PaymentSuccessContent() {
   const amount = Number(searchParams.get("amount") || "0");
 
   const [state, setState] = useState<ConfirmState>("checking");
-  const [message, setMessage] = useState("토스 결제 승인 정보를 확인하고 있습니다.");
+  const [message, setMessage] = useState(
+    "토스 결제 승인 정보를 확인하고 있습니다."
+  );
 
   useEffect(() => {
     let cancelled = false;
 
     async function confirmPayment() {
-      document.cookie = "myeongun_paid=; Path=/; Max-Age=0; SameSite=Lax";
+      document.cookie =
+        "myeongun_paid=; Path=/; Max-Age=0; SameSite=Lax";
 
       if (!paymentKey || !orderId || !amount) {
         if (!cancelled) {
           setState("error");
-          setMessage("결제 승인 정보가 올바르지 않습니다. 다시 결제를 진행해주세요.");
+          setMessage(
+            "결제 승인 정보가 올바르지 않습니다. 다시 결제를 진행해 주세요."
+          );
         }
         return;
       }
@@ -33,7 +38,9 @@ function PaymentSuccessContent() {
       try {
         const response = await fetch("/api/payment/confirm", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             paymentKey,
             orderId,
@@ -53,13 +60,19 @@ function PaymentSuccessContent() {
 
         if (!response.ok) {
           throw new Error(
-            result?.message || result?.code || "결제 승인 확인에 실패했습니다."
+            result?.message ||
+              result?.code ||
+              "결제 승인 확인에 실패했습니다."
           );
         }
 
         if (!cancelled) {
+          // 결제 직후에는 재열람 인증 화면을 거치지 않고
+          // 바로 상세 사주를 볼 수 있도록 현재 세션을 활성화합니다.
+          sessionStorage.setItem("myeongun_session_active", "1");
+
           setState("success");
-          setMessage("실제 결제 승인이 정상적으로 확인되었습니다.");
+          setMessage("결제 승인이 정상적으로 확인되었습니다.");
         }
       } catch (error) {
         console.error("결제 승인 확인 오류:", error);
@@ -134,7 +147,11 @@ function PaymentSuccessContent() {
             fontSize: "38px",
           }}
         >
-          {state === "success" ? "✓" : state === "error" ? "!" : "…"}
+          {state === "success"
+            ? "✓"
+            : state === "error"
+              ? "!"
+              : "…"}
         </div>
 
         <h1
@@ -174,9 +191,15 @@ function PaymentSuccessContent() {
           >
             {orderId && (
               <div style={{ marginBottom: "10px" }}>
-                <span style={{ color: "#888", fontSize: "12px" }}>
+                <span
+                  style={{
+                    color: "#888",
+                    fontSize: "12px",
+                  }}
+                >
                   주문번호
                 </span>
+
                 <strong
                   style={{
                     display: "block",
@@ -193,9 +216,15 @@ function PaymentSuccessContent() {
 
             {amount > 0 && (
               <div>
-                <span style={{ color: "#888", fontSize: "12px" }}>
+                <span
+                  style={{
+                    color: "#888",
+                    fontSize: "12px",
+                  }}
+                >
                   결제금액
                 </span>
+
                 <strong
                   style={{
                     display: "block",
@@ -294,6 +323,7 @@ export default function PaymentSuccessPage() {
             background: "#f5f1e8",
             display: "grid",
             placeItems: "center",
+            color: "#777",
           }}
         >
           결제 확인 중입니다...
