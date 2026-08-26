@@ -11,6 +11,22 @@ type SajuForm = {
   calendar: string;
 };
 
+const TIME_OPTIONS = [
+  { value: "모름", label: "모름" },
+  { value: "子(자) 23:30 ~ 01:29", label: "子(자)  23:30 ~ 01:29" },
+  { value: "丑(축) 01:30 ~ 03:29", label: "丑(축)  01:30 ~ 03:29" },
+  { value: "寅(인) 03:30 ~ 05:29", label: "寅(인)  03:30 ~ 05:29" },
+  { value: "卯(묘) 05:30 ~ 07:29", label: "卯(묘)  05:30 ~ 07:29" },
+  { value: "辰(진) 07:30 ~ 09:29", label: "辰(진)  07:30 ~ 09:29" },
+  { value: "巳(사) 09:30 ~ 11:29", label: "巳(사)  09:30 ~ 11:29" },
+  { value: "午(오) 11:30 ~ 13:29", label: "午(오)  11:30 ~ 13:29" },
+  { value: "未(미) 13:30 ~ 15:29", label: "未(미)  13:30 ~ 15:29" },
+  { value: "申(신) 15:30 ~ 17:29", label: "申(신)  15:30 ~ 17:29" },
+  { value: "酉(유) 17:30 ~ 19:29", label: "酉(유)  17:30 ~ 19:29" },
+  { value: "戌(술) 19:30 ~ 21:29", label: "戌(술)  19:30 ~ 21:29" },
+  { value: "亥(해) 21:30 ~ 23:29", label: "亥(해)  21:30 ~ 23:29" },
+];
+
 function pad2(value: number) {
   return String(value).padStart(2, "0");
 }
@@ -22,12 +38,7 @@ function daysInMonth(year: number, month: number) {
 function parseBirth(value: string) {
   const [y, m, d] = value.split("-").map(Number);
   if (!y || !m || !d) return null;
-
-  return {
-    year: y,
-    month: m,
-    day: d,
-  };
+  return { year: y, month: m, day: d };
 }
 
 function sameSaju(a: SajuForm, b: SajuForm) {
@@ -42,7 +53,6 @@ function sameSaju(a: SajuForm, b: SajuForm) {
 
 export default function SajuPage() {
   const router = useRouter();
-
   const today = new Date();
   const currentYear = today.getFullYear();
 
@@ -61,16 +71,11 @@ export default function SajuPage() {
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
 
   useEffect(() => {
-    // 사주 입력 화면에 들어왔다고 해서 7일 재열람 이용권을 삭제하지 않습니다.
-    // 현재 탭의 즉시 열람 세션만 종료합니다.
     sessionStorage.removeItem("myeongun_session_active");
   }, []);
 
   function update<K extends keyof SajuForm>(key: K, value: SajuForm[K]) {
-    setForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   const years = useMemo(
@@ -88,12 +93,10 @@ export default function SajuPage() {
 
   function openPicker() {
     const parsed = parseBirth(form.birth);
-
     if (parsed) {
       setPickerYear(parsed.year);
       setPickerMonth(parsed.month);
     }
-
     setPickerOpen(true);
   }
 
@@ -118,33 +121,21 @@ export default function SajuPage() {
   }
 
   function selectDay(day: number) {
-    update(
-      "birth",
-      `${pickerYear}-${pad2(pickerMonth)}-${pad2(day)}`
-    );
+    update("birth", `${pickerYear}-${pad2(pickerMonth)}-${pad2(day)}`);
     setPickerOpen(false);
   }
 
   async function tryReopenExistingPaidSaju(payload: SajuForm) {
     try {
       const savedText = localStorage.getItem("myeongun_saju");
-
-      if (!savedText) {
-        return false;
-      }
+      if (!savedText) return false;
 
       const saved = JSON.parse(savedText) as SajuForm;
-
-      // 저장된 사주 전체 정보와 현재 입력값이 동일할 때만 재열람을 시도합니다.
-      if (!sameSaju(saved, payload)) {
-        return false;
-      }
+      if (!sameSaju(saved, payload)) return false;
 
       const response = await fetch("/api/payment/reopen", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         cache: "no-store",
         body: JSON.stringify({
           name: payload.name.trim(),
@@ -152,19 +143,13 @@ export default function SajuPage() {
         }),
       });
 
-      if (!response.ok) {
-        return false;
-      }
+      if (!response.ok) return false;
 
       const result = await response.json();
-
-      if (!result?.ok) {
-        return false;
-      }
+      if (!result?.ok) return false;
 
       sessionStorage.setItem("myeongun_session_active", "1");
       router.push("/fortune/detail");
-
       return true;
     } catch {
       return false;
@@ -199,54 +184,33 @@ export default function SajuPage() {
     };
 
     if (!payload.name || !payload.birth || !payload.time) {
-      setError("이름, 생년월일, 출생시간을 모두 입력해 주세요.");
+      setError("이름, 생년월일, 출생시간을 모두 선택해 주세요.");
       return;
     }
 
     setLoading(true);
 
     try {
-      // 같은 사주가 7일 재열람 대상이면 결제 없이 바로 상세사주로 이동합니다.
       const reopened = await tryReopenExistingPaidSaju(payload);
+      if (reopened) return;
 
-      if (reopened) {
-        return;
-      }
-
-      // 다른 사주 또는 이용권 만료인 경우에만 기존 이용권을 종료하고 새 분석을 시작합니다.
       await resetOldEntitlement();
 
       const response = await fetch("/api/fortune", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const parsed = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          parsed?.error || "사주 분석에 실패했습니다."
-        );
+        throw new Error(parsed?.error || "사주 분석에 실패했습니다.");
       }
 
-      localStorage.setItem(
-        "myeongun_saju",
-        JSON.stringify(payload)
-      );
-
-      localStorage.setItem(
-        "myeongun_saju_result",
-        JSON.stringify(parsed)
-      );
-
-      sessionStorage.setItem(
-        "myeongun_session_active",
-        "1"
-      );
-
+      localStorage.setItem("myeongun_saju", JSON.stringify(payload));
+      localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
+      sessionStorage.setItem("myeongun_session_active", "1");
       router.push("/payment");
     } catch (err) {
       setError(
@@ -259,89 +223,46 @@ export default function SajuPage() {
     }
   }
 
-  const labelStyle = {
-    display: "grid",
-    gap: "8px",
-    fontSize: "13px",
-    fontWeight: 700,
-    color: "#2d312b",
-  } as const;
-
   const fieldStyle = {
     width: "100%",
     boxSizing: "border-box",
-    padding: "13px 14px",
-    border: "1px solid #d8cdbc",
-    borderRadius: "10px",
-    background: "#fff",
-    fontSize: "14px",
+    minHeight: "58px",
+    padding: "0 18px",
+    border: "1px solid #343847",
+    borderRadius: "12px",
+    background: "#0d1017",
+    color: "#f4f3ee",
+    fontSize: "16px",
+    outline: "none",
+  } as const;
+
+  const labelStyle = {
+    display: "grid",
+    gap: "10px",
+    color: "#f5f1e8",
+    fontSize: "15px",
+    fontWeight: 700,
   } as const;
 
   const smallButtonStyle = {
     minHeight: "42px",
-    border: "1px solid #d8cdbc",
+    border: "1px solid #414657",
     borderRadius: "10px",
-    background: "#fff",
-    color: "#3b3934",
+    background: "#171b24",
+    color: "#f5f1e8",
     fontWeight: 700,
     cursor: "pointer",
   } as const;
 
   return (
-    <main className="inner">
-      <section
-        style={{
-          textAlign: "center",
-          padding: "56px 20px 26px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "11px",
-            letterSpacing: "3px",
-            color: "#b08a3e",
-            fontWeight: 700,
-            marginBottom: "12px",
-          }}
-        >
-          MY SAJU
-        </div>
+    <main className="sajuPage">
+      <section className="sajuCard">
+        <header className="pageHeader">
+          <div className="eyebrow">FREE SAJU</div>
+          <h1>무료 사주 분석</h1>
+          <p>생년월일과 출생시간을 입력해 주세요.</p>
+        </header>
 
-        <h1
-          style={{
-            margin: 0,
-            fontFamily: "Georgia, serif",
-            fontSize: "44px",
-            fontWeight: 500,
-            color: "#20251f",
-          }}
-        >
-          나의 사주
-        </h1>
-
-        <p
-          style={{
-            margin: "14px 0 0",
-            color: "#777064",
-            fontSize: "14px",
-            lineHeight: 1.8,
-          }}
-        >
-          생년월일과 출생시간을 입력하면 나의 사주 흐름을 확인할 수 있습니다.
-        </p>
-      </section>
-
-      <section
-        style={{
-          maxWidth: "820px",
-          margin: "0 auto",
-          background: "#fffdf8",
-          border: "1px solid #dccfbf",
-          borderRadius: "18px",
-          padding: "28px",
-          boxShadow: "0 10px 30px rgba(0,0,0,.04)",
-        }}
-      >
         <form onSubmit={handleSubmit}>
           <label style={labelStyle}>
             이름
@@ -350,94 +271,45 @@ export default function SajuPage() {
               type="text"
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
-              placeholder="이름을 입력해 주세요"
+              placeholder="이름을 입력하세요"
               autoComplete="name"
               style={fieldStyle}
             />
           </label>
 
-          <div
-            className="twoCol"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2,minmax(0,1fr))",
-              gap: "16px",
-              marginTop: "18px",
-            }}
-          >
-            <label style={labelStyle}>
-              생년월일
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  gap: "8px",
-                }}
-              >
-                <input
-                  name="birth"
-                  type="text"
-                  readOnly
-                  required
-                  value={form.birth}
-                  placeholder="YYYY-MM-DD"
-                  onClick={openPicker}
-                  style={{
-                    ...fieldStyle,
-                    cursor: "pointer",
-                  }}
-                />
-
-                <button
-                  type="button"
-                  onClick={openPicker}
-                  style={{
-                    border: "none",
-                    borderRadius: "10px",
-                    padding: "0 16px",
-                    background: "#20251f",
-                    color: "#fff",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  달력
-                </button>
-              </div>
-            </label>
-
-            <label style={labelStyle}>
-              출생시간
-              <input
-                name="time"
-                type="time"
-                value={form.time}
-                onChange={(e) => update("time", e.target.value)}
-                required
-                style={fieldStyle}
-              />
-            </label>
-          </div>
-
-          {pickerOpen && (
-            <section
+          <label style={{ ...labelStyle, marginTop: "22px" }}>
+            생년월일
+            <div
               style={{
-                marginTop: "16px",
-                border: "1px solid #d8cdbc",
-                borderRadius: "16px",
-                padding: "16px",
-                background: "#fff",
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                gap: "8px",
               }}
             >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "44px 1fr 1fr 44px",
-                  gap: "8px",
-                  alignItems: "center",
-                }}
+              <input
+                name="birth"
+                type="text"
+                readOnly
+                required
+                value={form.birth}
+                placeholder="년-월-일"
+                onClick={openPicker}
+                style={{ ...fieldStyle, cursor: "pointer" }}
+              />
+
+              <button
+                type="button"
+                onClick={openPicker}
+                className="calendarButton"
               >
+                달력
+              </button>
+            </div>
+          </label>
+
+          {pickerOpen && (
+            <section className="datePicker">
+              <div className="pickerTop">
                 <button
                   type="button"
                   onClick={() => moveMonth(-1)}
@@ -450,10 +322,8 @@ export default function SajuPage() {
                 <select
                   aria-label="연도 선택"
                   value={pickerYear}
-                  onChange={(e) =>
-                    setPickerYear(Number(e.target.value))
-                  }
-                  style={fieldStyle}
+                  onChange={(e) => setPickerYear(Number(e.target.value))}
+                  style={{ ...fieldStyle, minHeight: "44px", padding: "0 10px" }}
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -465,15 +335,10 @@ export default function SajuPage() {
                 <select
                   aria-label="월 선택"
                   value={pickerMonth}
-                  onChange={(e) =>
-                    setPickerMonth(Number(e.target.value))
-                  }
-                  style={fieldStyle}
+                  onChange={(e) => setPickerMonth(Number(e.target.value))}
+                  style={{ ...fieldStyle, minHeight: "44px", padding: "0 10px" }}
                 >
-                  {Array.from(
-                    { length: 12 },
-                    (_, i) => i + 1
-                  ).map((month) => (
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
                     <option key={month} value={month}>
                       {month}월
                     </option>
@@ -490,42 +355,18 @@ export default function SajuPage() {
                 </button>
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(7,minmax(0,1fr))",
-                  gap: "7px",
-                  marginTop: "14px",
-                  textAlign: "center",
-                }}
-              >
-                {["일", "월", "화", "수", "목", "금", "토"].map(
-                  (dayName) => (
-                    <div
-                      key={dayName}
-                      style={{
-                        padding: "8px 0",
-                        color: "#b08a3e",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {dayName}
-                    </div>
-                  )
-                )}
+              <div className="calendarGrid">
+                {["일", "월", "화", "수", "목", "금", "토"].map((dayName) => (
+                  <div key={dayName} className="calendarDayName">
+                    {dayName}
+                  </div>
+                ))}
 
-                {Array.from({ length: firstDay }).map(
-                  (_, index) => (
-                    <div key={`blank-${index}`} />
-                  )
-                )}
+                {Array.from({ length: firstDay }).map((_, index) => (
+                  <div key={`blank-${index}`} />
+                ))}
 
-                {Array.from(
-                  { length: monthDays },
-                  (_, i) => i + 1
-                ).map((day) => {
+                {Array.from({ length: monthDays }, (_, i) => i + 1).map((day) => {
                   const selected =
                     parsedBirth?.year === pickerYear &&
                     parsedBirth?.month === pickerMonth &&
@@ -536,19 +377,7 @@ export default function SajuPage() {
                       key={day}
                       type="button"
                       onClick={() => selectDay(day)}
-                      style={{
-                        minHeight: "42px",
-                        border: "none",
-                        borderRadius: "10px",
-                        background: selected
-                          ? "#20251f"
-                          : "#f5f1ea",
-                        color: selected
-                          ? "#fff"
-                          : "#2d312b",
-                        fontSize: "14px",
-                        cursor: "pointer",
-                      }}
+                      className={selected ? "calendarDay selected" : "calendarDay"}
                     >
                       {day}
                     </button>
@@ -556,24 +385,14 @@ export default function SajuPage() {
                 })}
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "10px",
-                  marginTop: "14px",
-                }}
-              >
+              <div className="pickerBottom">
                 <button
                   type="button"
                   onClick={() => {
                     update("birth", "");
                     setPickerOpen(false);
                   }}
-                  style={{
-                    ...smallButtonStyle,
-                    padding: "0 16px",
-                  }}
+                  style={{ ...smallButtonStyle, padding: "0 16px" }}
                 >
                   삭제
                 </button>
@@ -581,10 +400,7 @@ export default function SajuPage() {
                 <button
                   type="button"
                   onClick={() => setPickerOpen(false)}
-                  style={{
-                    ...smallButtonStyle,
-                    padding: "0 16px",
-                  }}
+                  style={{ ...smallButtonStyle, padding: "0 16px" }}
                 >
                   닫기
                 </button>
@@ -592,24 +408,35 @@ export default function SajuPage() {
             </section>
           )}
 
-          <div
-            className="twoCol"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2,minmax(0,1fr))",
-              gap: "16px",
-              marginTop: "18px",
-            }}
-          >
+          <label style={{ ...labelStyle, marginTop: "22px" }}>
+            출생시간
+            <select
+              name="time"
+              value={form.time}
+              onChange={(e) => update("time", e.target.value)}
+              required
+              className="timeSelect"
+            >
+              <option value="" disabled>
+                시간을 선택하세요
+              </option>
+
+              {TIME_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="twoCol">
             <label style={labelStyle}>
               성별
               <select
                 name="gender"
                 value={form.gender}
-                onChange={(e) =>
-                  update("gender", e.target.value)
-                }
-                style={fieldStyle}
+                onChange={(e) => update("gender", e.target.value)}
+                className="darkSelect"
               >
                 <option value="남성">남성</option>
                 <option value="여성">여성</option>
@@ -617,73 +444,252 @@ export default function SajuPage() {
             </label>
 
             <label style={labelStyle}>
-              달력 기준
+              달력
               <select
                 name="calendar"
                 value={form.calendar}
-                onChange={(e) =>
-                  update("calendar", e.target.value)
-                }
-                style={fieldStyle}
+                onChange={(e) => update("calendar", e.target.value)}
+                className="darkSelect"
               >
-                <option value="양력">양력</option>
-                <option value="음력">음력</option>
+                <option value="양력">양력 (양력)</option>
+                <option value="음력">음력 (음력)</option>
               </select>
             </label>
           </div>
 
-          {error && (
-            <p
-              style={{
-                margin: "18px 0 0",
-                color: "#b42318",
-                fontSize: "13px",
-                lineHeight: 1.7,
-              }}
-            >
-              {error}
-            </p>
-          )}
+          {error && <p className="errorMessage">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: "100%",
-              marginTop: "22px",
-              border: "none",
-              borderRadius: "10px",
-              padding: "16px",
-              background: "#20251f",
-              color: "#fff",
-              fontSize: "15px",
-              fontWeight: 700,
-              cursor: loading ? "wait" : "pointer",
-            }}
+            className="submitButton"
           >
-            {loading
-              ? "사주 확인 중..."
-              : "사주 분석 시작"}
+            {loading ? "사주 분석 중..." : "무료 사주 분석 시작"}
           </button>
         </form>
+
+        <p className="privacyText">
+          입력하신 정보는 사주 분석을 위한 용도로만 사용됩니다.
+        </p>
       </section>
 
-      <p
-        style={{
-          textAlign: "center",
-          color: "#9a9388",
-          marginTop: "20px",
-          fontSize: "12px",
-          lineHeight: 1.7,
-        }}
-      >
-        결제한 동일 사주는 7일 동안 재결제 없이 다시 볼 수 있습니다.
-      </p>
-
       <style jsx>{`
+        .sajuPage {
+          min-height: 100vh;
+          padding: 48px 20px 80px;
+          background:
+            radial-gradient(circle at 50% 15%, rgba(47, 55, 84, 0.28), transparent 36%),
+            linear-gradient(180deg, #0a0d14 0%, #070910 100%);
+          color: #f4f3ee;
+        }
+
+        .sajuCard {
+          width: 100%;
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 48px 38px 36px;
+          border: 1px solid rgba(218, 171, 84, 0.32);
+          border-radius: 30px;
+          background: linear-gradient(
+            180deg,
+            rgba(23, 27, 40, 0.96),
+            rgba(17, 21, 32, 0.98)
+          );
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+        }
+
+        .pageHeader {
+          margin-bottom: 34px;
+          text-align: center;
+        }
+
+        .eyebrow {
+          color: #e2ad47;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 3px;
+        }
+
+        .pageHeader h1 {
+          margin: 12px 0;
+          color: #fff;
+          font-size: 38px;
+          line-height: 1.25;
+          font-weight: 800;
+        }
+
+        .pageHeader p {
+          margin: 0;
+          color: #9fa4b2;
+          font-size: 16px;
+        }
+
+        .calendarButton {
+          min-width: 78px;
+          border: 1px solid #343847;
+          border-radius: 12px;
+          background: #202636;
+          color: #e8bf6c;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .datePicker {
+          margin-top: 14px;
+          padding: 16px;
+          border: 1px solid #353b4d;
+          border-radius: 16px;
+          background: #111722;
+        }
+
+        .pickerTop {
+          display: grid;
+          grid-template-columns: 44px 1fr 1fr 44px;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .calendarGrid {
+          display: grid;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          gap: 7px;
+          margin-top: 14px;
+          text-align: center;
+        }
+
+        .calendarDayName {
+          padding: 8px 0;
+          color: #d8a449;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .calendarDay {
+          min-height: 42px;
+          border: none;
+          border-radius: 10px;
+          background: #1b2130;
+          color: #e9e8e2;
+          font-size: 14px;
+          cursor: pointer;
+        }
+
+        .calendarDay.selected {
+          background: #dfab4f;
+          color: #14171d;
+          font-weight: 800;
+        }
+
+        .pickerBottom {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .timeSelect,
+        .darkSelect {
+          width: 100%;
+          box-sizing: border-box;
+          min-height: 58px;
+          padding: 0 18px;
+          border: 1px solid #343847;
+          border-radius: 12px;
+          background: #0d1017;
+          color: #f4f3ee;
+          font-size: 16px;
+          outline: none;
+          cursor: pointer;
+        }
+
+        .timeSelect:focus,
+        .darkSelect:focus {
+          border-color: #c69236;
+          box-shadow: 0 0 0 2px rgba(198, 146, 54, 0.12);
+        }
+
+        .timeSelect option,
+        .darkSelect option {
+          background: #fff;
+          color: #1c2028;
+        }
+
+        .twoCol {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+          margin-top: 22px;
+        }
+
+        .errorMessage {
+          margin: 18px 0 0;
+          color: #ff8f85;
+          font-size: 13px;
+          line-height: 1.7;
+        }
+
+        .submitButton {
+          width: 100%;
+          min-height: 62px;
+          margin-top: 28px;
+          border: none;
+          border-radius: 14px;
+          background: linear-gradient(
+            90deg,
+            #dca747 0%,
+            #efbd5e 50%,
+            #dca747 100%
+          );
+          color: #17191e;
+          font-size: 18px;
+          font-weight: 900;
+          cursor: pointer;
+          box-shadow: 0 10px 30px rgba(220, 167, 71, 0.18);
+        }
+
+        .submitButton:disabled {
+          opacity: 0.65;
+          cursor: wait;
+        }
+
+        .privacyText {
+          margin: 18px 0 0;
+          text-align: center;
+          color: #868d9d;
+          font-size: 12px;
+          line-height: 1.7;
+        }
+
         @media (max-width: 640px) {
+          .sajuPage {
+            padding: 24px 12px 60px;
+          }
+
+          .sajuCard {
+            padding: 34px 18px 28px;
+            border-radius: 22px;
+          }
+
+          .pageHeader h1 {
+            font-size: 31px;
+          }
+
+          .pageHeader p {
+            font-size: 14px;
+          }
+
           .twoCol {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: 1fr;
+          }
+
+          .pickerTop {
+            grid-template-columns: 40px 1fr 1fr 40px;
+          }
+
+          .timeSelect,
+          .darkSelect {
+            font-size: 14px;
           }
         }
       `}</style>
