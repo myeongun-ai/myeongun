@@ -41,6 +41,22 @@ const cards = [
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
+const TIME_OPTIONS = [
+  { value: "모름", label: "모름" },
+  { value: "子(자) 23:30 ~ 01:29", label: "子(자)  23:30 ~ 01:29" },
+  { value: "丑(축) 01:30 ~ 03:29", label: "丑(축)  01:30 ~ 03:29" },
+  { value: "寅(인) 03:30 ~ 05:29", label: "寅(인)  03:30 ~ 05:29" },
+  { value: "卯(묘) 05:30 ~ 07:29", label: "卯(묘)  05:30 ~ 07:29" },
+  { value: "辰(진) 07:30 ~ 09:29", label: "辰(진)  07:30 ~ 09:29" },
+  { value: "巳(사) 09:30 ~ 11:29", label: "巳(사)  09:30 ~ 11:29" },
+  { value: "午(오) 11:30 ~ 13:29", label: "午(오)  11:30 ~ 13:29" },
+  { value: "未(미) 13:30 ~ 15:29", label: "未(미)  13:30 ~ 15:29" },
+  { value: "申(신) 15:30 ~ 17:29", label: "申(신)  15:30 ~ 17:29" },
+  { value: "酉(유) 17:30 ~ 19:29", label: "酉(유)  17:30 ~ 19:29" },
+  { value: "戌(술) 19:30 ~ 21:29", label: "戌(술)  19:30 ~ 21:29" },
+  { value: "亥(해) 21:30 ~ 23:29", label: "亥(해)  21:30 ~ 23:29" },
+];
+
 export default function Home() {
   const [form, setForm] = useState({
     name: "",
@@ -122,7 +138,7 @@ export default function Home() {
         sections: [
           {
             name: "전체 운세",
-            text: "현재의 흐름을 차분하게 정리하고 앞으로의 방향을 살펴보는 시기입니다. 중요한 결정은 충분히 생각한 뒤 움직이는 것이 좋습니다.",
+            text: "현재의 흐름을 차분하게 정리하고 앞으로의 방향을 살펴보는 시기입니다. 중요한 결정은 충분히 생각한 뒤  움직이는 것이 좋습니다.",
           },
           {
             name: "재물·사업운",
@@ -597,13 +613,23 @@ export default function Home() {
             {/* TIME */}
             <label style={labelStyle}>출생시간</label>
 
-            <input
+            <select
               name="time"
               value={form.time}
               onChange={handleChange}
-              type="time"
               style={inputStyle}
-            />
+              required
+            >
+              <option value="" disabled>
+                시간을 선택하세요
+              </option>
+
+              {TIME_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
             {/* GENDER */}
             <label style={labelStyle}>성별</label>
