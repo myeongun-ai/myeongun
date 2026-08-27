@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -51,6 +52,103 @@ function sameSaju(a: SajuForm, b: SajuForm) {
   );
 }
 
+function renderInline(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index}>
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return part;
+  });
+}
+
+function renderFreeResult(text: string) {
+  const lines = text
+    .replace(/\r\n/g, "\n")
+    .split("\n");
+
+  const nodes: React.ReactNode[] = [];
+  let bulletBuffer: string[] = [];
+
+  function flushBullets() {
+    if (!bulletBuffer.length) return;
+
+    nodes.push(
+      <ul className="resultList" key={`list-${nodes.length}`}>
+        {bulletBuffer.map((item, index) => (
+          <li key={`${item}-${index}`}>
+            {renderInline(item)}
+          </li>
+        ))}
+      </ul>
+    );
+
+    bulletBuffer = [];
+  }
+
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushBullets();
+      return;
+    }
+
+    if (line.startsWith("### ")) {
+      flushBullets();
+      nodes.push(
+        <h4 className="resultHeadingSmall" key={`h4-${index}`}>
+          {renderInline(line.slice(4))}
+        </h4>
+      );
+      return;
+    }
+
+    if (line.startsWith("## ")) {
+      flushBullets();
+      nodes.push(
+        <h3 className="resultHeading" key={`h3-${index}`}>
+          {renderInline(line.slice(3))}
+        </h3>
+      );
+      return;
+    }
+
+    if (line.startsWith("# ")) {
+      flushBullets();
+      nodes.push(
+        <h2 className="resultHeadingLarge" key={`h2-${index}`}>
+          {renderInline(line.slice(2))}
+        </h2>
+      );
+      return;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      bulletBuffer.push(line.replace(/^[-*]\s+/, ""));
+      return;
+    }
+
+    flushBullets();
+
+    nodes.push(
+      <p className="resultParagraph" key={`p-${index}`}>
+        {renderInline(line)}
+      </p>
+    );
+  });
+
+  flushBullets();
+
+  return nodes;
+}
+
 export default function SajuPage() {
   const router = useRouter();
   const today = new Date();
@@ -66,6 +164,7 @@ export default function SajuPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [freeResult, setFreeResult] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(currentYear);
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
@@ -76,6 +175,7 @@ export default function SajuPage() {
 
   function update<K extends keyof SajuForm>(key: K, value: SajuForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setFreeResult("");
   }
 
   const years = useMemo(
@@ -172,6 +272,7 @@ export default function SajuPage() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setFreeResult("");
 
     const data = new FormData(e.currentTarget);
 
@@ -210,8 +311,14 @@ export default function SajuPage() {
 
       localStorage.setItem("myeongun_saju", JSON.stringify(payload));
       localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
-      sessionStorage.setItem("myeongun_session_active", "1");
-      router.push("/payment");
+
+      const resultText = String(parsed?.result || "").trim();
+
+      if (!resultText) {
+        throw new Error("무료 사주 결과를 불러오지 못했습니다.");
+      }
+
+      setFreeResult(resultText);
     } catch (err) {
       setError(
         err instanceof Error
@@ -451,8 +558,8 @@ export default function SajuPage() {
                 onChange={(e) => update("calendar", e.target.value)}
                 className="darkSelect"
               >
-                <option value="양력">양력 (양력)</option>
-                <option value="음력">음력 (음력)</option>
+                <option value="양력">양력</option>
+                <option value="음력">음력</option>
               </select>
             </label>
           </div>
@@ -464,7 +571,7 @@ export default function SajuPage() {
             disabled={loading}
             className="submitButton"
           >
-            {loading ? "사주 분석 중..." : "무료 사주 분석 시작"}
+            {loading ? "무료 사주 분석 중..." : "무료 사주 분석 시작"}
           </button>
         </form>
 
@@ -472,6 +579,30 @@ export default function SajuPage() {
           입력하신 정보는 사주 분석을 위한 용도로만 사용됩니다.
         </p>
       </section>
+
+      {freeResult && (
+        <section className="resultCard">
+          <div className="resultEyebrow">FREE SAJU RESULT</div>
+          <h2>{form.name || "고객"}님의 무료 사주 분석</h2>
+
+          <div className="resultText">
+            {renderFreeResult(freeResult)}
+          </div>
+
+          <div className="premiumBox">
+            <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>
+            <h3>더 깊은 상세 사주 분석이 필요하신가요?</h3>
+            <p>
+              재물운, 사업운, 직업운, 인간관계, 2026년 운세,
+              장기 흐름까지 개인별 프리미엄 분석을 확인할 수 있습니다.
+            </p>
+
+            <Link href="/payment" className="premiumButton">
+              상세 사주 분석 보기 · 9,900원
+            </Link>
+          </div>
+        </section>
+      )}
 
       <style jsx>{`
         .sajuPage {
@@ -483,11 +614,11 @@ export default function SajuPage() {
           color: #f4f3ee;
         }
 
-        .sajuCard {
+        .sajuCard,
+        .resultCard {
           width: 100%;
           max-width: 900px;
           margin: 0 auto;
-          padding: 48px 38px 36px;
           border: 1px solid rgba(218, 171, 84, 0.32);
           border-radius: 30px;
           background: linear-gradient(
@@ -498,12 +629,18 @@ export default function SajuPage() {
           box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
         }
 
+        .sajuCard {
+          padding: 48px 38px 36px;
+        }
+
         .pageHeader {
           margin-bottom: 34px;
           text-align: center;
         }
 
-        .eyebrow {
+        .eyebrow,
+        .resultEyebrow,
+        .premiumEyebrow {
           color: #e2ad47;
           font-size: 13px;
           font-weight: 700;
@@ -661,12 +798,113 @@ export default function SajuPage() {
           line-height: 1.7;
         }
 
+        .resultCard {
+          margin-top: 26px;
+          padding: 38px;
+        }
+
+        .resultCard h2 {
+          margin: 12px 0 20px;
+          color: #f5e7c2;
+          font-size: 28px;
+        }
+
+        .resultText {
+          padding: 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.045);
+          color: #d4d6df;
+          font-size: 15px;
+          line-height: 1.95;
+        }
+
+        .resultText :global(.resultHeadingLarge) {
+          margin: 26px 0 12px;
+          color: #f5e7c2;
+          font-size: 24px;
+          line-height: 1.4;
+        }
+
+        .resultText :global(.resultHeading) {
+          margin: 24px 0 10px;
+          color: #e7b85c;
+          font-size: 20px;
+          line-height: 1.45;
+        }
+
+        .resultText :global(.resultHeadingSmall) {
+          margin: 20px 0 8px;
+          color: #f1d89e;
+          font-size: 17px;
+          line-height: 1.5;
+        }
+
+        .resultText :global(.resultParagraph) {
+          margin: 0 0 12px;
+        }
+
+        .resultText :global(.resultList) {
+          margin: 8px 0 18px;
+          padding-left: 22px;
+        }
+
+        .resultText :global(.resultList li) {
+          margin-bottom: 7px;
+        }
+
+        .resultText :global(strong) {
+          color: #fff0c9;
+          font-weight: 800;
+        }
+
+        .premiumBox {
+          margin-top: 26px;
+          padding: 28px;
+          border: 1px solid rgba(218,170,88,0.25);
+          border-radius: 18px;
+          background: linear-gradient(
+            135deg,
+            rgba(218,170,88,0.12),
+            rgba(255,255,255,0.03)
+          );
+          text-align: center;
+        }
+
+        .premiumBox h3 {
+          margin: 10px 0;
+          color: #f5e7c2;
+          font-size: 23px;
+        }
+
+        .premiumBox p {
+          max-width: 680px;
+          margin: 0 auto 20px;
+          color: #aeb1bd;
+          font-size: 14px;
+          line-height: 1.8;
+        }
+
+        .premiumButton {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 54px;
+          padding: 0 28px;
+          border-radius: 12px;
+          background: #dbaa58;
+          color: #111;
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 900;
+        }
+
         @media (max-width: 640px) {
           .sajuPage {
             padding: 24px 12px 60px;
           }
 
-          .sajuCard {
+          .sajuCard,
+          .resultCard {
             padding: 34px 18px 28px;
             border-radius: 22px;
           }
@@ -690,6 +928,23 @@ export default function SajuPage() {
           .timeSelect,
           .darkSelect {
             font-size: 14px;
+          }
+
+          .resultCard h2 {
+            font-size: 24px;
+          }
+
+          .resultText :global(.resultHeadingLarge) {
+            font-size: 21px;
+          }
+
+          .resultText :global(.resultHeading) {
+            font-size: 18px;
+          }
+
+          .premiumButton {
+            width: 100%;
+            box-sizing: border-box;
           }
         }
       `}</style>
