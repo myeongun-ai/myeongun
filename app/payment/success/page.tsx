@@ -67,10 +67,13 @@ function PaymentSuccessContent() {
         }
 
         if (!cancelled) {
-          // 결제 직후에는 재열람 인증 화면을 거치지 않고
-          // 바로 상세 사주를 볼 수 있도록 현재 세션을 활성화합니다.
-          sessionStorage.setItem("myeongun_session_active", "1");
+          const paidSaju = localStorage.getItem("myeongun_saju");
 
+          if (paidSaju) {
+            localStorage.setItem("myeongun_paid_saju", paidSaju);
+          }
+
+          sessionStorage.setItem("myeongun_session_active", "1");
           setState("success");
           setMessage("결제 승인이 정상적으로 확인되었습니다.");
         }
@@ -191,15 +194,9 @@ function PaymentSuccessContent() {
           >
             {orderId && (
               <div style={{ marginBottom: "10px" }}>
-                <span
-                  style={{
-                    color: "#888",
-                    fontSize: "12px",
-                  }}
-                >
+                <span style={{ color: "#888", fontSize: "12px" }}>
                   주문번호
                 </span>
-
                 <strong
                   style={{
                     display: "block",
@@ -216,15 +213,9 @@ function PaymentSuccessContent() {
 
             {amount > 0 && (
               <div>
-                <span
-                  style={{
-                    color: "#888",
-                    fontSize: "12px",
-                  }}
-                >
+                <span style={{ color: "#888", fontSize: "12px" }}>
                   결제금액
                 </span>
-
                 <strong
                   style={{
                     display: "block",

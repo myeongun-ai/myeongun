@@ -42,11 +42,73 @@ function parseBirth(value: string) {
   return { year: y, month: m, day: d };
 }
 
-function sameSaju(a: SajuForm, b: SajuForm) {
+function toMinutes(value: string) {
+  const match = value.match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+
+  if (
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+
+  return hour * 60 + minute;
+}
+
+function parseRange(value: string) {
+  const match = value.match(/(\d{2}):(\d{2})\s*~\s*(\d{2}):(\d{2})/);
+  if (!match) return null;
+
+  return {
+    start: Number(match[1]) * 60 + Number(match[2]),
+    end: Number(match[3]) * 60 + Number(match[4]),
+  };
+}
+
+function timeMatches(savedTime: string, enteredTime: string) {
+  if (savedTime === enteredTime) return true;
+
+  if (savedTime === "모름" || enteredTime === "모름") {
+    return false;
+  }
+
+  const savedMinutes = toMinutes(savedTime);
+  const enteredMinutes = toMinutes(enteredTime);
+  const savedRange = parseRange(savedTime);
+  const enteredRange = parseRange(enteredTime);
+
+  function isInside(minutes: number, range: { start: number; end: number }) {
+    if (range.start <= range.end) {
+      return minutes >= range.start && minutes <= range.end;
+    }
+
+    return minutes >= range.start || minutes <= range.end;
+  }
+
+  if (savedMinutes !== null && enteredRange) {
+    return isInside(savedMinutes, enteredRange);
+  }
+
+  if (enteredMinutes !== null && savedRange) {
+    return isInside(enteredMinutes, savedRange);
+  }
+
+  return false;
+}
+
+function sameSajuForReopen(a: SajuForm, b: SajuForm) {
   return (
     a.name.trim() === b.name.trim() &&
     a.birth === b.birth &&
-    a.time === b.time &&
+    timeMatches(a.time, b.time) &&
     a.gender === b.gender &&
     a.calendar === b.calendar
   );
@@ -227,11 +289,17 @@ export default function SajuPage() {
 
   async function tryReopenExistingPaidSaju(payload: SajuForm) {
     try {
-      const savedText = localStorage.getItem("myeongun_saju");
+      const savedText =
+        localStorage.getItem("myeongun_paid_saju") ||
+        localStorage.getItem("myeongun_saju");
+
       if (!savedText) return false;
 
       const saved = JSON.parse(savedText) as SajuForm;
-      if (!sameSaju(saved, payload)) return false;
+
+      if (!sameSajuForReopen(saved, payload)) {
+        return false;
+      }
 
       const response = await fetch("/api/payment/reopen", {
         method: "POST",
@@ -248,25 +316,13 @@ export default function SajuPage() {
       const result = await response.json();
       if (!result?.ok) return false;
 
+      localStorage.setItem("myeongun_saju", savedText);
       sessionStorage.setItem("myeongun_session_active", "1");
       router.push("/fortune/detail");
       return true;
     } catch {
       return false;
     }
-  }
-
-  async function resetOldEntitlement() {
-    try {
-      await fetch("/api/payment/reset", {
-        method: "POST",
-        cache: "no-store",
-      });
-    } catch (resetError) {
-      console.error("기존 결제 이용권 초기화 오류:", resetError);
-    }
-
-    localStorage.removeItem("myeongun_premium_result");
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -295,7 +351,9 @@ export default function SajuPage() {
       const reopened = await tryReopenExistingPaidSaju(payload);
       if (reopened) return;
 
-      await resetOldEntitlement();
+      // 무료 사주를 새로 분석해도 기존 7일 결제 이용권은 삭제하지 않습니다.
+      // 새 결제가 정상 승인되면 서버가 새 이용권으로 교체합니다.
+      localStorage.removeItem("myeongun_premium_result");
 
       const response = await fetch("/api/fortune", {
         method: "POST",
