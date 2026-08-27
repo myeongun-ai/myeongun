@@ -1,15 +1,15 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-type Result = {
-  title: string;
-  summary: string;
-  sections: {
-    name: string;
-    text: string;
-  }[];
+type SajuForm = {
+  name: string;
+  birth: string;
+  time: string;
+  gender: string;
+  calendar: string;
 };
 
 const cards = [
@@ -57,8 +57,103 @@ const TIME_OPTIONS = [
   { value: "亥(해) 21:30 ~ 23:29", label: "亥(해)  21:30 ~ 23:29" },
 ];
 
+
+function sameSaju(a: SajuForm, b: SajuForm) {
+  return (
+    a.name.trim() === b.name.trim() &&
+    a.birth === b.birth &&
+    a.time === b.time &&
+    a.gender === b.gender &&
+    a.calendar === b.calendar
+  );
+}
+
+function renderInline(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+function renderFreeResult(text: string) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const nodes: React.ReactNode[] = [];
+  let bulletBuffer: string[] = [];
+
+  function flushBullets() {
+    if (!bulletBuffer.length) return;
+    nodes.push(
+      <ul className="homeResultList" key={`list-${nodes.length}`}>
+        {bulletBuffer.map((item, index) => (
+          <li key={`${item}-${index}`}>{renderInline(item)}</li>
+        ))}
+      </ul>
+    );
+    bulletBuffer = [];
+  }
+
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushBullets();
+      return;
+    }
+
+    if (line.startsWith("### ")) {
+      flushBullets();
+      nodes.push(
+        <h4 className="homeResultHeadingSmall" key={`h4-${index}`}>
+          {renderInline(line.slice(4))}
+        </h4>
+      );
+      return;
+    }
+
+    if (line.startsWith("## ")) {
+      flushBullets();
+      nodes.push(
+        <h3 className="homeResultHeading" key={`h3-${index}`}>
+          {renderInline(line.slice(3))}
+        </h3>
+      );
+      return;
+    }
+
+    if (line.startsWith("# ")) {
+      flushBullets();
+      nodes.push(
+        <h2 className="homeResultHeadingLarge" key={`h2-${index}`}>
+          {renderInline(line.slice(2))}
+        </h2>
+      );
+      return;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      bulletBuffer.push(line.replace(/^[-*]\s+/, ""));
+      return;
+    }
+
+    flushBullets();
+    nodes.push(
+      <p className="homeResultParagraph" key={`p-${index}`}>
+        {renderInline(line)}
+      </p>
+    );
+  });
+
+  flushBullets();
+  return nodes;
+}
+
 export default function Home() {
-  const [form, setForm] = useState({
+  const router = useRouter();
+  const [form, setForm] = useState<SajuForm>({
     name: "",
     birth: "",
     time: "",
@@ -67,7 +162,8 @@ export default function Home() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Result | null>(null);
+  const [error, setError] = useState("");
+  const [freeResult, setFreeResult] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date());
 
@@ -96,6 +192,8 @@ export default function Home() {
       ...prev,
       [name]: value,
     }));
+    setFreeResult("");
+    setError("");
   };
 
   const selectDate = (day: number) => {
@@ -119,48 +217,108 @@ export default function Home() {
     setViewDate(new Date(year, month + 1, 1));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    sessionStorage.removeItem("myeongun_session_active");
+  }, []);
 
-    if (!form.birth) {
-      alert("생년월일을 입력해주세요.");
+  async function tryReopenExistingPaidSaju(payload: SajuForm) {
+    try {
+      const savedText = localStorage.getItem("myeongun_saju");
+      if (!savedText) return false;
+
+      const saved = JSON.parse(savedText) as SajuForm;
+      if (!sameSaju(saved, payload)) return false;
+
+      const response = await fetch("/api/payment/reopen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({
+          name: payload.name.trim(),
+          birth: payload.birth,
+        }),
+      });
+
+      if (!response.ok) return false;
+
+      const result = await response.json();
+      if (!result?.ok) return false;
+
+      sessionStorage.setItem("myeongun_session_active", "1");
+      router.push("/fortune/detail");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function resetOldEntitlement() {
+    try {
+      await fetch("/api/payment/reset", {
+        method: "POST",
+        cache: "no-store",
+      });
+    } catch (resetError) {
+      console.error("기존 결제 이용권 초기화 오류:", resetError);
+    }
+
+    localStorage.removeItem("myeongun_premium_result");
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setFreeResult("");
+
+    const payload: SajuForm = {
+      name: form.name.trim(),
+      birth: form.birth,
+      time: form.time,
+      gender: form.gender,
+      calendar: form.calendar,
+    };
+
+    if (!payload.name || !payload.birth || !payload.time) {
+      setError("이름, 생년월일, 출생시간을 모두 입력해 주세요.");
       return;
     }
 
     setLoading(true);
-    setResult(null);
 
-    setTimeout(() => {
-      setResult({
-        title: `${form.name || "귀하"}님의 사주 분석`,
-        summary:
-          "입력하신 생년월일과 시간을 기준으로 전체적인 운의 흐름을 살펴봅니다.",
-        sections: [
-          {
-            name: "전체 운세",
-            text: "현재의 흐름을 차분하게 정리하고 앞으로의 방향을 살펴보는 시기입니다. 중요한 결정은 충분히 생각한 뒤  움직이는 것이 좋습니다.",
-          },
-          {
-            name: "재물·사업운",
-            text: "새로운 기회를 무조건 크게 확장하기보다는 현재 가진 자원과 경험을 활용하는 전략이 유리합니다. 장기적인 관점에서 안정적인 수익 구조를 만드는 것이 중요합니다.",
-          },
-          {
-            name: "직업·사업",
-            text: "본인의 경험과 전문성을 활용할수록 강점이 살아나는 흐름입니다. 사람과의 연결을 통해 새로운 기회가 만들어질 가능성도 있습니다.",
-          },
-          {
-            name: "인간관계",
-            text: "가까운 사람들과의 소통이 중요한 시기입니다. 자신의 생각만 고집하기보다 상대방의 입장을 함께 살펴보면 관계가 더욱 좋아질 수 있습니다.",
-          },
-          {
-            name: "건강·생활",
-            text: "무리해서 한 번에 많은 것을 해결하기보다 규칙적인 생활과 충분한 휴식을 유지하는 것이 좋습니다.",
-          },
-        ],
+    try {
+      const reopened = await tryReopenExistingPaidSaju(payload);
+      if (reopened) return;
+
+      await resetOldEntitlement();
+
+      const response = await fetch("/api/fortune", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
+      const parsed = await response.json();
+
+      if (!response.ok) {
+        throw new Error(parsed?.error || "사주 분석에 실패했습니다.");
+      }
+
+      localStorage.setItem("myeongun_saju", JSON.stringify(payload));
+      localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
+
+      const resultText = String(parsed?.result || "").trim();
+      if (!resultText) {
+        throw new Error("무료 사주 결과를 불러오지 못했습니다.");
+      }
+
+      setFreeResult(resultText);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "사주 분석 중 오류가 발생했습니다."
+      );
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -657,6 +815,19 @@ export default function Home() {
               <option value="음력">음력</option>
             </select>
 
+            {error && (
+              <p
+                style={{
+                  margin: "18px 0 0",
+                  color: "#ff8f85",
+                  fontSize: "13px",
+                  lineHeight: 1.7,
+                }}
+              >
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -692,7 +863,7 @@ export default function Home() {
       </section>
 
       {/* RESULT */}
-      {result && (
+      {freeResult && (
         <section
           style={{
             maxWidth: "900px",
@@ -716,69 +887,23 @@ export default function Home() {
                 marginBottom: "12px",
               }}
             >
-              SAJU RESULT
+              FREE SAJU RESULT
             </div>
 
             <h2
               style={{
-                margin: "0 0 16px",
+                margin: "0 0 20px",
                 fontSize: "28px",
                 color: "#f5e7c2",
               }}
             >
-              {result.title}
+              {form.name || "고객"}님의 무료 사주 분석
             </h2>
 
-            <p
-              style={{
-                color: "#aeb1bd",
-                lineHeight: 1.8,
-                marginBottom: "28px",
-              }}
-            >
-              {result.summary}
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gap: "12px",
-              }}
-            >
-              {result.sections.map((section) => (
-                <article
-                  key={section.name}
-                  style={{
-                    padding: "20px",
-                    background: "rgba(255,255,255,0.045)",
-                    borderRadius: "14px",
-                    border: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <h3
-                    style={{
-                      color: "#f5e7c2",
-                      margin: "0 0 10px",
-                      fontSize: "17px",
-                    }}
-                  >
-                    {section.name}
-                  </h3>
-
-                  <p
-                    style={{
-                      color: "#aeb1bd",
-                      lineHeight: 1.8,
-                      margin: 0,
-                    }}
-                  >
-                    {section.text}
-                  </p>
-                </article>
-              ))}
+            <div className="homeResultText">
+              {renderFreeResult(freeResult)}
             </div>
 
-            {/* PREMIUM */}
             <div
               style={{
                 marginTop: "30px",
@@ -807,7 +932,7 @@ export default function Home() {
                   margin: "10px 0",
                 }}
               >
-                더 깊은 사주 분석이 필요하신가요?
+                더 깊은 상세 사주 분석이 필요하신가요?
               </h3>
 
               <p
@@ -817,9 +942,9 @@ export default function Home() {
                   margin: "0 0 18px",
                 }}
               >
-                대운, 재물운, 사업운, 직업운, 인간관계 등
+                재물운, 사업운, 직업운, 인간관계, 2026년 운세,
                 <br />
-                보다 상세한 분석을 확인할 수 있습니다.
+                장기 흐름까지 개인별 프리미엄 분석을 확인할 수 있습니다.
               </p>
 
               <Link
@@ -840,6 +965,61 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <style jsx>{`
+        .homeResultText {
+          padding: 24px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.045);
+          color: #d4d6df;
+          font-size: 15px;
+          line-height: 1.95;
+        }
+        .homeResultText :global(.homeResultHeadingLarge) {
+          margin: 26px 0 12px;
+          color: #f5e7c2;
+          font-size: 24px;
+          line-height: 1.4;
+        }
+        .homeResultText :global(.homeResultHeading) {
+          margin: 24px 0 10px;
+          color: #e7b85c;
+          font-size: 20px;
+          line-height: 1.45;
+        }
+        .homeResultText :global(.homeResultHeadingSmall) {
+          margin: 20px 0 8px;
+          color: #f1d89e;
+          font-size: 17px;
+          line-height: 1.5;
+        }
+        .homeResultText :global(.homeResultParagraph) {
+          margin: 0 0 12px;
+        }
+        .homeResultText :global(.homeResultList) {
+          margin: 8px 0 18px;
+          padding-left: 22px;
+        }
+        .homeResultText :global(.homeResultList li) {
+          margin-bottom: 7px;
+        }
+        .homeResultText :global(strong) {
+          color: #fff0c9;
+          font-weight: 800;
+        }
+        @media (max-width: 640px) {
+          .homeResultText {
+            padding: 18px;
+            font-size: 14px;
+          }
+          .homeResultText :global(.homeResultHeadingLarge) {
+            font-size: 21px;
+          }
+          .homeResultText :global(.homeResultHeading) {
+            font-size: 18px;
+          }
+        }
+      `}</style>
 
       {/* AI BANNER */}
       <section
