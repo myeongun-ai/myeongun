@@ -17,13 +17,13 @@ function PaymentSuccessContent() {
   const [message, setMessage] = useState(
     "토스 결제 승인 정보를 확인하고 있습니다."
   );
+  const [reopenCode, setReopenCode] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
     async function confirmPayment() {
-      document.cookie =
-        "myeongun_paid=; Path=/; Max-Age=0; SameSite=Lax";
+      document.cookie = "myeongun_paid=; Path=/; Max-Age=0; SameSite=Lax";
 
       if (!paymentKey || !orderId || !amount) {
         if (!cancelled) {
@@ -60,9 +60,7 @@ function PaymentSuccessContent() {
 
         if (!response.ok) {
           throw new Error(
-            result?.message ||
-              result?.code ||
-              "결제 승인 확인에 실패했습니다."
+            result?.message || result?.code || "결제 승인 확인에 실패했습니다."
           );
         }
 
@@ -71,6 +69,14 @@ function PaymentSuccessContent() {
 
           if (paidSaju) {
             localStorage.setItem("myeongun_paid_saju", paidSaju);
+          }
+
+          if (result?.reopenCode) {
+            setReopenCode(String(result.reopenCode));
+            localStorage.setItem(
+              "myeongun_reopen_code",
+              String(result.reopenCode)
+            );
           }
 
           sessionStorage.setItem("myeongun_session_active", "1");
@@ -150,11 +156,7 @@ function PaymentSuccessContent() {
             fontSize: "38px",
           }}
         >
-          {state === "success"
-            ? "✓"
-            : state === "error"
-              ? "!"
-              : "…"}
+          {state === "success" ? "✓" : state === "error" ? "!" : "…"}
         </div>
 
         <h1
@@ -228,6 +230,50 @@ function PaymentSuccessContent() {
                 </strong>
               </div>
             )}
+          </div>
+        )}
+
+        {state === "success" && reopenCode && (
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "22px 20px",
+              border: "1px solid #d7c9aa",
+              borderRadius: "14px",
+              background: "#fffaf0",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#8a6a2c",
+                fontWeight: 800,
+              }}
+            >
+              7일 재열람 코드
+            </div>
+            <div
+              style={{
+                marginTop: "9px",
+                fontSize: "28px",
+                letterSpacing: "4px",
+                fontWeight: 900,
+                color: "#20251f",
+              }}
+            >
+              {reopenCode}
+            </div>
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: "12px",
+                lineHeight: 1.7,
+                color: "#777",
+              }}
+            >
+              이 코드를 보관하면 결제 후 7일 동안 휴대폰이나 다른 PC에서도
+              상세 사주를 다시 볼 수 있습니다.
+            </p>
           </div>
         )}
 

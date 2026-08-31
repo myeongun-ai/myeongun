@@ -1,22 +1,108 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function parseBirth(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  return {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3]),
+  };
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
 
 export default function ReopenPaymentPage() {
   const router = useRouter();
 
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(currentYear);
+  const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
+
+  const years = useMemo(
+    () =>
+      Array.from(
+        { length: currentYear - 1930 + 1 },
+        (_, index) => currentYear - index
+      ),
+    [currentYear]
+  );
+
+  const parsedBirth = parseBirth(birth);
+  const monthDays = daysInMonth(pickerYear, pickerMonth);
+  const firstDay = new Date(pickerYear, pickerMonth - 1, 1).getDay();
+
+  function openPicker() {
+    const parsed = parseBirth(birth);
+
+    if (parsed) {
+      setPickerYear(parsed.year);
+      setPickerMonth(parsed.month);
+    }
+
+    setPickerOpen(true);
+  }
+
+  function moveMonth(delta: number) {
+    let nextYear = pickerYear;
+    let nextMonth = pickerMonth + delta;
+
+    if (nextMonth < 1) {
+      nextMonth = 12;
+      nextYear -= 1;
+    }
+
+    if (nextMonth > 12) {
+      nextMonth = 1;
+      nextYear += 1;
+    }
+
+    if (nextYear < 1930 || nextYear > currentYear) {
+      return;
+    }
+
+    setPickerYear(nextYear);
+    setPickerMonth(nextMonth);
+  }
+
+  function selectDay(day: number) {
+    const selected = new Date(pickerYear, pickerMonth - 1, day);
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
+    if (selected > now) {
+      return;
+    }
+
+    setBirth(`${pickerYear}-${pad2(pickerMonth)}-${pad2(day)}`);
+    setPickerOpen(false);
+  }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage("");
 
-    if (!name.trim() || !birth) {
-      setMessage("이름과 생년월일을 입력해주세요.");
+    if (!name.trim() || !birth || !code.trim()) {
+      setMessage("이름, 생년월일, 재열람 코드를 모두 입력해주세요.");
       return;
     }
 
@@ -32,6 +118,7 @@ export default function ReopenPaymentPage() {
         body: JSON.stringify({
           name: name.trim(),
           birth,
+          code: code.trim(),
         }),
       });
 
@@ -41,27 +128,14 @@ export default function ReopenPaymentPage() {
         throw new Error(result?.message || "재열람 확인에 실패했습니다.");
       }
 
-      // 결제한 브라우저에 저장되어 있는 동일 사주 정보인지 마지막으로 확인합니다.
-      const saved = localStorage.getItem("myeongun_saju");
-
-      if (!saved) {
-        throw new Error(
-          "이 브라우저에 저장된 사주 결과가 없습니다. 새로 사주를 입력해주세요."
-        );
+      if (!result?.saju) {
+        throw new Error("재열람할 사주 정보를 불러오지 못했습니다.");
       }
 
-      const saju = JSON.parse(saved);
-
-      if (
-        String(saju?.name || "").trim() !== name.trim() ||
-        String(saju?.birth || "") !== birth
-      ) {
-        throw new Error(
-          "저장된 사주 정보와 입력한 정보가 일치하지 않습니다."
-        );
-      }
-
+      localStorage.setItem("myeongun_saju", JSON.stringify(result.saju));
+      localStorage.setItem("myeongun_paid_saju", JSON.stringify(result.saju));
       sessionStorage.setItem("myeongun_session_active", "1");
+
       router.replace("/fortune/detail");
     } catch (error) {
       setMessage(
@@ -73,6 +147,26 @@ export default function ReopenPaymentPage() {
       setLoading(false);
     }
   }
+
+  const inputStyle = {
+    width: "100%",
+    boxSizing: "border-box" as const,
+    padding: "13px 14px",
+    border: "1px solid #d8cfbf",
+    borderRadius: "10px",
+    background: "#fff",
+    fontSize: "14px",
+  };
+
+  const pickerButtonStyle = {
+    minHeight: "42px",
+    border: "1px solid #d8cfbf",
+    borderRadius: "9px",
+    background: "#fff",
+    color: "#35322d",
+    fontWeight: 800,
+    cursor: "pointer",
+  };
 
   return (
     <main
@@ -127,9 +221,9 @@ export default function ReopenPaymentPage() {
             lineHeight: 1.8,
           }}
         >
-          결제 후 7일 동안 같은 브라우저에서 다시 열 수 있습니다.
+          결제 후 7일 동안 PC와 휴대폰 등 다른 기기에서도 다시 열 수 있습니다.
           <br />
-          개인정보 보호를 위해 이름과 생년월일을 다시 확인합니다.
+          결제 완료 화면에서 발급된 8자리 재열람 코드를 입력해주세요.
         </p>
 
         <form onSubmit={submit}>
@@ -148,17 +242,212 @@ export default function ReopenPaymentPage() {
               onChange={(e) => setName(e.target.value)}
               autoComplete="name"
               placeholder="결제할 때 입력한 이름"
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "13px 14px",
-                border: "1px solid #d8cfbf",
-                borderRadius: "10px",
-                background: "#fff",
-                fontSize: "14px",
-              }}
+              style={inputStyle}
             />
           </label>
+
+          <div
+            style={{
+              display: "grid",
+              gap: "8px",
+              marginTop: "16px",
+              fontSize: "13px",
+              fontWeight: 700,
+              color: "#35322d",
+            }}
+          >
+            <span>생년월일</span>
+
+            <button
+              type="button"
+              onClick={openPicker}
+              style={{
+                ...inputStyle,
+                minHeight: "48px",
+                textAlign: "left",
+                cursor: "pointer",
+                color: birth ? "#20251f" : "#888",
+              }}
+            >
+              {birth || "생년월일을 선택하세요"}
+            </button>
+
+            {pickerOpen && (
+              <section
+                style={{
+                  marginTop: "4px",
+                  padding: "14px",
+                  border: "1px solid #d8cfbf",
+                  borderRadius: "14px",
+                  background: "#fff",
+                  boxShadow: "0 12px 28px rgba(0,0,0,.08)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "42px minmax(0,1fr) minmax(0,1fr) 42px",
+                    gap: "7px",
+                    alignItems: "center",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => moveMonth(-1)}
+                    aria-label="이전 월"
+                    style={pickerButtonStyle}
+                  >
+                    ‹
+                  </button>
+
+                  <select
+                    aria-label="연도 선택"
+                    value={pickerYear}
+                    onChange={(e) => setPickerYear(Number(e.target.value))}
+                    style={{
+                      ...inputStyle,
+                      minWidth: 0,
+                      minHeight: "42px",
+                      padding: "0 8px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}년
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    aria-label="월 선택"
+                    value={pickerMonth}
+                    onChange={(e) => setPickerMonth(Number(e.target.value))}
+                    style={{
+                      ...inputStyle,
+                      minWidth: 0,
+                      minHeight: "42px",
+                      padding: "0 8px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {Array.from({ length: 12 }, (_, index) => index + 1).map(
+                      (month) => (
+                        <option key={month} value={month}>
+                          {month}월
+                        </option>
+                      )
+                    )}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => moveMonth(1)}
+                    aria-label="다음 월"
+                    style={pickerButtonStyle}
+                  >
+                    ›
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(7, 1fr)",
+                    gap: "5px",
+                    marginTop: "14px",
+                    textAlign: "center",
+                  }}
+                >
+                  {["일", "월", "화", "수", "목", "금", "토"].map((dayName) => (
+                    <div
+                      key={dayName}
+                      style={{
+                        padding: "7px 0",
+                        color: "#8b8377",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                      }}
+                    >
+                      {dayName}
+                    </div>
+                  ))}
+
+                  {Array.from({ length: firstDay }, (_, index) => (
+                    <div key={`blank-${index}`} />
+                  ))}
+
+                  {Array.from({ length: monthDays }, (_, index) => index + 1).map(
+                    (day) => {
+                      const selected =
+                        parsedBirth?.year === pickerYear &&
+                        parsedBirth?.month === pickerMonth &&
+                        parsedBirth?.day === day;
+
+                      const date = new Date(pickerYear, pickerMonth - 1, day);
+                      const now = new Date();
+                      now.setHours(23, 59, 59, 999);
+                      const future = date > now;
+
+                      return (
+                        <button
+                          key={day}
+                          type="button"
+                          disabled={future}
+                          onClick={() => selectDay(day)}
+                          style={{
+                            aspectRatio: "1 / 1",
+                            border: selected
+                              ? "1px solid #20251f"
+                              : "1px solid transparent",
+                            borderRadius: "50%",
+                            background: selected ? "#20251f" : "transparent",
+                            color: future
+                              ? "#cfc8bc"
+                              : selected
+                                ? "#fff"
+                                : "#35322d",
+                            fontSize: "12px",
+                            cursor: future ? "default" : "pointer",
+                          }}
+                        >
+                          {day}
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "8px",
+                    marginTop: "14px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBirth("");
+                      setPickerOpen(false);
+                    }}
+                    style={{ ...pickerButtonStyle, padding: "0 16px" }}
+                  >
+                    삭제
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(false)}
+                    style={{ ...pickerButtonStyle, padding: "0 16px" }}
+                  >
+                    닫기
+                  </button>
+                </div>
+              </section>
+            )}
+          </div>
 
           <label
             style={{
@@ -170,19 +459,29 @@ export default function ReopenPaymentPage() {
               color: "#35322d",
             }}
           >
-            생년월일
+            재열람 코드
             <input
-              type="date"
-              value={birth}
-              onChange={(e) => setBirth(e.target.value)}
+              value={code}
+              onChange={(e) =>
+                setCode(
+                  e.target.value
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9]/g, "")
+                    .slice(0, 8)
+                )
+              }
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="text"
+              maxLength={8}
+              placeholder="예: AB7K9M2P"
               style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "13px 14px",
-                border: "1px solid #d8cfbf",
-                borderRadius: "10px",
-                background: "#fff",
-                fontSize: "14px",
+                ...inputStyle,
+                fontSize: "17px",
+                fontWeight: 800,
+                letterSpacing: "2px",
+                textTransform: "uppercase",
               }}
             />
           </label>
@@ -213,6 +512,7 @@ export default function ReopenPaymentPage() {
               color: "#fff",
               fontWeight: 800,
               fontSize: "15px",
+              cursor: loading ? "wait" : "pointer",
             }}
           >
             {loading ? "확인 중..." : "상세 사주 다시 보기"}
@@ -228,7 +528,7 @@ export default function ReopenPaymentPage() {
             textAlign: "center",
           }}
         >
-          새 사주를 입력하면 기존 재열람 이용권은 종료됩니다.
+          재열람 코드는 결제한 상세 사주에만 사용할 수 있으며 7일 후 만료됩니다.
         </p>
       </section>
     </main>

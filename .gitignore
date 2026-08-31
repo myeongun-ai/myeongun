@@ -15,3 +15,8 @@ app/page.tsx.bak
 
 app-backup/
 
+.vercel
+.env*
+
+route-fortune-backup-20260827.txt
+route.backup-20260827.txt

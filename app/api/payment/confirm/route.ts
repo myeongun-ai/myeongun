@@ -1,9 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import {
   createEntitlement,
   entitlementCookie,
   SajuAccessInput,
 } from "../../../../lib/paymentAccess";
+import { saveCrossDeviceReopen } from "../../../../lib/reopenStore";
 
 const PREMIUM_PRICE = 9900;
 
@@ -18,28 +19,28 @@ export async function POST(request: Request) {
 
     if (!paymentKey || !orderId || !Number.isFinite(amount)) {
       return NextResponse.json(
-        { message: "寃곗젣 ?뱀씤 ?뺣낫媛 遺議깊빀?덈떎." },
+        { message: "결제 승인 정보가 부족합니다." },
         { status: 400 }
       );
     }
 
     if (!saju?.name || !saju?.birth || !saju?.time) {
       return NextResponse.json(
-        { message: "寃곗젣???ъ＜ ?뺣낫媛 ?놁뒿?덈떎." },
+        { message: "결제에 연결할 사주 정보가 없습니다." },
         { status: 400 }
       );
     }
 
     if (amount !== PREMIUM_PRICE) {
       return NextResponse.json(
-        { message: "寃곗젣 湲덉븸???щ컮瑜댁? ?딆뒿?덈떎." },
+        { message: "결제 금액이 올바르지 않습니다." },
         { status: 400 }
       );
     }
 
     if (!orderId.startsWith("MYEONGUN-")) {
       return NextResponse.json(
-        { message: "?좏슚?섏? ?딆? 二쇰Ц踰덊샇?낅땲??" },
+        { message: "유효하지 않은 주문번호입니다." },
         { status: 400 }
       );
     }
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
 
     if (!secretKey) {
       return NextResponse.json(
-        { message: "?좎뒪 ?쒗겕由??ㅺ? ?ㅼ젙?섏? ?딆븯?듬땲??" },
+        { message: "토스 시크릿 키가 설정되지 않았습니다." },
         { status: 500 }
       );
     }
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
         {
           message:
             result?.message ||
-            "?좎뒪 寃곗젣 ?뱀씤 ?붿껌???뺤긽?곸쑝濡?泥섎━?섏? ?딆븯?듬땲??",
+            "토스 결제 승인 요청을 정상적으로 처리하지 못했습니다.",
           code: result?.code,
         },
         { status: response.status }
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
 
     if (result?.orderId && result.orderId !== orderId) {
       return NextResponse.json(
-        { message: "?뱀씤??二쇰Ц踰덊샇媛 ?붿껌 ?뺣낫? ?쇱튂?섏? ?딆뒿?덈떎." },
+        { message: "승인된 주문번호가 요청 정보와 일치하지 않습니다." },
         { status: 400 }
       );
     }
@@ -98,12 +99,13 @@ export async function POST(request: Request) {
       result.totalAmount !== PREMIUM_PRICE
     ) {
       return NextResponse.json(
-        { message: "?뱀씤??寃곗젣 湲덉븸???곹뭹 湲덉븸怨??쇱튂?섏? ?딆뒿?덈떎." },
+        { message: "승인된 결제 금액이 상품 금액과 일치하지 않습니다." },
         { status: 400 }
       );
     }
 
     const entitlement = createEntitlement(orderId, saju);
+    const reopen = await saveCrossDeviceReopen(orderId, saju);
 
     const nextResponse = NextResponse.json(
       {
@@ -111,7 +113,9 @@ export async function POST(request: Request) {
         orderId,
         amount: PREMIUM_PRICE,
         status: result?.status || "DONE",
-        reopenDays: 7,
+        reopenDays: reopen.reopenDays,
+        reopenCode: reopen.code,
+        reopenExpiresAt: reopen.expiresAt,
       },
       { status: 200 }
     );
@@ -124,7 +128,7 @@ export async function POST(request: Request) {
       maxAge: entitlementCookie.maxAge,
     });
 
-    // 怨쇨굅 踰꾩쟾 荑좏궎???쒓굅
+    // 과거 버전 쿠키 제거
     nextResponse.cookies.set("myeongun_paid", "", {
       httpOnly: true,
       sameSite: "lax",
@@ -135,10 +139,10 @@ export async function POST(request: Request) {
 
     return nextResponse;
   } catch (error) {
-    console.error("寃곗젣 ?뱀씤 ?ㅻ쪟:", error);
+    console.error("결제 승인 오류:", error);
 
     return NextResponse.json(
-      { message: "寃곗젣 ?뱀씤 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎." },
+      { message: "결제 승인 중 오류가 발생했습니다." },
       { status: 500 }
     );
   }

@@ -1,52 +1,63 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import {
+  createEntitlement,
   entitlementCookie,
-  hashReopen,
-  verifyEntitlement,
 } from "../../../../lib/paymentAccess";
+import { redeemCrossDeviceReopen } from "../../../../lib/reopenStore";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const name = String(body?.name || "").trim();
     const birth = String(body?.birth || "").trim();
+    const code = String(body?.code || "").trim();
 
-    if (!name || !birth) {
+    if (!name || !birth || !code) {
       return NextResponse.json(
-        { ok: false, message: "이름과 생년월일을 입력해주세요." },
+        { message: "이름, 생년월일, 재열람 코드를 모두 입력해주세요." },
         { status: 400 }
       );
     }
 
-    const token = request.cookies.get(entitlementCookie.name)?.value;
-    const entitlement = verifyEntitlement(token);
+    const reopened = await redeemCrossDeviceReopen({ name, birth, code });
 
-    if (!entitlement) {
+    if (!reopened) {
       return NextResponse.json(
-        { ok: false, message: "재열람 가능한 이용권이 없습니다." },
-        { status: 401 }
-      );
-    }
-
-    if (entitlement.reopenHash !== hashReopen({ name, birth })) {
-      return NextResponse.json(
-        { ok: false, message: "결제한 사주 정보와 일치하지 않습니다." },
+        {
+          message:
+            "결제 정보와 일치하지 않거나 재열람 기간이 만료되었습니다. 입력 정보를 다시 확인해주세요.",
+        },
         { status: 403 }
       );
     }
 
-    return NextResponse.json(
+    const entitlement = createEntitlement(reopened.orderId, reopened.saju);
+
+    const response = NextResponse.json(
       {
         ok: true,
-        expiresAt: entitlement.exp,
+        saju: reopened.saju,
+        expiresAt: reopened.expiresAt,
       },
-      { status: 200, headers: { "Cache-Control": "no-store" } }
+      { status: 200 }
     );
-  } catch {
+
+    response.cookies.set(entitlementCookie.name, entitlement, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: entitlementCookie.maxAge,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("상세 사주 재열람 오류:", error);
+
     return NextResponse.json(
-      { ok: false, message: "재열람 확인 중 오류가 발생했습니다." },
-      { status: 400 }
+      { message: "재열람 확인 중 오류가 발생했습니다." },
+      { status: 500 }
     );
   }
 }
