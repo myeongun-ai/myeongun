@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
@@ -558,6 +558,85 @@ export default function Home() {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* PAID REOPEN */}
+      <section
+        style={{
+          maxWidth: "760px",
+          margin: "0 auto",
+          padding: "0 24px 26px",
+        }}
+      >
+        <div
+          style={{
+            padding: "22px 24px",
+            borderRadius: "18px",
+            border: "1px solid rgba(218,170,88,0.2)",
+            background:
+              "linear-gradient(135deg, rgba(218,170,88,0.09), rgba(255,255,255,0.025))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "18px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                color: "#dbaa58",
+                fontSize: "11px",
+                letterSpacing: "1.8px",
+                marginBottom: "7px",
+              }}
+            >
+              PAID SAJU REOPEN
+            </div>
+
+            <div
+              style={{
+                color: "#f5e7c2",
+                fontSize: "17px",
+                fontWeight: 800,
+                marginBottom: "5px",
+              }}
+            >
+              이미 상세 사주를 결제하셨나요?
+            </div>
+
+            <div
+              style={{
+                color: "#969aa9",
+                fontSize: "13px",
+                lineHeight: 1.65,
+              }}
+            >
+              결제 후 7일 동안 재열람 코드로 PC와 휴대폰에서 다시 볼 수 있습니다.
+            </div>
+          </div>
+
+          <Link
+            href="/payment/reopen"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "46px",
+              padding: "0 20px",
+              borderRadius: "11px",
+              border: "1px solid rgba(218,170,88,0.55)",
+              background: "rgba(218,170,88,0.08)",
+              color: "#f1cf8b",
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 800,
+              whiteSpace: "nowrap",
+            }}
+          >
+            결제한 상세 사주 다시 보기 →
+          </Link>
         </div>
       </section>
 
