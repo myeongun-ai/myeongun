@@ -41,6 +41,8 @@ export type PillarDetail = {
 
 export type StrengthLevel = "신강" | "중화" | "신약";
 
+export type YongshinCalculation = { yongshin: FiveElement; heesin: FiveElement; reason: string; };
+
 type StrengthCalculation = {
   level: StrengthLevel;
   score: number;
@@ -94,6 +96,8 @@ export type MyeongunManseryeokResult = {
     reason: string;
   };
 
+  yongshin?: YongshinCalculation;
+
   time: {
     known: boolean;
     calculatedHour: number | null;
@@ -138,6 +142,9 @@ const BRANCH_INFO: Record<
   술: { element: "토", yinYang: "양" },
   해: { element: "수", yinYang: "음" },
 };
+
+const GENERATES: Record<FiveElement, FiveElement> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+const CONTROLS: Record<FiveElement, FiveElement> = { 목: "토", 화: "금", 토: "수", 금: "목", 수: "화" };
 
 const HIDDEN_STEMS: Record<string, string[]> = {
   자: ["계"],
@@ -303,35 +310,20 @@ function getTenGod(
     return samePolarity ? "비견" : "겁재";
   }
 
-  const generates: Record<FiveElement, FiveElement> = {
-    목: "화",
-    화: "토",
-    토: "금",
-    금: "수",
-    수: "목",
-  };
 
-  const controls: Record<FiveElement, FiveElement> = {
-    목: "토",
-    화: "금",
-    토: "수",
-    금: "목",
-    수: "화",
-  };
-
-  if (generates[day.element] === target.element) {
+  if (GENERATES[day.element] === target.element) {
     return samePolarity ? "식신" : "상관";
   }
 
-  if (generates[target.element] === day.element) {
+  if (GENERATES[target.element] === day.element) {
     return samePolarity ? "편인" : "정인";
   }
 
-  if (controls[day.element] === target.element) {
+  if (CONTROLS[day.element] === target.element) {
     return samePolarity ? "편재" : "정재";
   }
 
-  if (controls[target.element] === day.element) {
+  if (CONTROLS[target.element] === day.element) {
     return samePolarity ? "편관" : "정관";
   }
 
@@ -464,6 +456,21 @@ function countFiveElements(
   return result;
 }
 
+function rankFiveElements(fiveElements: { 목: number; 화: number; 토: number; 금: number; 수: number }): FiveElement[] {
+  return (Object.entries(fiveElements) as [FiveElement, number][]).sort((a, b) => a[1] - b[1]).map(([element]) => element);
+}
+
+function calculateYongshin(strength: StrengthCalculation, fiveElements: { 목: number; 화: number; 토: number; 금: number; 수: number }, dayMasterElement: FiveElement): YongshinCalculation {
+  const ranked = rankFiveElements(fiveElements);
+  const supportElements: FiveElement[] = [dayMasterElement, ...Object.entries(GENERATES).filter(([, target]) => target === dayMasterElement).map(([element]) => element as FiveElement)];
+  const drainControlElements: FiveElement[] = [GENERATES[dayMasterElement], CONTROLS[dayMasterElement], ...Object.entries(CONTROLS).filter(([, target]) => target === dayMasterElement).map(([element]) => element as FiveElement)];
+  const candidates = strength.level === "신약" ? supportElements : strength.level === "신강" ? drainControlElements : ranked;
+  const yongshin = candidates.find((element) => ranked.includes(element)) ?? ranked[0] ?? dayMasterElement;
+  const heesin = ranked.find((element) => element !== yongshin && GENERATES[element] === yongshin) ?? dayMasterElement;
+  const reason = `${strength.level} ${strength.score}점과 오행 분포를 기준으로 선정한 참고용 용신은 ${yongshin}, 희신은 ${heesin}입니다.`;
+  return { yongshin, heesin, reason };
+}
+
 export function calculateMyeongunManseryeok(
   input: MyeongunSajuInput
 ): MyeongunManseryeokResult {
@@ -557,6 +564,8 @@ export function calculateMyeongunManseryeok(
     hourPillar
   );
 
+  const yongshin = calculateYongshin(strength, fiveElements, STEM_INFO[dayStem].element);
+
   return {
     input: {
       birth: input.birth,
@@ -589,6 +598,8 @@ export function calculateMyeongunManseryeok(
     fiveElements,
 
     strength,
+
+    yongshin,
 
     time: {
       known: birthTime.known,

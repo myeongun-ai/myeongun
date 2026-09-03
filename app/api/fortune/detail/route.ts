@@ -154,10 +154,11 @@ export async function POST(request: NextRequest) {
 지장간: 연지 ${formatHiddenStems(manseryeok.pillars.year)}, 월지 ${formatHiddenStems(manseryeok.pillars.month)}, 일지 ${formatHiddenStems(manseryeok.pillars.day)}, 시지 ${manseryeok.pillars.hour ? formatHiddenStems(manseryeok.pillars.hour) : "출생시간 미상"}
 오행: 목 ${manseryeok.fiveElements.목}, 화 ${manseryeok.fiveElements.화}, 토 ${manseryeok.fiveElements.토}, 금 ${manseryeok.fiveElements.금}, 수 ${manseryeok.fiveElements.수}
 신강·신약: ${manseryeok.strength.level} (${manseryeok.strength.score}점) - ${manseryeok.strength.reason}
+참고용 용신·희신: 용신 ${manseryeok.yongshin?.yongshin || "미산출"}, 희신 ${manseryeok.yongshin?.heesin || "미산출"} - ${manseryeok.yongshin?.reason || "용신·희신 참고값 미산출"}
 
 [매우 중요한 해석 원칙]
 1. 위 연주·월주·일주·시주, 일간, 오행, 천간 십성, 지지 십성, 지장간 값은 만세력 계산 엔진으로 산출된 값이므로 상세 해석의 근거로 사용하세요.
-2. 신강·신약은 위 만세력 계산 엔진의 값을 그대로 상세 해석에 사용하고, 현재 제공되지 않은 용신·희신, 대운 등의 값은 임의로 계산하거나 만들어내지 마세요.
+2. 신강·신약과 용신·희신은 위 만세력 계산 엔진에서 산출한 참고값을 그대로 상세 해석에 사용하세요. 용신·희신은 전통 명리의 절대적인 확정 판정이 아니라 명운 엔진의 참고용 분석값으로 표현하세요. 대운 등 현재 제공되지 않은 값은 임의로 계산하거나 만들어내지 마세요.
 3. 입력 정보와 전통 명리 해석의 일반적 관점을 참고한 AI 분석임을 유지하세요.
 4. 확정적인 예언, 공포를 유발하는 표현, 수명·사고·질병의 단정은 하지 마세요.
 5. 재물·사업·직업 분석은 현실적인 행동 조언과 함께 설명하세요.

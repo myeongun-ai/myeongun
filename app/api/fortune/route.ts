@@ -53,13 +53,14 @@ export async function POST(req: Request) {
 일간: ${manseryeok.dayMaster.stem} (${manseryeok.dayMaster.element}, ${manseryeok.dayMaster.yinYang})
 오행: 목 ${manseryeok.fiveElements.목}, 화 ${manseryeok.fiveElements.화}, 토 ${manseryeok.fiveElements.토}, 금 ${manseryeok.fiveElements.금}, 수 ${manseryeok.fiveElements.수}
 신강·신약: ${manseryeok.strength.level} (${manseryeok.strength.score}점) - ${manseryeok.strength.reason}
+참고용 용신·희신: 용신 ${manseryeok.yongshin?.yongshin || "미산출"}, 희신 ${manseryeok.yongshin?.heesin || "미산출"} - ${manseryeok.yongshin?.reason || "용신·희신 참고값 미산출"}
 지지 십성: 연지 ${manseryeok.pillars.year.tenGodBranch}, 월지 ${manseryeok.pillars.month.tenGodBranch}, 일지 ${manseryeok.pillars.day.tenGodBranch}, 시지 ${manseryeok.pillars.hour?.tenGodBranch || "출생시간 미상"}
 지장간: 연지 ${formatHiddenStems(manseryeok.pillars.year)}, 월지 ${formatHiddenStems(manseryeok.pillars.month)}, 일지 ${formatHiddenStems(manseryeok.pillars.day)}, 시지 ${manseryeok.pillars.hour ? formatHiddenStems(manseryeok.pillars.hour) : "출생시간 미상"}
 
 [중요 원칙]
 - 위 연주·월주·일주·시주, 일간, 오행, 지지 십성, 지장간 값은 만세력 계산 엔진으로 산출된 값이므로 해석의 근거로 사용하세요.
 - 지지 십성과 지장간은 성향, 재물, 직업, 인간관계 해석에 실제로 연결하여 설명하세요.
-- 신강·신약은 위 만세력 계산 엔진의 값을 그대로 해석에 사용하고, 현재 제공되지 않은 용신·희신, 대운 등의 값은 임의로 계산하거나 만들어내지 마세요.
+- 신강·신약과 용신·희신은 위 만세력 계산 엔진에서 산출한 참고값을 그대로 해석에 사용하세요. 용신·희신은 전통 명리의 절대적인 확정 판정이 아니라 명운 엔진의 참고용 분석값으로 표현하세요. 대운 등 현재 제공되지 않은 값은 임의로 계산하거나 만들어내지 마세요.
 - 전통 명리 관점을 참고한 AI 해석임을 유지하세요.
 - 확정적인 미래 예언, 수명, 사고, 질병을 단정하지 마세요.
 - 재물·사업·직업 내용은 현실적인 행동 조언과 함께 설명하세요.
