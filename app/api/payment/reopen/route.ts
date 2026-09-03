@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const name = String(body?.name || "").trim();
     const birth = String(body?.birth || "").trim();
     const code = String(body?.code || "").trim();
+    const calendar = String(body?.calendar || "양력").trim();
 
     if (!name || !birth || !code) {
       return NextResponse.json(
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const reopened = await redeemCrossDeviceReopen({ name, birth, code });
+    const reopened = await redeemCrossDeviceReopen({ name, birth, code, calendar });
 
     if (!reopened) {
       return NextResponse.json(

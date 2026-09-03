@@ -101,8 +101,13 @@ function decryptSaju(value: string): SajuAccessInput {
   return JSON.parse(decrypted.toString("utf8")) as SajuAccessInput;
 }
 
-function isSameActualBirthDate(stored: SajuAccessInput, inputBirth: string) {
+function isSameActualBirthDate(
+  stored: SajuAccessInput,
+  inputBirth: string,
+  inputCalendar?: string
+) {
   if (!stored.birth) return false;
+
   try {
     const storedResult = calculateMyeongunManseryeok({
       birth: stored.birth,
@@ -110,9 +115,12 @@ function isSameActualBirthDate(stored: SajuAccessInput, inputBirth: string) {
       calendar: stored.calendar,
     });
 
-    const storedSolar = `${storedResult.solar.year}-${String(storedResult.solar.month).padStart(2, "0")}-${String(storedResult.solar.day).padStart(2, "0")}`;
+    const storedSolar =
+      `${storedResult.solar.year}-${String(storedResult.solar.month).padStart(2, "0")}-${String(storedResult.solar.day).padStart(2, "0")}`;
 
-    const calendars = ["양력", "음력(평달)", "음력(윤달)"] as const;
+    const calendars = inputCalendar
+      ? [String(inputCalendar).trim()]
+      : ["양력", "음력(평달)", "음력(윤달)"];
 
     return calendars.some((calendar) => {
       try {
@@ -121,7 +129,8 @@ function isSameActualBirthDate(stored: SajuAccessInput, inputBirth: string) {
           calendar,
         });
 
-        const candidateSolar = `${candidate.solar.year}-${String(candidate.solar.month).padStart(2, "0")}-${String(candidate.solar.day).padStart(2, "0")}`;
+        const candidateSolar =
+          `${candidate.solar.year}-${String(candidate.solar.month).padStart(2, "0")}-${String(candidate.solar.day).padStart(2, "0")}`;
 
         return candidateSolar === storedSolar;
       } catch {
@@ -205,6 +214,7 @@ export async function redeemCrossDeviceReopen(input: {
   name: string;
   birth: string;
   code: string;
+  calendar?: string;
 }) {
   await ensureTable();
 
@@ -241,10 +251,14 @@ export async function redeemCrossDeviceReopen(input: {
 
   const saju = decryptSaju(row.saju_ciphertext);
 
-  if (!exactMatch) {
-    const sameName =
-      String(saju.name || "").trim() === String(input.name || "").trim();
+  const sameName =
+    String(saju.name || "").trim() === String(input.name || "").trim();
 
+  if (input.calendar) {
+    if (!sameName || !isSameActualBirthDate(saju, input.birth, input.calendar)) {
+      return null;
+    }
+  } else if (!exactMatch) {
     if (!sameName || !isSameActualBirthDate(saju, input.birth)) {
       return null;
     }

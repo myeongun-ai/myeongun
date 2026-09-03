@@ -30,6 +30,7 @@ export default function ReopenPaymentPage() {
 
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");
+  const [calendar, setCalendar] = useState("양력");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -48,8 +49,8 @@ export default function ReopenPaymentPage() {
   );
 
   const parsedBirth = parseBirth(birth);
-  const monthDays = daysInMonth(pickerYear, pickerMonth);
-  const firstDay = new Date(pickerYear, pickerMonth - 1, 1).getDay();
+  const monthDays = calendar === "양력" ? daysInMonth(pickerYear, pickerMonth) : 30;
+  const firstDay = calendar === "양력" ? new Date(pickerYear, pickerMonth - 1, 1).getDay() : 0;
 
   function openPicker() {
     const parsed = parseBirth(birth);
@@ -85,12 +86,14 @@ export default function ReopenPaymentPage() {
   }
 
   function selectDay(day: number) {
-    const selected = new Date(pickerYear, pickerMonth - 1, day);
-    const now = new Date();
-    now.setHours(23, 59, 59, 999);
+    if (calendar === "양력") {
+      const selected = new Date(pickerYear, pickerMonth - 1, day);
+      const now = new Date();
+      now.setHours(23, 59, 59, 999);
 
-    if (selected > now) {
-      return;
+      if (selected > now) {
+        return;
+      }
     }
 
     setBirth(`${pickerYear}-${pad2(pickerMonth)}-${pad2(day)}`);
@@ -118,6 +121,7 @@ export default function ReopenPaymentPage() {
         body: JSON.stringify({
           name: name.trim(),
           birth,
+          calendar,
           code: code.trim(),
         }),
       });
@@ -246,6 +250,28 @@ export default function ReopenPaymentPage() {
             />
           </label>
 
+          <label
+            style={{
+              display: "grid",
+              gap: "8px",
+              marginTop: "16px",
+              fontSize: "13px",
+              fontWeight: 700,
+              color: "#35322d",
+            }}
+          >
+            {"달력 기준"}
+            <select
+              value={calendar}
+              onChange={(e) => { setCalendar(e.target.value); setBirth(""); setPickerOpen(false); }}
+              style={inputStyle}
+              aria-label="달력 기준 선택"
+            >
+              <option value="양력">양력</option>
+              <option value="음력(평달)">음력(평달)</option>
+              <option value="음력(윤달)">음력(윤달)</option>
+            </select>
+          </label>
           <div
             style={{
               display: "grid",
@@ -359,19 +385,20 @@ export default function ReopenPaymentPage() {
                     textAlign: "center",
                   }}
                 >
-                  {["일", "월", "화", "수", "목", "금", "토"].map((dayName) => (
-                    <div
-                      key={dayName}
-                      style={{
-                        padding: "7px 0",
-                        color: "#8b8377",
-                        fontSize: "11px",
-                        fontWeight: 800,
-                      }}
-                    >
-                      {dayName}
-                    </div>
-                  ))}
+                  {calendar === "양력" &&
+                    ["일", "월", "화", "수", "목", "금", "토"].map((dayName) => (
+                      <div
+                        key={dayName}
+                        style={{
+                          padding: "7px 0",
+                          color: "#8b8377",
+                          fontSize: "11px",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {dayName}
+                      </div>
+                    ))}
 
                   {Array.from({ length: firstDay }, (_, index) => (
                     <div key={`blank-${index}`} />
@@ -384,10 +411,11 @@ export default function ReopenPaymentPage() {
                         parsedBirth?.month === pickerMonth &&
                         parsedBirth?.day === day;
 
-                      const date = new Date(pickerYear, pickerMonth - 1, day);
-                      const now = new Date();
-                      now.setHours(23, 59, 59, 999);
-                      const future = date > now;
+                      const future =
+                        calendar === "양력"
+                          ? new Date(pickerYear, pickerMonth - 1, day) >
+                            new Date(new Date().setHours(23, 59, 59, 999))
+                          : false;
 
                       return (
                         <button
