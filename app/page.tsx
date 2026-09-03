@@ -226,6 +226,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [freeResult, setFreeResult] = useState("");
+  const [yongshin, setYongshin] = useState<{ yongshin: string; heesin: string; reason: string } | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date());
 
@@ -370,6 +371,7 @@ export default function Home() {
       }
 
       setFreeResult(resultText);
+      setYongshin(parsed?.yongshin || null);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "사주 분석 중 오류가 발생했습니다."
@@ -1038,6 +1040,17 @@ export default function Home() {
               {form.name || "고객"}님의 무료 사주 분석
             </h2>
 
+            {yongshin && (
+              <div style={{ marginBottom: "24px", padding: "20px", borderRadius: "16px", border: "1px solid rgba(218,170,88,0.25)", background: "rgba(218,170,88,0.07)" }}>
+                <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "1.5px", color: "#dbaa58" }}>참고용 오행 분석</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
+                  <div style={{ padding: "14px", borderRadius: "12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}><div style={{ fontSize: "12px", color: "#aaa" }}>용신</div><strong style={{ display: "block", marginTop: "5px", fontSize: "21px", color: "#f5e7c2" }}>{yongshin.yongshin}</strong></div>
+                  <div style={{ padding: "14px", borderRadius: "12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}><div style={{ fontSize: "12px", color: "#aaa" }}>희신</div><strong style={{ display: "block", marginTop: "5px", fontSize: "21px", color: "#f5e7c2" }}>{yongshin.heesin}</strong></div>
+                </div>
+                <p style={{ margin: "12px 0 0", fontSize: "12px", lineHeight: 1.6, color: "#aaa" }}>{yongshin.reason}</p>
+                <p style={{ margin: "7px 0 0", fontSize: "11px", lineHeight: 1.5, color: "#777" }}>※ 전통 명리의 확정 판정이 아닌 명운의 참고용 분석입니다.</p>
+              </div>
+            )}
             <div className="homeResultText">
               {renderFreeResult(freeResult)}
             </div>
