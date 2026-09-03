@@ -419,7 +419,7 @@ function calculateStrength(
 
   const branchPillars: Array<{ pillar: PillarDetail; weight: number }> = [
     { pillar: year, weight: 1 },
-    { pillar: month, weight: 2 },
+    { pillar: month, weight: 2.5 },
     { pillar: day, weight: 1.25 },
     ...(hour ? [{ pillar: hour, weight: 1 }] : []),
   ];
@@ -438,7 +438,7 @@ function calculateStrength(
   const score = totalWeight > 0 ? Math.round((supportWeight / totalWeight) * 100) : 50;
   const level: StrengthLevel = score > 60 ? "신강" : score < 40 ? "신약" : "중화";
   const monthSupport = isSupportingTenGod(month.tenGodBranch);
-  const reason = `월지 본기는 ${month.tenGodBranch}으로 일간을 ${monthSupport ? "지원" : "소모·제어"}하며, 천간과 지장간을 종합한 지원도는 ${score}%입니다.`;
+  const reason = `월지 본기는 ${month.tenGodBranch}으로 일간을 ${monthSupport ? "지원" : "직접 지원하지 않"}으며, 천간과 지장간을 종합한 지원도는 ${score}%입니다.${hour ? "" : " 출생시간이 없어 시주를 제외한 참고 판정입니다."}`;
 
   return { level, score, reason };
 }
