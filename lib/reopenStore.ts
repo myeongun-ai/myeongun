@@ -11,6 +11,7 @@ import {
   hashReopen,
   SajuAccessInput,
 } from "./paymentAccess";
+import { calculateMyeongunManseryeok } from "./manseryeok";
 
 const REOPEN_DAYS = 7;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -100,6 +101,37 @@ function decryptSaju(value: string): SajuAccessInput {
   return JSON.parse(decrypted.toString("utf8")) as SajuAccessInput;
 }
 
+function isSameActualBirthDate(stored: SajuAccessInput, inputBirth: string) {
+  if (!stored.birth) return false;
+  try {
+    const storedResult = calculateMyeongunManseryeok({
+      birth: stored.birth,
+      time: stored.time,
+      calendar: stored.calendar,
+    });
+
+    const storedSolar = `${storedResult.solar.year}-${String(storedResult.solar.month).padStart(2, "0")}-${String(storedResult.solar.day).padStart(2, "0")}`;
+
+    const calendars = ["양력", "음력(평달)", "음력(윤달)"] as const;
+
+    return calendars.some((calendar) => {
+      try {
+        const candidate = calculateMyeongunManseryeok({
+          birth: inputBirth,
+          calendar,
+        });
+
+        const candidateSolar = `${candidate.solar.year}-${String(candidate.solar.month).padStart(2, "0")}-${String(candidate.solar.day).padStart(2, "0")}`;
+
+        return candidateSolar === storedSolar;
+      } catch {
+        return false;
+      }
+    });
+  } catch {
+    return false;
+  }
+}
 async function ensureTable() {
   const sql = sqlClient();
 
@@ -203,14 +235,20 @@ export async function redeemCrossDeviceReopen(input: {
     hashReopen({ name: input.name, birth: input.birth })
   );
 
-  if (
-    expected.length !== received.length ||
-    !timingSafeEqual(expected, received)
-  ) {
-    return null;
-  }
+  const exactMatch =
+    expected.length === received.length &&
+    timingSafeEqual(expected, received);
 
   const saju = decryptSaju(row.saju_ciphertext);
+
+  if (!exactMatch) {
+    const sameName =
+      String(saju.name || "").trim() === String(input.name || "").trim();
+
+    if (!sameName || !isSameActualBirthDate(saju, input.birth)) {
+      return null;
+    }
+  }
 
   return {
     orderId: row.order_id,
