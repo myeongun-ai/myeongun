@@ -227,6 +227,7 @@ export default function SajuPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [freeResult, setFreeResult] = useState("");
+  const [yongshin, setYongshin] = useState<{ yongshin: string; heesin: string; reason: string } | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(currentYear);
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
@@ -377,6 +378,7 @@ export default function SajuPage() {
       }
 
       setFreeResult(resultText);
+      setYongshin(parsed?.yongshin || null);
     } catch (err) {
       setError(
         err instanceof Error
@@ -643,6 +645,18 @@ export default function SajuPage() {
         <section className="resultCard">
           <div className="resultEyebrow">FREE SAJU RESULT</div>
           <h2>{form.name || "고객"}님의 무료 사주 분석</h2>
+
+          {yongshin && (
+            <div style={{ marginTop: "20px", padding: "20px", borderRadius: "14px", border: "1px solid #d8d0c3", background: "#f8f5ee" }}>
+              <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", color: "#777" }}>참고용 오행 분석</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
+                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>용신</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.yongshin}</strong></div>
+                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>희신</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.heesin}</strong></div>
+              </div>
+              <p style={{ margin: "12px 0 0", fontSize: "12px", lineHeight: 1.6, color: "#777" }}>{yongshin.reason}</p>
+              <p style={{ margin: "8px 0 0", fontSize: "11px", lineHeight: 1.5, color: "#999" }}>※ 전통 명리의 확정 판정이 아닌 명운의 참고용 분석입니다.</p>
+            </div>
+          )}
 
           <div className="resultText">
             {renderFreeResult(freeResult)}

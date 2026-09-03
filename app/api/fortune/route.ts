@@ -114,6 +114,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       result,
+      yongshin: manseryeok.yongshin,
     });
   } catch (error) {
     console.error("fortune API error:", error);
