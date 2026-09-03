@@ -119,6 +119,8 @@ export async function POST(request: NextRequest) {
 
     const manseryeok = calculateMyeongunManseryeok({ birth: saju.birth, time: saju.time, calendar: saju.calendar });
 
+    const formatHiddenStems = (pillar: typeof manseryeok.pillars.year) => pillar.hiddenStems.map((item) => `${item.stem}(${item.tenGod})`).join(" · ");
+
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
@@ -148,11 +150,13 @@ export async function POST(request: NextRequest) {
 시주: ${manseryeok.pillars.hour?.pillar || "출생시간 미상"}
 일간: ${manseryeok.dayMaster.stem} (${manseryeok.dayMaster.element}, ${manseryeok.dayMaster.yinYang})
 천간 십성: 연간 ${manseryeok.pillars.year.tenGodStem}, 월간 ${manseryeok.pillars.month.tenGodStem}, 일간 ${manseryeok.pillars.day.tenGodStem}, 시간 ${manseryeok.pillars.hour?.tenGodStem || "미상"}
+지지 십성: 연지 ${manseryeok.pillars.year.tenGodBranch}, 월지 ${manseryeok.pillars.month.tenGodBranch}, 일지 ${manseryeok.pillars.day.tenGodBranch}, 시지 ${manseryeok.pillars.hour?.tenGodBranch || "출생시간 미상"}
+지장간: 연지 ${formatHiddenStems(manseryeok.pillars.year)}, 월지 ${formatHiddenStems(manseryeok.pillars.month)}, 일지 ${formatHiddenStems(manseryeok.pillars.day)}, 시지 ${manseryeok.pillars.hour ? formatHiddenStems(manseryeok.pillars.hour) : "출생시간 미상"}
 오행: 목 ${manseryeok.fiveElements.목}, 화 ${manseryeok.fiveElements.화}, 토 ${manseryeok.fiveElements.토}, 금 ${manseryeok.fiveElements.금}, 수 ${manseryeok.fiveElements.수}
 
 [매우 중요한 해석 원칙]
-1. 위 연주·월주·일주·시주, 일간, 오행, 천간 십성 값은 만세력 계산 엔진으로 산출된 값이므로 상세 해석의 근거로 사용하세요.
-2. 다만 현재 제공되지 않은 지장간, 지지 십성, 신강·신약, 용신·희신, 대운 등의 값은 임의로 계산하거나 만들어내지 마세요.
+1. 위 연주·월주·일주·시주, 일간, 오행, 천간 십성, 지지 십성, 지장간 값은 만세력 계산 엔진으로 산출된 값이므로 상세 해석의 근거로 사용하세요.
+2. 다만 현재 제공되지 않은 신강·신약, 용신·희신, 대운 등의 값은 임의로 계산하거나 만들어내지 마세요.
 3. 입력 정보와 전통 명리 해석의 일반적 관점을 참고한 AI 분석임을 유지하세요.
 4. 확정적인 예언, 공포를 유발하는 표현, 수명·사고·질병의 단정은 하지 마세요.
 5. 재물·사업·직업 분석은 현실적인 행동 조언과 함께 설명하세요.

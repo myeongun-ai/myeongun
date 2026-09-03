@@ -19,6 +19,13 @@ export type MyeongunSajuInput = {
   calendar?: string;
 };
 
+export type HiddenStemDetail = {
+  stem: string;
+  element: FiveElement;
+  yinYang: YinYang;
+  tenGod: string;
+};
+
 export type PillarDetail = {
   pillar: string;
   stem: string;
@@ -28,6 +35,8 @@ export type PillarDetail = {
   stemYinYang: YinYang;
   branchYinYang: YinYang;
   tenGodStem: string;
+  tenGodBranch: string;
+  hiddenStems: HiddenStemDetail[];
 };
 
 export type MyeongunManseryeokResult = {
@@ -114,6 +123,21 @@ const BRANCH_INFO: Record<
   유: { element: "금", yinYang: "음" },
   술: { element: "토", yinYang: "양" },
   해: { element: "수", yinYang: "음" },
+};
+
+const HIDDEN_STEMS: Record<string, string[]> = {
+  자: ["계"],
+  축: ["기", "계", "신"],
+  인: ["갑", "병", "무"],
+  묘: ["을"],
+  진: ["무", "을", "계"],
+  사: ["병", "무", "경"],
+  오: ["정", "기"],
+  미: ["기", "정", "을"],
+  신: ["경", "임", "무"],
+  유: ["신"],
+  술: ["무", "신", "정"],
+  해: ["임", "갑"],
 };
 
 function normalizeCalendar(value?: string): CalendarType {
@@ -320,6 +344,19 @@ function makePillar(
     );
   }
 
+  const hiddenStems: HiddenStemDetail[] = (HIDDEN_STEMS[branch] || []).map((hiddenStem) => {
+    const info = STEM_INFO[hiddenStem];
+    if (!info) {
+      throw new Error(`지원하지 않는 지장간 값입니다: ${hiddenStem}`);
+    }
+    return {
+      stem: hiddenStem,
+      element: info.element,
+      yinYang: info.yinYang,
+      tenGod: getTenGod(dayStem, hiddenStem),
+    };
+  });
+
   return {
     pillar,
     stem,
@@ -329,6 +366,8 @@ function makePillar(
     stemYinYang: stemInfo.yinYang,
     branchYinYang: branchInfo.yinYang,
     tenGodStem: getTenGod(dayStem, stem),
+    tenGodBranch: hiddenStems[0]?.tenGod || '-',
+    hiddenStems,
   };
 }
 
