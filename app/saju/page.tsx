@@ -617,7 +617,8 @@ export default function SajuPage() {
                 className="darkSelect"
               >
                 <option value="양력">양력</option>
-                <option value="음력">음력</option>
+                <option value="음력">음력(평달)</option>
+                <option value="음력(윤달)">음력(윤달)</option>
               </select>
             </label>
           </div>

@@ -6,6 +6,7 @@ import {
   verifyEntitlement,
   type SajuAccessInput,
 } from "../../../../lib/paymentAccess";
+import { calculateMyeongunManseryeok } from "../../../../lib/manseryeok";
 
 type PremiumSection = {
   title: string;
@@ -116,6 +117,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const manseryeok = calculateMyeongunManseryeok({ birth: saju.birth, time: saju.time, calendar: saju.calendar });
+
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
@@ -138,9 +141,18 @@ export async function POST(request: NextRequest) {
 성별: ${saju.gender}
 달력 기준: ${saju.calendar}
 
+[실제 만세력 계산 결과]
+연주: ${manseryeok.pillars.year.pillar}
+월주: ${manseryeok.pillars.month.pillar}
+일주: ${manseryeok.pillars.day.pillar}
+시주: ${manseryeok.pillars.hour?.pillar || "출생시간 미상"}
+일간: ${manseryeok.dayMaster.stem} (${manseryeok.dayMaster.element}, ${manseryeok.dayMaster.yinYang})
+천간 십성: 연간 ${manseryeok.pillars.year.tenGodStem}, 월간 ${manseryeok.pillars.month.tenGodStem}, 일간 ${manseryeok.pillars.day.tenGodStem}, 시간 ${manseryeok.pillars.hour?.tenGodStem || "미상"}
+오행: 목 ${manseryeok.fiveElements.목}, 화 ${manseryeok.fiveElements.화}, 토 ${manseryeok.fiveElements.토}, 금 ${manseryeok.fiveElements.금}, 수 ${manseryeok.fiveElements.수}
+
 [매우 중요한 해석 원칙]
-1. 현재 입력에는 만세력으로 계산된 년주·월주·일주·시주, 오행 분포, 십성, 대운 정보가 제공되지 않았습니다.
-2. 따라서 실제 사주 원국이나 오행·십성·대운을 계산했다고 주장하거나 특정 간지를 임의로 만들어내지 마세요.
+1. 위 연주·월주·일주·시주, 일간, 오행, 천간 십성 값은 만세력 계산 엔진으로 산출된 값이므로 상세 해석의 근거로 사용하세요.
+2. 다만 현재 제공되지 않은 지장간, 지지 십성, 신강·신약, 용신·희신, 대운 등의 값은 임의로 계산하거나 만들어내지 마세요.
 3. 입력 정보와 전통 명리 해석의 일반적 관점을 참고한 AI 분석임을 유지하세요.
 4. 확정적인 예언, 공포를 유발하는 표현, 수명·사고·질병의 단정은 하지 마세요.
 5. 재물·사업·직업 분석은 현실적인 행동 조언과 함께 설명하세요.

@@ -949,7 +949,8 @@ export default function Home() {
               style={inputStyle}
             >
               <option value="양력">양력</option>
-              <option value="음력">음력</option>
+              <option value="음력">음력(평달)</option>
+              <option value="음력(윤달)">음력(윤달)</option>
             </select>
 
             {error && (

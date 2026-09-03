@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { calculateMyeongunManseryeok } from "../../../lib/manseryeok";
 
 export async function POST(req: Request) {
   try {
@@ -11,6 +12,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const manseryeok = calculateMyeongunManseryeok({ birth: body.birth, time: body.time, calendar: body.calendar });
 
     const apiKey = process.env.OPENAI_API_KEY;
 
@@ -40,9 +43,17 @@ export async function POST(req: Request) {
 성별: ${body.gender}
 달력 기준: ${body.calendar}
 
+[실제 만세력 계산 결과]
+연주: ${manseryeok.pillars.year.pillar}
+월주: ${manseryeok.pillars.month.pillar}
+일주: ${manseryeok.pillars.day.pillar}
+시주: ${manseryeok.pillars.hour?.pillar || "출생시간 미상"}
+일간: ${manseryeok.dayMaster.stem} (${manseryeok.dayMaster.element}, ${manseryeok.dayMaster.yinYang})
+오행: 목 ${manseryeok.fiveElements.목}, 화 ${manseryeok.fiveElements.화}, 토 ${manseryeok.fiveElements.토}, 금 ${manseryeok.fiveElements.금}, 수 ${manseryeok.fiveElements.수}
+
 [중요 원칙]
-- 현재 입력에는 만세력으로 계산된 년주·월주·일주·시주, 오행, 십성, 대운 값이 제공되지 않았습니다.
-- 따라서 특정 사주 원국이나 간지를 실제 계산한 것처럼 만들어내지 마세요.
+- 위 연주·월주·일주·시주, 일간, 오행 값은 만세력 계산 엔진으로 산출된 값이므로 해석의 근거로 사용하세요.
+- 다만 현재 제공되지 않은 지장간, 지지 십성, 신강·신약, 용신·희신, 대운 등의 값은 임의로 계산하거나 만들어내지 마세요.
 - 전통 명리 관점을 참고한 AI 해석임을 유지하세요.
 - 확정적인 미래 예언, 수명, 사고, 질병을 단정하지 마세요.
 - 재물·사업·직업 내용은 현실적인 행동 조언과 함께 설명하세요.
