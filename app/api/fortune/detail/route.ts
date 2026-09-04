@@ -282,6 +282,8 @@ export async function POST(request: NextRequest) {
       {
         ok: true,
         result: parsed,
+        strength: manseryeok.strength,
+        yongshin: manseryeok.yongshin,
         expiresAt: entitlement.exp,
       },
       {

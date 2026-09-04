@@ -30,9 +30,14 @@ type PremiumResult = {
   disclaimer: string;
 };
 
+type StrengthInfo = { level: string; score: number; reason: string; };
+type YongshinInfo = { yongshin: string; heesin: string; reason: string; };
+
 type CachedPremium = {
   saju: SajuForm;
   result: PremiumResult;
+  strength?: StrengthInfo;
+  yongshin?: YongshinInfo;
 };
 
 function sameSaju(a: SajuForm, b: SajuForm) {
@@ -61,6 +66,8 @@ export default function FortuneDetailPage() {
 
   const [saju, setSaju] = useState<SajuForm | null>(null);
   const [result, setResult] = useState<PremiumResult | null>(null);
+  const [strength, setStrength] = useState<StrengthInfo | null>(null);
+  const [yongshin, setYongshin] = useState<YongshinInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -122,9 +129,13 @@ export default function FortuneDetailPage() {
             if (
               cached?.saju &&
               cached?.result &&
+              cached?.strength &&
+              cached?.yongshin &&
               sameSaju(cached.saju, parsedSaju)
             ) {
               setResult(cached.result);
+              setStrength(cached.strength || null);
+              setYongshin(cached.yongshin || null);
               setLoading(false);
               return;
             }
@@ -155,12 +166,16 @@ export default function FortuneDetailPage() {
         if (cancelled) return;
 
         setResult(detailData.result);
+        setStrength(detailData.strength || null);
+        setYongshin(detailData.yongshin || null);
 
         localStorage.setItem(
           "myeongun_premium_result",
           JSON.stringify({
             saju: parsedSaju,
             result: detailData.result,
+            strength: detailData.strength || null,
+            yongshin: detailData.yongshin || null,
           })
         );
       } catch (err) {
@@ -427,6 +442,19 @@ export default function FortuneDetailPage() {
           </div>
         </header>
 
+        {(strength || yongshin) && (
+          <section style={{ marginBottom: "26px", padding: "24px", borderRadius: "18px", border: "1px solid rgba(199,161,89,0.25)", background: "rgba(199,161,89,0.07)" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "1.5px", color: "#b88b43" }}>명운 핵심 오행 요약</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px", marginTop: "16px" }}>
+              {strength && <div style={{ padding: "15px", borderRadius: "12px", background: "rgba(255,255,255,0.7)" }}><span style={{ display: "block", fontSize: "12px", color: "#777" }}>신강·신약</span><strong style={{ display: "block", marginTop: "5px", fontSize: "20px", color: "#2e2a24" }}>{strength.level} {strength.score}점</strong></div>}
+              {yongshin && <div style={{ padding: "15px", borderRadius: "12px", background: "rgba(255,255,255,0.7)" }}><span style={{ display: "block", fontSize: "12px", color: "#777" }}>용신</span><strong style={{ display: "block", marginTop: "5px", fontSize: "20px", color: "#2e2a24" }}>{yongshin.yongshin}</strong></div>}
+              {yongshin && <div style={{ padding: "15px", borderRadius: "12px", background: "rgba(255,255,255,0.7)" }}><span style={{ display: "block", fontSize: "12px", color: "#777" }}>희신</span><strong style={{ display: "block", marginTop: "5px", fontSize: "20px", color: "#2e2a24" }}>{yongshin.heesin}</strong></div>}
+            </div>
+            {strength && <p style={{ margin: "14px 0 0", fontSize: "12px", lineHeight: 1.7, color: "#6f685f" }}>{strength.reason}</p>}
+            {yongshin && <p style={{ margin: "7px 0 0", fontSize: "12px", lineHeight: 1.7, color: "#6f685f" }}>{yongshin.reason}</p>}
+            <p style={{ margin: "8px 0 0", fontSize: "11px", lineHeight: 1.6, color: "#999" }}>※ 신강·신약과 용신·희신은 명운 엔진의 참고용 분석값입니다.</p>
+          </section>
+        )}
         <section className="introPanel">
           <div className="introHead">
             <div>
