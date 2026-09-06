@@ -1,14 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
-type Saju = {
-  name?: string;
-  birth?: string;
-  time?: string;
-  gender?: string;
-  calendar?: string;
+type SajuForm = {
+  name: string;
+  birth: string;
+  time: string;
+  gender: string;
+  calendar: string;
 };
 
 type YongshinInfo = {
@@ -17,106 +16,252 @@ type YongshinInfo = {
   reason?: string;
 };
 
-function renderBusinessResult(text: string) {
-  return text.split("\n").map((line, index) => {
-    const trimmed = line.trim();
+const TIME_OPTIONS = [
+  { value: "모름", label: "모름" },
+  { value: "子(자) 23:30 ~ 01:29", label: "子(자)  23:30 ~ 01:29" },
+  { value: "丑(축) 01:30 ~ 03:29", label: "丑(축)  01:30 ~ 03:29" },
+  { value: "寅(인) 03:30 ~ 05:29", label: "寅(인)  03:30 ~ 05:29" },
+  { value: "卯(묘) 05:30 ~ 07:29", label: "卯(묘)  05:30 ~ 07:29" },
+  { value: "辰(진) 07:30 ~ 09:29", label: "辰(진)  07:30 ~ 09:29" },
+  { value: "巳(사) 09:30 ~ 11:29", label: "巳(사)  09:30 ~ 11:29" },
+  { value: "午(오) 11:30 ~ 13:29", label: "午(오)  11:30 ~ 13:29" },
+  { value: "未(미) 13:30 ~ 15:29", label: "未(미)  13:30 ~ 15:29" },
+  { value: "申(신) 15:30 ~ 17:29", label: "申(신)  15:30 ~ 17:29" },
+  { value: "酉(유) 17:30 ~ 19:29", label: "酉(유)  17:30 ~ 19:29" },
+  { value: "戌(술) 19:30 ~ 21:29", label: "戌(술)  19:30 ~ 21:29" },
+  { value: "亥(해) 21:30 ~ 23:29", label: "亥(해)  21:30 ~ 23:29" },
+];
 
-    if (!trimmed) {
-      return <div key={index} style={{ height: 10 }} />;
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+function parseBirth(value: string) {
+  const [y, m, d] = value.split("-").map(Number);
+
+  if (!y || !m || !d) {
+    return null;
+  }
+
+  return {
+    year: y,
+    month: m,
+    day: d,
+  };
+}
+
+function renderInline(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
     }
 
-    if (trimmed.startsWith("## ")) {
-      return (
-        <h2
-          key={index}
-          style={{
-            margin: "30px 0 12px",
-            fontSize: "21px",
-            lineHeight: 1.5,
-            color: "#2d2a24",
-          }}
-        >
-          {trimmed.replace(/^##\s*/, "")}
-        </h2>
-      );
-    }
-
-    if (trimmed.startsWith("### ")) {
-      return (
-        <h3
-          key={index}
-          style={{
-            margin: "24px 0 10px",
-            fontSize: "17px",
-            lineHeight: 1.5,
-            color: "#4a4338",
-          }}
-        >
-          {trimmed.replace(/^###\s*/, "")}
-        </h3>
-      );
-    }
-
-    if (/^[-*]\s+/.test(trimmed)) {
-      return (
-        <div
-          key={index}
-          style={{
-            margin: "8px 0",
-            paddingLeft: 18,
-            lineHeight: 1.85,
-            color: "#625b50",
-          }}
-        >
-          • {trimmed.replace(/^[-*]\s+/, "")}
-        </div>
-      );
-    }
-
-    return (
-      <p
-        key={index}
-        style={{
-          margin: "8px 0",
-          lineHeight: 1.9,
-          color: "#625b50",
-        }}
-      >
-        {trimmed.replace(/\*\*/g, "")}
-      </p>
-    );
+    return part;
   });
 }
 
+function renderBusinessResult(text: string) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+
+  const nodes: React.ReactNode[] = [];
+  let bulletBuffer: string[] = [];
+
+  function flushBullets() {
+    if (!bulletBuffer.length) {
+      return;
+    }
+
+    nodes.push(
+      <ul className="businessResultList" key={`list-${nodes.length}`}>
+        {bulletBuffer.map((item, index) => (
+          <li key={`${item}-${index}`}>{renderInline(item)}</li>
+        ))}
+      </ul>
+    );
+
+    bulletBuffer = [];
+  }
+
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushBullets();
+      return;
+    }
+
+    if (line.startsWith("### ")) {
+      flushBullets();
+
+      nodes.push(
+        <h4 className="businessHeadingSmall" key={`h4-${index}`}>
+          {renderInline(line.slice(4))}
+        </h4>
+      );
+
+      return;
+    }
+
+    if (line.startsWith("## ")) {
+      flushBullets();
+
+      nodes.push(
+        <h3 className="businessHeading" key={`h3-${index}`}>
+          {renderInline(line.slice(3))}
+        </h3>
+      );
+
+      return;
+    }
+
+    if (line.startsWith("# ")) {
+      flushBullets();
+
+      nodes.push(
+        <h2 className="businessHeadingLarge" key={`h2-${index}`}>
+          {renderInline(line.slice(2))}
+        </h2>
+      );
+
+      return;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      bulletBuffer.push(line.replace(/^[-*]\s+/, ""));
+      return;
+    }
+
+    flushBullets();
+
+    nodes.push(
+      <p className="businessParagraph" key={`p-${index}`}>
+        {renderInline(line)}
+      </p>
+    );
+  });
+
+  flushBullets();
+
+  return nodes;
+}
+
 export default function BusinessFortunePage() {
-  const [saju, setSaju] = useState<Saju | null>(null);
-  const [result, setResult] = useState("");
-  const [yongshin, setYongshin] = useState<YongshinInfo | null>(null);
-  const [ready, setReady] = useState(false);
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
+  const [form, setForm] = useState<SajuForm>({
+    name: "",
+    birth: "",
+    time: "",
+    gender: "남성",
+    calendar: "양력",
+  });
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(currentYear);
+  const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [result, setResult] = useState("");
+  const [yongshin, setYongshin] = useState<YongshinInfo | null>(null);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("myeongun_saju");
-      setSaju(saved ? JSON.parse(saved) : null);
-    } catch {
-      setSaju(null);
-    } finally {
-      setReady(true);
+  const years = useMemo(
+    () =>
+      Array.from(
+        { length: currentYear - 1930 + 1 },
+        (_, index) => currentYear - index
+      ),
+    [currentYear]
+  );
+
+  const parsedBirth = parseBirth(form.birth);
+  const monthDays = daysInMonth(pickerYear, pickerMonth);
+  const firstDay = new Date(pickerYear, pickerMonth - 1, 1).getDay();
+
+  function update<K extends keyof SajuForm>(
+    key: K,
+    value: SajuForm[K]
+  ) {
+    setForm((previous) => ({
+      ...previous,
+      [key]: value,
+    }));
+
+    setResult("");
+    setYongshin(null);
+    setError("");
+  }
+
+  function openPicker() {
+    const parsed = parseBirth(form.birth);
+
+    if (parsed) {
+      setPickerYear(parsed.year);
+      setPickerMonth(parsed.month);
     }
-  }, []);
 
-  async function analyzeBusiness() {
-    if (!saju?.birth || !saju?.time || !saju?.gender || !saju?.calendar) {
-      setError("재물·사업운 분석에 필요한 사주 정보가 없습니다.");
+    setPickerOpen(true);
+  }
+
+  function moveMonth(delta: number) {
+    let year = pickerYear;
+    let month = pickerMonth + delta;
+
+    if (month < 1) {
+      month = 12;
+      year -= 1;
+    }
+
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+
+    if (year < 1930 || year > currentYear) {
+      return;
+    }
+
+    setPickerYear(year);
+    setPickerMonth(month);
+  }
+
+  function selectDay(day: number) {
+    update(
+      "birth",
+      `${pickerYear}-${pad2(pickerMonth)}-${pad2(day)}`
+    );
+
+    setPickerOpen(false);
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError("");
+    setResult("");
+    setYongshin(null);
+
+    const payload: SajuForm = {
+      name: form.name.trim(),
+      birth: form.birth,
+      time: form.time,
+      gender: form.gender,
+      calendar: form.calendar,
+    };
+
+    if (!payload.name || !payload.birth || !payload.time) {
+      setError("이름, 생년월일, 출생시간을 모두 선택해 주세요.");
       return;
     }
 
     setLoading(true);
-    setError("");
-    setResult("");
-    setYongshin(null);
 
     try {
       const response = await fetch("/api/fortune/business", {
@@ -125,20 +270,15 @@ export default function BusinessFortunePage() {
           "Content-Type": "application/json",
         },
         cache: "no-store",
-        body: JSON.stringify({
-          name: saju.name || "고객",
-          birth: saju.birth,
-          time: saju.time,
-          gender: saju.gender,
-          calendar: saju.calendar,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data?.error || "재물·사업운 분석을 불러오지 못했습니다."
+          data?.error ||
+            "재물·사업운 분석을 불러오지 못했습니다."
         );
       }
 
@@ -161,259 +301,432 @@ export default function BusinessFortunePage() {
     }
   }
 
-  if (!ready) {
-    return (
-      <main className="inner">
-        <section
-          className="contentCard"
-          style={{ textAlign: "center" }}
-        >
-          <p>사주 정보를 확인하고 있습니다...</p>
-        </section>
-      </main>
-    );
+  function resetAnalysis() {
+    setForm({
+      name: "",
+      birth: "",
+      time: "",
+      gender: "남성",
+      calendar: "양력",
+    });
+
+    setResult("");
+    setYongshin(null);
+    setError("");
+    setPickerOpen(false);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
-  if (!saju?.birth || !saju?.time) {
-    return (
-      <main className="inner">
-        <section className="pageIntro">
-          <span className="eyebrow">WEALTH · BUSINESS</span>
-          <h1>재물·사업운</h1>
-          <p>
-            재물과 사업의 흐름을 분석하려면 먼저 사주 정보를 입력해 주세요.
-          </p>
-        </section>
+  const labelStyle = {
+    display: "block",
+    fontSize: "14px",
+    fontWeight: 700,
+    color: "#4d473e",
+  } as const;
 
-        <section
-          className="contentCard"
-          style={{
-            maxWidth: 760,
-            margin: "0 auto",
-            textAlign: "center",
-          }}
-        >
-          <h2>먼저 나의 사주를 입력해 주세요</h2>
-          <p>
-            생년월일과 출생시간을 입력하면 명운 만세력 엔진을 기준으로
-            재물·사업운을 분석합니다.
-          </p>
+  const fieldStyle = {
+    width: "100%",
+    minHeight: "52px",
+    marginTop: "9px",
+    padding: "0 14px",
+    border: "1px solid #d8d0c3",
+    borderRadius: "10px",
+    background: "#fff",
+    color: "#302c26",
+    fontSize: "15px",
+    outline: "none",
+    boxSizing: "border-box",
+  } as const;
 
-          <Link href="/saju" className="primaryBtn inline">
-            사주 입력하러 가기
-          </Link>
-        </section>
-      </main>
-    );
-  }
+  const smallButtonStyle = {
+    minHeight: "44px",
+    border: "1px solid #d8d0c3",
+    borderRadius: "9px",
+    background: "#fff",
+    color: "#4d473e",
+    fontWeight: 700,
+    cursor: "pointer",
+  } as const;
 
   return (
-    <main className="inner">
-      <section className="pageIntro">
+    <main className="businessPage">
+      <section className="businessHero">
         <span className="eyebrow">WEALTH · BUSINESS</span>
-
-        <h1>
-          {saju.name
-            ? `${saju.name}님의 재물·사업운`
-            : "나의 재물·사업운"}
-        </h1>
-
+        <h1>재물·사업운</h1>
         <p>
-          명운 만세력의 사주 구성과 오행·십성·신강신약을 바탕으로
-          재물과 사업의 방향을 집중 분석합니다.
+          생년월일과 출생시간을 입력하면 명운 만세력 엔진을
+          기준으로 재물과 사업의 흐름을 집중 분석합니다.
         </p>
       </section>
 
-      <section className="contentCard">
-        <h2>입력된 사주 정보</h2>
-
-        <div className="featureList">
-          <div>
-            <strong>생년월일</strong>
-            <span>{saju.birth}</span>
-          </div>
-
-          <div>
-            <strong>출생시간</strong>
-            <span>{saju.time}</span>
-          </div>
-
-          <div>
-            <strong>성별</strong>
-            <span>{saju.gender || "-"}</span>
-          </div>
-
-          <div>
-            <strong>달력 기준</strong>
-            <span>{saju.calendar || "-"}</span>
-          </div>
-        </div>
-      </section>
-
       {!result && (
-        <section
-          className="contentCard"
-          style={{ textAlign: "center" }}
-        >
-          <span className="eyebrow">MONEY · BUSINESS ANALYSIS</span>
+        <section className="businessCard inputCard">
+          <div className="cardTitle">
+            <span>MYEONGUN BUSINESS</span>
+            <h2>재물·사업운 정보 입력</h2>
+            <p>
+              분석할 분의 정보를 직접 입력해 주세요.
+              이전에 입력한 사주 정보는 자동으로 불러오지 않습니다.
+            </p>
+          </div>
 
-          <h2 style={{ marginTop: 10 }}>
-            나의 재물·사업 흐름 분석
-          </h2>
+          <form onSubmit={handleSubmit}>
+            <label style={labelStyle}>
+              이름
+              <input
+                name="name"
+                type="text"
+                value={form.name}
+                onChange={(event) =>
+                  update("name", event.target.value)
+                }
+                placeholder="이름을 입력하세요"
+                autoComplete="off"
+                style={fieldStyle}
+              />
+            </label>
 
-          <p
-            style={{
-              maxWidth: 650,
-              margin: "12px auto 24px",
-              lineHeight: 1.8,
-            }}
-          >
-            재물 성향, 돈의 관리 방식, 사업가 성향, 직장과 사업의
-            적합성, 투자·확장 시 주의점과 2026년 흐름을 분석합니다.
-          </p>
-
-          <button
-            type="button"
-            className="primaryBtn inline"
-            onClick={analyzeBusiness}
-            disabled={loading}
-            style={{
-              border: 0,
-              cursor: loading ? "wait" : "pointer",
-            }}
-          >
-            {loading
-              ? "재물·사업운 분석 중..."
-              : "재물·사업운 분석하기"}
-          </button>
-
-          {error && (
-            <p
+            <label
               style={{
-                marginTop: 18,
-                color: "#b0443c",
-                lineHeight: 1.7,
+                ...labelStyle,
+                marginTop: "22px",
               }}
             >
-              {error}
-            </p>
-          )}
+              생년월일
+
+              <div className="birthRow">
+                <input
+                  name="birth"
+                  type="text"
+                  readOnly
+                  required
+                  value={form.birth}
+                  placeholder="년-월-일"
+                  onClick={openPicker}
+                  style={{
+                    ...fieldStyle,
+                    cursor: "pointer",
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={openPicker}
+                  className="calendarButton"
+                >
+                  달력
+                </button>
+              </div>
+            </label>
+
+            {pickerOpen && (
+              <section className="datePicker">
+                <div className="pickerTop">
+                  <button
+                    type="button"
+                    onClick={() => moveMonth(-1)}
+                    aria-label="이전 월"
+                    style={smallButtonStyle}
+                  >
+                    ‹
+                  </button>
+
+                  <select
+                    aria-label="연도 선택"
+                    value={pickerYear}
+                    onChange={(event) =>
+                      setPickerYear(Number(event.target.value))
+                    }
+                    style={{
+                      ...fieldStyle,
+                      minHeight: "44px",
+                      marginTop: 0,
+                      padding: "0 10px",
+                    }}
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}년
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    aria-label="월 선택"
+                    value={pickerMonth}
+                    onChange={(event) =>
+                      setPickerMonth(Number(event.target.value))
+                    }
+                    style={{
+                      ...fieldStyle,
+                      minHeight: "44px",
+                      marginTop: 0,
+                      padding: "0 10px",
+                    }}
+                  >
+                    {Array.from(
+                      { length: 12 },
+                      (_, index) => index + 1
+                    ).map((month) => (
+                      <option key={month} value={month}>
+                        {month}월
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => moveMonth(1)}
+                    aria-label="다음 월"
+                    style={smallButtonStyle}
+                  >
+                    ›
+                  </button>
+                </div>
+
+                <div className="calendarGrid">
+                  {[
+                    "일",
+                    "월",
+                    "화",
+                    "수",
+                    "목",
+                    "금",
+                    "토",
+                  ].map((dayName) => (
+                    <div
+                      key={dayName}
+                      className="calendarDayName"
+                    >
+                      {dayName}
+                    </div>
+                  ))}
+
+                  {Array.from({
+                    length: firstDay,
+                  }).map((_, index) => (
+                    <div key={`blank-${index}`} />
+                  ))}
+
+                  {Array.from(
+                    { length: monthDays },
+                    (_, index) => index + 1
+                  ).map((day) => {
+                    const selected =
+                      parsedBirth?.year === pickerYear &&
+                      parsedBirth?.month === pickerMonth &&
+                      parsedBirth?.day === day;
+
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => selectDay(day)}
+                        className={
+                          selected
+                            ? "calendarDay selected"
+                            : "calendarDay"
+                        }
+                      >
+                        {day}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="pickerBottom">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      update("birth", "");
+                      setPickerOpen(false);
+                    }}
+                    style={{
+                      ...smallButtonStyle,
+                      padding: "0 16px",
+                    }}
+                  >
+                    삭제
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(false)}
+                    style={{
+                      ...smallButtonStyle,
+                      padding: "0 16px",
+                    }}
+                  >
+                    닫기
+                  </button>
+                </div>
+              </section>
+            )}
+
+            <label
+              style={{
+                ...labelStyle,
+                marginTop: "22px",
+              }}
+            >
+              출생시간
+
+              <select
+                name="time"
+                value={form.time}
+                onChange={(event) =>
+                  update("time", event.target.value)
+                }
+                required
+                className="businessSelect"
+              >
+                <option value="" disabled>
+                  시간을 선택하세요
+                </option>
+
+                {TIME_OPTIONS.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="twoCol">
+              <label style={labelStyle}>
+                성별
+
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={(event) =>
+                    update("gender", event.target.value)
+                  }
+                  className="businessSelect"
+                >
+                  <option value="남성">남성</option>
+                  <option value="여성">여성</option>
+                </select>
+              </label>
+
+              <label style={labelStyle}>
+                달력
+
+                <select
+                  name="calendar"
+                  value={form.calendar}
+                  onChange={(event) =>
+                    update("calendar", event.target.value)
+                  }
+                  className="businessSelect"
+                >
+                  <option value="양력">양력</option>
+                  <option value="음력">음력(평달)</option>
+                  <option value="음력(윤달)">
+                    음력(윤달)
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            {error && (
+              <p className="errorMessage">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="analyzeButton"
+            >
+              {loading
+                ? "재물·사업운 분석 중..."
+                : "재물·사업운 분석하기"}
+            </button>
+          </form>
+
+          <p className="privacyText">
+            입력하신 정보는 현재 재물·사업운 분석을 위한
+            용도로만 사용하며, 이 페이지에서 이전 사주 정보를
+            자동으로 불러오지 않습니다.
+          </p>
         </section>
       )}
 
       {result && (
         <>
+          <section className="businessCard profileCard">
+            <div>
+              <span>분석 대상</span>
+              <strong>{form.name}</strong>
+            </div>
+
+            <div>
+              <span>생년월일</span>
+              <strong>{form.birth}</strong>
+            </div>
+
+            <div>
+              <span>출생시간</span>
+              <strong>{form.time}</strong>
+            </div>
+
+            <div>
+              <span>기준</span>
+              <strong>
+                {form.gender} · {form.calendar}
+              </strong>
+            </div>
+          </section>
+
           {yongshin && (
-            <section className="contentCard">
-              <span className="eyebrow">
-                FIVE ELEMENTS GUIDE
-              </span>
+            <section className="businessCard">
+              <div className="cardTitle left">
+                <span>FIVE ELEMENTS GUIDE</span>
+                <h2>재물·사업 참고 오행</h2>
+              </div>
 
-              <h2>재물·사업 참고 오행</h2>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fit, minmax(180px, 1fr))",
-                  gap: 12,
-                  marginTop: 20,
-                }}
-              >
-                <div
-                  style={{
-                    padding: 20,
-                    borderRadius: 14,
-                    background: "#f5f0e7",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#8a7d69",
-                    }}
-                  >
-                    용신
-                  </div>
-
-                  <strong
-                    style={{
-                      display: "block",
-                      marginTop: 7,
-                      fontSize: 24,
-                      color: "#342f27",
-                    }}
-                  >
+              <div className="elementGrid">
+                <article>
+                  <span>용신</span>
+                  <strong>
                     {yongshin.yongshin || "-"}
                   </strong>
-                </div>
+                </article>
 
-                <div
-                  style={{
-                    padding: 20,
-                    borderRadius: 14,
-                    background: "#f5f0e7",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#8a7d69",
-                    }}
-                  >
-                    희신
-                  </div>
-
-                  <strong
-                    style={{
-                      display: "block",
-                      marginTop: 7,
-                      fontSize: 24,
-                      color: "#342f27",
-                    }}
-                  >
+                <article>
+                  <span>희신</span>
+                  <strong>
                     {yongshin.heesin || "-"}
                   </strong>
-                </div>
+                </article>
               </div>
 
               {yongshin.reason && (
-                <p
-                  style={{
-                    margin: "15px 0 0",
-                    fontSize: 13,
-                    lineHeight: 1.8,
-                    color: "#777066",
-                  }}
-                >
+                <p className="elementReason">
                   {yongshin.reason}
                 </p>
               )}
             </section>
           )}
 
-          <section className="contentCard">
-            <span className="eyebrow">
-              WEALTH · BUSINESS REPORT
-            </span>
+          <section className="businessCard reportCard">
+            <div className="cardTitle left">
+              <span>WEALTH · BUSINESS REPORT</span>
+              <h2>{form.name}님의 재물·사업운 집중 분석</h2>
+            </div>
 
-            <h2>재물·사업운 집중 분석</h2>
-
-            <div style={{ marginTop: 22 }}>
+            <div className="resultBody">
               {renderBusinessResult(result)}
             </div>
 
-            <div
-              style={{
-                marginTop: 30,
-                padding: 18,
-                borderRadius: 14,
-                background: "#f5f0e7",
-                fontSize: 12,
-                lineHeight: 1.8,
-                color: "#777066",
-              }}
-            >
+            <div className="noticeBox">
               본 분석은 전통 명리 관점을 참고한 AI 분석입니다.
               실제 투자·대출·사업 결정은 시장 상황과 재무 상태,
               관련 전문가의 조언을 함께 고려해 주세요.
@@ -421,23 +734,384 @@ export default function BusinessFortunePage() {
 
             <button
               type="button"
-              onClick={analyzeBusiness}
-              disabled={loading}
-              style={{
-                display: "block",
-                margin: "24px auto 0",
-                border: 0,
-                background: "transparent",
-                color: "#9b742f",
-                fontWeight: 700,
-                cursor: loading ? "wait" : "pointer",
-              }}
+              onClick={resetAnalysis}
+              className="resetButton"
             >
-              {loading ? "다시 분석 중..." : "재물·사업운 다시 분석하기"}
+              다른 사람 재물·사업운 분석하기
             </button>
           </section>
         </>
       )}
+
+      <style jsx>{`
+        .businessPage {
+          min-height: 100vh;
+          padding: 64px 20px 90px;
+          background:
+            radial-gradient(
+              circle at top,
+              rgba(184, 145, 76, 0.1),
+              transparent 34%
+            ),
+            #f4f1eb;
+        }
+
+        .businessHero {
+          max-width: 860px;
+          margin: 0 auto 32px;
+          text-align: center;
+        }
+
+        .eyebrow,
+        .cardTitle span {
+          display: block;
+          color: #9a722e;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 2px;
+        }
+
+        .businessHero h1 {
+          margin: 12px 0;
+          color: #26231e;
+          font-size: clamp(32px, 5vw, 48px);
+        }
+
+        .businessHero p {
+          max-width: 660px;
+          margin: 0 auto;
+          color: #70695e;
+          line-height: 1.8;
+        }
+
+        .businessCard {
+          width: 100%;
+          max-width: 860px;
+          margin: 20px auto 0;
+          padding: 34px;
+          border: 1px solid #ddd5c8;
+          border-radius: 20px;
+          background: #fffdf9;
+          box-shadow: 0 14px 38px rgba(61, 50, 33, 0.06);
+        }
+
+        .inputCard {
+          max-width: 720px;
+        }
+
+        .cardTitle {
+          margin-bottom: 28px;
+          text-align: center;
+        }
+
+        .cardTitle.left {
+          text-align: left;
+        }
+
+        .cardTitle h2 {
+          margin: 9px 0 8px;
+          color: #302b24;
+          font-size: 24px;
+        }
+
+        .cardTitle p {
+          margin: 0;
+          color: #777065;
+          font-size: 14px;
+          line-height: 1.75;
+        }
+
+        .birthRow {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 8px;
+        }
+
+        .calendarButton {
+          min-width: 74px;
+          min-height: 52px;
+          margin-top: 9px;
+          padding: 0 15px;
+          border: 1px solid #d8d0c3;
+          border-radius: 10px;
+          background: #f7f2e9;
+          color: #5b5143;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .datePicker {
+          margin-top: 12px;
+          padding: 18px;
+          border: 1px solid #d8d0c3;
+          border-radius: 14px;
+          background: #faf7f1;
+        }
+
+        .pickerTop {
+          display: grid;
+          grid-template-columns: 44px 1fr 1fr 44px;
+          gap: 8px;
+        }
+
+        .calendarGrid {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 5px;
+          margin-top: 16px;
+        }
+
+        .calendarDayName {
+          padding: 8px 0;
+          color: #8a8175;
+          font-size: 12px;
+          font-weight: 800;
+          text-align: center;
+        }
+
+        .calendarDay {
+          min-height: 38px;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #4c463e;
+          cursor: pointer;
+        }
+
+        .calendarDay:hover {
+          background: #eee6d8;
+        }
+
+        .calendarDay.selected {
+          background: #2f332b;
+          color: #fff;
+          font-weight: 800;
+        }
+
+        .pickerBottom {
+          display: flex;
+          justify-content: flex-end;
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .businessSelect {
+          width: 100%;
+          min-height: 52px;
+          margin-top: 9px;
+          padding: 0 14px;
+          border: 1px solid #d8d0c3;
+          border-radius: 10px;
+          background: #fff;
+          color: #302c26;
+          font-size: 15px;
+        }
+
+        .twoCol {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-top: 22px;
+        }
+
+        .analyzeButton {
+          width: 100%;
+          min-height: 58px;
+          margin-top: 28px;
+          border: 0;
+          border-radius: 12px;
+          background: #252a23;
+          color: #fff;
+          font-size: 16px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .analyzeButton:disabled {
+          cursor: wait;
+          opacity: 0.65;
+        }
+
+        .errorMessage {
+          margin: 18px 0 0;
+          color: #b0443c;
+          font-size: 14px;
+          line-height: 1.7;
+          text-align: center;
+        }
+
+        .privacyText {
+          margin: 18px 0 0;
+          color: #928a7e;
+          font-size: 12px;
+          line-height: 1.7;
+          text-align: center;
+        }
+
+        .profileCard {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+
+        .profileCard div {
+          padding: 15px;
+          border-radius: 12px;
+          background: #f6f1e8;
+        }
+
+        .profileCard span,
+        .elementGrid span {
+          display: block;
+          color: #8c8376;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .profileCard strong {
+          display: block;
+          margin-top: 7px;
+          color: #332f29;
+          font-size: 14px;
+          word-break: break-word;
+        }
+
+        .elementGrid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .elementGrid article {
+          padding: 22px;
+          border-radius: 14px;
+          background: #f5f0e7;
+        }
+
+        .elementGrid strong {
+          display: block;
+          margin-top: 8px;
+          color: #342f27;
+          font-size: 26px;
+        }
+
+        .elementReason {
+          margin: 16px 0 0;
+          color: #777066;
+          font-size: 13px;
+          line-height: 1.8;
+        }
+
+        .resultBody {
+          margin-top: 24px;
+        }
+
+        .businessHeadingLarge {
+          margin: 30px 0 14px;
+          color: #28241f;
+          font-size: 25px;
+        }
+
+        .businessHeading {
+          margin: 30px 0 12px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #e7dfd3;
+          color: #342f28;
+          font-size: 21px;
+          line-height: 1.5;
+        }
+
+        .businessHeadingSmall {
+          margin: 22px 0 9px;
+          color: #51493e;
+          font-size: 17px;
+        }
+
+        .businessParagraph {
+          margin: 9px 0;
+          color: #625b50;
+          font-size: 15px;
+          line-height: 1.95;
+        }
+
+        .businessResultList {
+          margin: 10px 0 20px;
+          padding-left: 22px;
+          color: #625b50;
+        }
+
+        .businessResultList li {
+          margin: 7px 0;
+          line-height: 1.85;
+        }
+
+        .noticeBox {
+          margin-top: 30px;
+          padding: 18px;
+          border-radius: 14px;
+          background: #f5f0e7;
+          color: #777066;
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+        .resetButton {
+          display: block;
+          width: 100%;
+          min-height: 54px;
+          margin-top: 22px;
+          border: 1px solid #cdbd9e;
+          border-radius: 11px;
+          background: #fffaf0;
+          color: #765b29;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        @media (max-width: 680px) {
+          .businessPage {
+            padding: 42px 14px 70px;
+          }
+
+          .businessCard {
+            padding: 24px 18px;
+            border-radius: 16px;
+          }
+
+          .twoCol {
+            grid-template-columns: 1fr;
+          }
+
+          .profileCard {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .pickerTop {
+            grid-template-columns: 40px 1fr 1fr 40px;
+            gap: 5px;
+          }
+
+          .datePicker {
+            padding: 12px 9px;
+          }
+
+          .calendarDay {
+            min-height: 36px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .profileCard,
+          .elementGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .businessHero h1 {
+            font-size: 34px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
