@@ -52,6 +52,28 @@ const emptyPartner: PersonForm = {
   calendar: "양력",
 };
 
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+function parseBirth(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3]),
+  };
+}
+
 function renderInline(text: string) {
   const parts = text.split(/(\*\*.*?\*\*)/g);
 
@@ -236,6 +258,28 @@ export default function CompatibilityPage() {
   const [result, setResult] = useState("");
   const [people, setPeople] = useState<CompatibilityPeople | null>(null);
 
+  const today = new Date();
+  const currentYear = today.getFullYear();
+
+  const [mePickerOpen, setMePickerOpen] = useState(false);
+  const [mePickerYear, setMePickerYear] = useState(currentYear);
+  const [mePickerMonth, setMePickerMonth] = useState(today.getMonth() + 1);
+
+  const [partnerPickerOpen, setPartnerPickerOpen] = useState(false);
+  const [partnerPickerYear, setPartnerPickerYear] = useState(currentYear);
+  const [partnerPickerMonth, setPartnerPickerMonth] = useState(
+    today.getMonth() + 1
+  );
+
+  const years = useMemo(
+    () =>
+      Array.from(
+        { length: currentYear - 1920 + 1 },
+        (_, index) => currentYear - index
+      ),
+    [currentYear]
+  );
+
   const canAnalyze = useMemo(() => {
     return Boolean(
       me.name.trim() &&
@@ -271,6 +315,96 @@ export default function CompatibilityPage() {
     setResult("");
     setPeople(null);
     setError("");
+  }
+
+  function openMePicker() {
+    const parsed = parseBirth(me.birth);
+
+    if (parsed) {
+      setMePickerYear(parsed.year);
+      setMePickerMonth(parsed.month);
+    } else {
+      setMePickerYear(currentYear);
+      setMePickerMonth(today.getMonth() + 1);
+    }
+
+    setPartnerPickerOpen(false);
+    setMePickerOpen(true);
+  }
+
+  function openPartnerPicker() {
+    const parsed = parseBirth(partner.birth);
+
+    if (parsed) {
+      setPartnerPickerYear(parsed.year);
+      setPartnerPickerMonth(parsed.month);
+    } else {
+      setPartnerPickerYear(currentYear);
+      setPartnerPickerMonth(today.getMonth() + 1);
+    }
+
+    setMePickerOpen(false);
+    setPartnerPickerOpen(true);
+  }
+
+  function changeMePickerMonth(amount: number) {
+    let year = mePickerYear;
+    let month = mePickerMonth + amount;
+
+    if (month < 1) {
+      month = 12;
+      year -= 1;
+    }
+
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+
+    if (year < 1920 || year > currentYear) {
+      return;
+    }
+
+    setMePickerYear(year);
+    setMePickerMonth(month);
+  }
+
+  function changePartnerPickerMonth(amount: number) {
+    let year = partnerPickerYear;
+    let month = partnerPickerMonth + amount;
+
+    if (month < 1) {
+      month = 12;
+      year -= 1;
+    }
+
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+
+    if (year < 1920 || year > currentYear) {
+      return;
+    }
+
+    setPartnerPickerYear(year);
+    setPartnerPickerMonth(month);
+  }
+
+  function selectMeBirth(day: number) {
+    const value =
+      `${mePickerYear}-${pad2(mePickerMonth)}-${pad2(day)}`;
+
+    updateMe("birth", value);
+    setMePickerOpen(false);
+  }
+
+  function selectPartnerBirth(day: number) {
+    const value =
+      `${partnerPickerYear}-${pad2(partnerPickerMonth)}-${pad2(day)}`;
+
+    updatePartner("birth", value);
+    setPartnerPickerOpen(false);
   }
 
   async function analyze(event: FormEvent<HTMLFormElement>) {
@@ -385,14 +519,115 @@ export default function CompatibilityPage() {
                 />
               </label>
 
-              <label className="field full">
+              <div className="field full">
                 <span>생년월일</span>
-                <input
-                  type="date"
-                  value={me.birth}
-                  onChange={(e) => updateMe("birth", e.target.value)}
-                />
-              </label>
+
+                <button
+                  type="button"
+                  className="birthPickerButton"
+                  onClick={openMePicker}
+                >
+                  {me.birth || "생년월일을 선택하세요"}
+                  <span>📅</span>
+                </button>
+
+                {mePickerOpen && (
+                  <div className="birthPicker">
+                    <div className="birthPickerHeader">
+                      <button
+                        type="button"
+                        onClick={() => changeMePickerMonth(-1)}
+                      >
+                        ‹
+                      </button>
+
+                      <div className="birthPickerSelects">
+                        <select
+                          value={mePickerYear}
+                          onChange={(e) =>
+                            setMePickerYear(Number(e.target.value))
+                          }
+                        >
+                          {years.map((year) => (
+                            <option key={year} value={year}>
+                              {year}년
+                            </option>
+                          ))}
+                        </select>
+
+                        <select
+                          value={mePickerMonth}
+                          onChange={(e) =>
+                            setMePickerMonth(Number(e.target.value))
+                          }
+                        >
+                          {Array.from({ length: 12 }, (_, index) => index + 1).map(
+                            (month) => (
+                              <option key={month} value={month}>
+                                {month}월
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => changeMePickerMonth(1)}
+                      >
+                        ›
+                      </button>
+                    </div>
+
+                    <div className="birthPickerWeek">
+                      <span>일</span>
+                      <span>월</span>
+                      <span>화</span>
+                      <span>수</span>
+                      <span>목</span>
+                      <span>금</span>
+                      <span>토</span>
+                    </div>
+
+                    <div className="birthPickerDays">
+                      {Array.from({
+                        length: new Date(
+                          mePickerYear,
+                          mePickerMonth - 1,
+                          1
+                        ).getDay(),
+                      }).map((_, index) => (
+                        <span key={`empty-${index}`} />
+                      ))}
+
+                      {Array.from({
+                        length: daysInMonth(
+                          mePickerYear,
+                          mePickerMonth
+                        ),
+                      }).map((_, index) => {
+                        const day = index + 1;
+                        const selected =
+                          me.birth ===
+                          `${mePickerYear}-${pad2(
+                            mePickerMonth
+                          )}-${pad2(day)}`;
+
+                        return (
+                          <button
+                            type="button"
+                            key={day}
+                            className={selected ? "selected" : ""}
+                            onClick={() => selectMeBirth(day)}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>              
 
               <label className="field">
                 <span>출생시간</span>
@@ -468,16 +703,116 @@ export default function CompatibilityPage() {
                 />
               </label>
 
-              <label className="field full">
+              <div className="field full">
                 <span>생년월일</span>
-                <input
-                  type="date"
-                  value={partner.birth}
-                  onChange={(e) =>
-                    updatePartner("birth", e.target.value)
-                  }
-                />
-              </label>
+
+                <button
+                  type="button"
+                  className="birthPickerButton"
+                  onClick={openPartnerPicker}
+                >
+                  {partner.birth || "생년월일을 선택하세요"}
+                  <span>📅</span>
+                </button>
+
+                {partnerPickerOpen && (
+                  <div className="birthPicker">
+                    <div className="birthPickerHeader">
+                      <button
+                        type="button"
+                        onClick={() => changePartnerPickerMonth(-1)}
+                      >
+                        ‹
+                      </button>
+
+                      <div className="birthPickerSelects">
+                        <select
+                          value={partnerPickerYear}
+                          onChange={(e) =>
+                            setPartnerPickerYear(Number(e.target.value))
+                          }
+                        >
+                          {years.map((year) => (
+                            <option key={year} value={year}>
+                              {year}년
+                            </option>
+                          ))}
+                        </select>
+
+                        <select
+                          value={partnerPickerMonth}
+                          onChange={(e) =>
+                            setPartnerPickerMonth(Number(e.target.value))
+                          }
+                        >
+                          {Array.from(
+                            { length: 12 },
+                            (_, index) => index + 1
+                          ).map((month) => (
+                            <option key={month} value={month}>
+                              {month}월
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => changePartnerPickerMonth(1)}
+                      >
+                        ›
+                      </button>
+                    </div>
+
+                    <div className="birthPickerWeek">
+                      <span>일</span>
+                      <span>월</span>
+                      <span>화</span>
+                      <span>수</span>
+                      <span>목</span>
+                      <span>금</span>
+                      <span>토</span>
+                    </div>
+
+                    <div className="birthPickerDays">
+                      {Array.from({
+                        length: new Date(
+                          partnerPickerYear,
+                          partnerPickerMonth - 1,
+                          1
+                        ).getDay(),
+                      }).map((_, index) => (
+                        <span key={`partner-empty-${index}`} />
+                      ))}
+
+                      {Array.from({
+                        length: daysInMonth(
+                          partnerPickerYear,
+                          partnerPickerMonth
+                        ),
+                      }).map((_, index) => {
+                        const day = index + 1;
+                        const selected =
+                          partner.birth ===
+                          `${partnerPickerYear}-${pad2(
+                            partnerPickerMonth
+                          )}-${pad2(day)}`;
+
+                        return (
+                          <button
+                            type="button"
+                            key={day}
+                            className={selected ? "selected" : ""}
+                            onClick={() => selectPartnerBirth(day)}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <label className="field">
                 <span>출생시간</span>
@@ -836,6 +1171,118 @@ export default function CompatibilityPage() {
         .field select:focus {
           border-color: #b49358;
           box-shadow: 0 0 0 3px rgba(180, 147, 88, 0.1);
+        }
+
+        .birthPickerButton {
+          display: flex;
+          width: 100%;
+          min-height: 48px;
+          box-sizing: border-box;
+          align-items: center;
+          justify-content: space-between;
+          border: 1px solid #dcd2c3;
+          border-radius: 10px;
+          background: #fff;
+          padding: 0 13px;
+          color: #39342d;
+          font: inherit;
+          font-size: 14px;
+          cursor: pointer;
+        }
+
+        .birthPickerButton:focus {
+          outline: none;
+          border-color: #b49358;
+          box-shadow: 0 0 0 3px rgba(180, 147, 88, 0.1);
+        }
+
+        .birthPicker {
+          margin-top: 8px;
+          padding: 14px;
+          border: 1px solid #dcd2c3;
+          border-radius: 12px;
+          background: #fff;
+          box-shadow: 0 10px 25px rgba(66, 52, 30, 0.1);
+        }
+
+        .birthPickerHeader {
+          display: grid;
+          grid-template-columns: 38px 1fr 38px;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+
+        .birthPickerHeader > button {
+          width: 38px;
+          height: 38px;
+          border: 1px solid #ddd2c0;
+          border-radius: 9px;
+          background: #fffaf2;
+          color: #8b682d;
+          font-size: 22px;
+          cursor: pointer;
+        }
+
+        .birthPickerSelects {
+          display: grid;
+          grid-template-columns: 1.25fr 0.75fr;
+          gap: 8px;
+        }
+
+        .birthPickerSelects select {
+          width: 100%;
+          min-height: 38px;
+          border: 1px solid #ddd2c0;
+          border-radius: 8px;
+          background: #fff;
+          padding: 0 8px;
+          color: #39342d;
+          font-size: 14px;
+        }
+
+        .birthPickerWeek,
+        .birthPickerDays {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 5px;
+        }
+
+        .birthPickerWeek {
+          margin-bottom: 5px;
+        }
+
+        .birthPickerWeek span {
+          padding: 5px 0;
+          color: #8a8175;
+          font-size: 11px;
+          font-weight: 800;
+          text-align: center;
+        }
+
+        .birthPickerDays > span {
+          min-height: 36px;
+        }
+
+        .birthPickerDays button {
+          min-width: 0;
+          height: 36px;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #51493e;
+          font-size: 13px;
+          cursor: pointer;
+        }
+
+        .birthPickerDays button:hover {
+          background: #f5efe4;
+        }
+
+        .birthPickerDays button.selected {
+          background: #9a722e;
+          color: #fff;
+          font-weight: 900;
         }
 
         .toggleGroup {
