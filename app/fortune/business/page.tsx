@@ -1499,6 +1499,225 @@ export default function BusinessFortunePage() {
           }
         }
       `}</style>
+
+      <style jsx global>{`
+        .premiumBusinessResult {
+          display: grid;
+          gap: 22px;
+        }
+
+        .businessIntroCard {
+          padding: 24px 26px;
+          border: 1px solid #e3d8c5;
+          border-radius: 16px;
+          background:
+            linear-gradient(
+              135deg,
+              rgba(183, 143, 72, 0.09),
+              rgba(255, 253, 249, 0.8)
+            );
+        }
+
+        .businessIntroMark {
+          margin-bottom: 12px;
+          color: #9a722e;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 2px;
+        }
+
+        .businessSectionGrid {
+          display: grid;
+          gap: 24px;
+        }
+
+        .businessAnalysisCard {
+          overflow: hidden;
+          border: 1px solid #d8c8ab;
+          border-radius: 18px;
+          background: #fffaf2;
+          box-shadow:
+            0 12px 30px rgba(79, 61, 31, 0.08);
+        }
+
+        .businessAnalysisHeader {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 22px 24px 19px;
+          border-bottom: 1px solid #dcc9a9;
+          background:
+            linear-gradient(
+              135deg,
+              #f2e6cf 0%,
+              #fffaf2 100%
+            );
+        }
+
+        .businessSectionNumber {
+          display: flex;
+          flex: 0 0 54px;
+          width: 54px;
+          height: 54px;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #9a722e;
+          border-radius: 50%;
+          background: #9a722e;
+          color: #fff;
+          font-size: 17px;
+          font-weight: 900;
+          letter-spacing: 1px;
+          box-shadow:
+            0 5px 14px rgba(154, 114, 46, 0.18);
+        }
+
+        .businessSectionTitleWrap {
+          min-width: 0;
+          flex: 1;
+        }
+
+        .businessSectionLabel {
+          display: block;
+          margin-bottom: 5px;
+          color: #a17a36;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.7px;
+        }
+
+        .businessAnalysisHeader .businessHeading {
+          margin: 0;
+          padding: 0;
+          border: 0;
+          color: #302b24;
+          font-size: 20px;
+          line-height: 1.45;
+        }
+
+        .businessAnalysisContent {
+          padding: 22px 26px 25px;
+          background: #fffdf9;
+        }
+
+        .businessAnalysisContent .businessParagraph {
+          margin: 0 0 13px;
+          color: #625b50;
+          font-size: 15px;
+          line-height: 1.95;
+          word-break: keep-all;
+        }
+
+        .businessAnalysisContent .businessParagraph:last-child {
+          margin-bottom: 0;
+        }
+
+        .businessAnalysisContent .businessHeadingSmall {
+          margin: 20px 0 10px;
+          color: #6f5527;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+
+        .businessAnalysisContent .businessResultList {
+          display: grid;
+          gap: 9px;
+          margin: 15px 0 4px;
+          padding: 0;
+          list-style: none;
+        }
+
+        .businessAnalysisContent .businessResultList li {
+          position: relative;
+          margin: 0;
+          padding: 13px 15px 13px 38px;
+          border-radius: 11px;
+          background: #f7f2e9;
+          color: #5d564c;
+          font-size: 14px;
+          line-height: 1.75;
+        }
+
+        .businessAnalysisContent .businessResultList li::before {
+          content: "✓";
+          position: absolute;
+          top: 13px;
+          left: 15px;
+          color: #9a722e;
+          font-weight: 900;
+        }
+
+        .businessAnalysisCard:last-child {
+          border: 2px solid #c5a66d;
+          background:
+            linear-gradient(
+              135deg,
+              #fff8e8,
+              #fffdf9
+            );
+        }
+
+        .businessAnalysisCard:last-child .businessAnalysisHeader {
+          background:
+            linear-gradient(
+              135deg,
+              #ead7ae,
+              #fff8e8
+            );
+        }
+
+        @media (max-width: 680px) {
+          .premiumBusinessResult {
+            gap: 16px;
+          }
+
+          .businessSectionGrid {
+            gap: 18px;
+          }
+
+          .businessAnalysisCard {
+            border-radius: 15px;
+          }
+
+          .businessAnalysisHeader {
+            align-items: flex-start;
+            gap: 12px;
+            padding: 18px 16px 16px;
+          }
+
+          .businessSectionNumber {
+            flex-basis: 44px;
+            width: 44px;
+            height: 44px;
+            font-size: 14px;
+          }
+
+          .businessAnalysisHeader .businessHeading {
+            font-size: 18px;
+          }
+
+          .businessAnalysisContent {
+            padding: 18px 16px 20px;
+          }
+
+          .businessAnalysisContent .businessParagraph {
+            font-size: 14px;
+            line-height: 1.9;
+            word-break: normal;
+          }
+
+          .businessAnalysisContent .businessResultList li {
+            padding: 12px 13px 12px 35px;
+            font-size: 13px;
+          }
+
+          .businessAnalysisContent .businessResultList li::before {
+            top: 12px;
+            left: 13px;
+          }
+        }
+      `}</style>
+
     </main>
   );
 }
