@@ -69,86 +69,173 @@ function renderInline(text: string) {
 function renderBusinessResult(text: string) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
 
-  const nodes: React.ReactNode[] = [];
-  let bulletBuffer: string[] = [];
+  type ResultSection = {
+    title: string;
+    content: string[];
+  };
 
-  function flushBullets() {
-    if (!bulletBuffer.length) {
-      return;
-    }
+  const intro: string[] = [];
+  const sections: ResultSection[] = [];
+  let currentSection: ResultSection | null = null;
 
-    nodes.push(
-      <ul className="businessResultList" key={`list-${nodes.length}`}>
-        {bulletBuffer.map((item, index) => (
-          <li key={`${item}-${index}`}>{renderInline(item)}</li>
-        ))}
-      </ul>
-    );
-
-    bulletBuffer = [];
-  }
-
-  lines.forEach((rawLine, index) => {
+  lines.forEach((rawLine) => {
     const line = rawLine.trim();
 
     if (!line) {
-      flushBullets();
-      return;
-    }
-
-    if (line.startsWith("### ")) {
-      flushBullets();
-
-      nodes.push(
-        <h4 className="businessHeadingSmall" key={`h4-${index}`}>
-          {renderInline(line.slice(4))}
-        </h4>
-      );
-
       return;
     }
 
     if (line.startsWith("## ")) {
-      flushBullets();
+      currentSection = {
+        title: line.slice(3).trim(),
+        content: [],
+      };
 
-      nodes.push(
-        <h3 className="businessHeading" key={`h3-${index}`}>
-          {renderInline(line.slice(3))}
-        </h3>
-      );
-
+      sections.push(currentSection);
       return;
     }
 
     if (line.startsWith("# ")) {
-      flushBullets();
+      intro.push(line.slice(2).trim());
+      return;
+    }
+
+    if (currentSection) {
+      currentSection.content.push(line);
+    } else {
+      intro.push(line);
+    }
+  });
+
+  function renderSectionContent(
+    content: string[],
+    sectionIndex: number
+  ) {
+    const nodes: React.ReactNode[] = [];
+    let bullets: string[] = [];
+
+    function flushBullets() {
+      if (!bullets.length) {
+        return;
+      }
 
       nodes.push(
-        <h2 className="businessHeadingLarge" key={`h2-${index}`}>
-          {renderInline(line.slice(2))}
-        </h2>
+        <ul
+          className="businessResultList"
+          key={`section-${sectionIndex}-list-${nodes.length}`}
+        >
+          {bullets.map((item, index) => (
+            <li key={`${sectionIndex}-${index}-${item}`}>
+              {renderInline(item)}
+            </li>
+          ))}
+        </ul>
       );
 
-      return;
+      bullets = [];
     }
 
-    if (/^[-*]\s+/.test(line)) {
-      bulletBuffer.push(line.replace(/^[-*]\s+/, ""));
-      return;
-    }
+    content.forEach((line, lineIndex) => {
+      if (/^[-*]\s+/.test(line)) {
+        bullets.push(line.replace(/^[-*]\s+/, ""));
+        return;
+      }
+
+      flushBullets();
+
+      if (line.startsWith("### ")) {
+        nodes.push(
+          <h4
+            className="businessHeadingSmall"
+            key={`section-${sectionIndex}-h4-${lineIndex}`}
+          >
+            {renderInline(line.slice(4))}
+          </h4>
+        );
+        return;
+      }
+
+      nodes.push(
+        <p
+          className="businessParagraph"
+          key={`section-${sectionIndex}-p-${lineIndex}`}
+        >
+          {renderInline(line)}
+        </p>
+      );
+    });
 
     flushBullets();
 
-    nodes.push(
-      <p className="businessParagraph" key={`p-${index}`}>
-        {renderInline(line)}
-      </p>
-    );
-  });
+    return nodes;
+  }
 
-  flushBullets();
+  function getSectionNumber(title: string) {
+    const match = title.match(/^(\d+)\./);
+    return match?.[1] || "";
+  }
 
-  return nodes;
+  function getSectionTitle(title: string) {
+    return title.replace(/^\d+\.\s*/, "");
+  }
+
+  return (
+    <div className="premiumBusinessResult">
+      {intro.length > 0 && (
+        <section className="businessIntroCard">
+          <div className="businessIntroMark">MYEONGUN</div>
+
+          {intro.map((line, index) => (
+            <p
+              className="businessParagraph"
+              key={`intro-${index}`}
+            >
+              {renderInline(line)}
+            </p>
+          ))}
+        </section>
+      )}
+
+      <div className="businessSectionGrid">
+        {sections.map((section, index) => {
+          const number = getSectionNumber(section.title);
+          const title = getSectionTitle(section.title);
+
+          return (
+            <section
+              className="businessAnalysisCard"
+              key={`${section.title}-${index}`}
+            >
+              <header className="businessAnalysisHeader">
+                {number && (
+                  <div className="businessSectionNumber">
+                    {number.padStart(2, "0")}
+                  </div>
+                )}
+
+                <div className="businessSectionTitleWrap">
+                  <span className="businessSectionLabel">
+                    WEALTH · BUSINESS
+                  </span>
+
+                  <h3 className="businessHeading">
+                    {renderInline(title)}
+                  </h3>
+                </div>
+              </header>
+
+              <div className="businessAnalysisContent">
+                {renderSectionContent(
+                  section.content,
+                  index
+                )}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export default function BusinessFortunePage() {
@@ -1004,6 +1091,210 @@ export default function BusinessFortunePage() {
 
         .resultBody {
           margin-top: 24px;
+        }
+
+        .premiumBusinessResult {
+          display: grid;
+          gap: 22px;
+        }
+
+        .businessIntroCard {
+          padding: 24px 26px;
+          border: 1px solid #e3d8c5;
+          border-radius: 16px;
+          background:
+            linear-gradient(
+              135deg,
+              rgba(183, 143, 72, 0.09),
+              rgba(255, 253, 249, 0.8)
+            );
+        }
+
+        .businessIntroMark {
+          margin-bottom: 12px;
+          color: #9a722e;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 2px;
+        }
+
+        .businessSectionGrid {
+          display: grid;
+          gap: 18px;
+        }
+
+        .businessAnalysisCard {
+          overflow: hidden;
+          border: 1px solid #e2d9ca;
+          border-radius: 18px;
+          background: #fffdf9;
+          box-shadow:
+            0 8px 24px rgba(61, 50, 33, 0.045);
+        }
+
+        .businessAnalysisHeader {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 22px 24px 19px;
+          border-bottom: 1px solid #ebe3d7;
+          background:
+            linear-gradient(
+              135deg,
+              #f8f3e9 0%,
+              #fffdf9 72%
+            );
+        }
+
+        .businessSectionNumber {
+          display: flex;
+          flex: 0 0 54px;
+          width: 54px;
+          height: 54px;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #d7c49d;
+          border-radius: 50%;
+          background: #fffaf0;
+          color: #9a722e;
+          font-size: 17px;
+          font-weight: 900;
+          letter-spacing: 1px;
+        }
+
+        .businessSectionTitleWrap {
+          min-width: 0;
+          flex: 1;
+        }
+
+        .businessSectionLabel {
+          display: block;
+          margin-bottom: 5px;
+          color: #a17a36;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.7px;
+        }
+
+        .businessAnalysisHeader .businessHeading {
+          margin: 0;
+          padding: 0;
+          border: 0;
+          color: #302b24;
+          font-size: 20px;
+          line-height: 1.45;
+        }
+
+        .businessAnalysisContent {
+          padding: 22px 26px 25px;
+        }
+
+        .businessAnalysisContent .businessParagraph {
+          margin: 0 0 13px;
+          color: #625b50;
+          font-size: 15px;
+          line-height: 1.95;
+          word-break: keep-all;
+        }
+
+        .businessAnalysisContent .businessParagraph:last-child {
+          margin-bottom: 0;
+        }
+
+        .businessAnalysisContent .businessHeadingSmall {
+          margin: 20px 0 10px;
+          color: #6f5527;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+
+        .businessAnalysisContent .businessResultList {
+          display: grid;
+          gap: 9px;
+          margin: 15px 0 4px;
+          padding: 0;
+          list-style: none;
+        }
+
+        .businessAnalysisContent .businessResultList li {
+          position: relative;
+          margin: 0;
+          padding: 13px 15px 13px 38px;
+          border-radius: 11px;
+          background: #f7f2e9;
+          color: #5d564c;
+          font-size: 14px;
+          line-height: 1.75;
+        }
+
+        .businessAnalysisContent .businessResultList li::before {
+          content: "✓";
+          position: absolute;
+          top: 13px;
+          left: 15px;
+          color: #9a722e;
+          font-weight: 900;
+        }
+
+        @media (max-width: 680px) {
+          .premiumBusinessResult {
+            gap: 16px;
+          }
+
+          .businessIntroCard {
+            padding: 20px 18px;
+            border-radius: 14px;
+          }
+
+          .businessSectionGrid {
+            gap: 14px;
+          }
+
+          .businessAnalysisCard {
+            border-radius: 15px;
+          }
+
+          .businessAnalysisHeader {
+            align-items: flex-start;
+            gap: 12px;
+            padding: 18px 16px 16px;
+          }
+
+          .businessSectionNumber {
+            flex-basis: 44px;
+            width: 44px;
+            height: 44px;
+            font-size: 14px;
+          }
+
+          .businessSectionLabel {
+            font-size: 9px;
+            letter-spacing: 1.2px;
+          }
+
+          .businessAnalysisHeader .businessHeading {
+            font-size: 18px;
+          }
+
+          .businessAnalysisContent {
+            padding: 18px 16px 20px;
+          }
+
+          .businessAnalysisContent .businessParagraph {
+            font-size: 14px;
+            line-height: 1.9;
+            word-break: normal;
+          }
+
+          .businessAnalysisContent .businessResultList li {
+            padding: 12px 13px 12px 35px;
+            font-size: 13px;
+          }
+
+          .businessAnalysisContent .businessResultList li::before {
+            top: 12px;
+            left: 13px;
+          }
         }
 
         .businessHeadingLarge {
