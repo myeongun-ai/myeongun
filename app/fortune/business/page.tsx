@@ -1089,6 +1089,102 @@ export default function BusinessFortunePage() {
           line-height: 1.8;
         }
 
+        .reportCard {
+          background: transparent;
+          border: 0;
+          box-shadow: none;
+          padding-left: 0;
+          padding-right: 0;
+        }
+
+        .reportCard > .cardTitle {
+          max-width: 860px;
+          margin-left: auto;
+          margin-right: auto;
+          padding: 0 8px;
+        }
+
+        .reportCard .resultBody {
+          margin-top: 24px;
+        }
+
+        .businessSectionGrid {
+          gap: 24px;
+        }
+
+        .businessAnalysisCard {
+          border: 1px solid #d8c8ab;
+          background: #fffaf2;
+          box-shadow:
+            0 12px 30px rgba(79, 61, 31, 0.08);
+        }
+
+        .businessAnalysisHeader {
+          background:
+            linear-gradient(
+              135deg,
+              #f2e6cf 0%,
+              #fffaf2 100%
+            );
+          border-bottom: 1px solid #dcc9a9;
+        }
+
+        .businessSectionNumber {
+          background: #9a722e;
+          color: #fff;
+          border-color: #9a722e;
+          box-shadow:
+            0 5px 14px rgba(154, 114, 46, 0.18);
+        }
+
+        .businessAnalysisContent {
+          background: #fffdf9;
+        }
+
+        .businessAnalysisCard:last-child {
+          border: 2px solid #c5a66d;
+          background:
+            linear-gradient(
+              135deg,
+              #fff8e8,
+              #fffdf9
+            );
+        }
+
+        .businessAnalysisCard:last-child .businessAnalysisHeader {
+          background:
+            linear-gradient(
+              135deg,
+              #ead7ae,
+              #fff8e8
+            );
+        }
+
+        .businessAnalysisCard:last-child .businessSectionLabel {
+          color: #7b5b22;
+        }
+
+        @media (max-width: 680px) {
+          .reportCard {
+            padding-left: 0;
+            padding-right: 0;
+          }
+
+          .reportCard > .cardTitle {
+            padding: 0 4px;
+          }
+
+          .businessSectionGrid {
+            gap: 18px;
+          }
+
+          .businessAnalysisCard {
+            border-width: 1px;
+            box-shadow:
+              0 8px 20px rgba(79, 61, 31, 0.07);
+          }
+        }
+
         .resultBody {
           margin-top: 24px;
         }
