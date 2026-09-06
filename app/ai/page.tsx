@@ -53,6 +53,97 @@ function parseBirth(value: string) {
   };
 }
 
+function renderAIAnswer(text: string) {
+  const normalized = text.replace(/\r\n/g, "\n").trim();
+
+  const headingPattern =
+    /^(?:\d+[.)]\s*)?(핵심 답변|사주 근거|2026년 흐름(?:과 질문 주제 연결)?|질문 주제 해석|시기별(?: 또는 상황별)? 주의점|실전 조언)\s*:?\s*$/;
+
+  const lines = normalized.split("\n");
+  const sections: { title: string; content: string[] }[] = [];
+  const intro: string[] = [];
+  let currentSection: { title: string; content: string[] } | null = null;
+
+  lines.forEach((rawLine) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      return;
+    }
+
+    const heading = line.match(headingPattern);
+
+    if (heading) {
+      currentSection = {
+        title: heading[1],
+        content: [],
+      };
+
+      sections.push(currentSection);
+      return;
+    }
+
+    if (currentSection) {
+      currentSection.content.push(line);
+    } else {
+      intro.push(line);
+    }
+  });
+
+  if (!sections.length) {
+    return <p className="aiAnswerPlain">{text}</p>;
+  }
+
+  return (
+    <div className="aiAnswerStructured">
+      {intro.length > 0 && (
+        <div className="aiAnswerIntro">
+          {intro.map((line, index) => (
+            <p key={`intro-${index}`}>{line}</p>
+          ))}
+        </div>
+      )}
+
+      {sections.map((section, index) => (
+        <section
+          className="aiAnswerSection"
+          key={`${section.title}-${index}`}
+        >
+          <div className="aiAnswerSectionHeader">
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{section.title}</strong>
+          </div>
+
+          <div className="aiAnswerSectionBody">
+            {section.content.map((line, lineIndex) => {
+              const bullet = line.match(/^[-•]\s*(.+)$/);
+              const numbered = line.match(/^\d+[.)]\s*(.+)$/);
+
+              if (bullet || numbered) {
+                return (
+                  <div
+                    className="aiAnswerPoint"
+                    key={`${index}-${lineIndex}`}
+                  >
+                    <span>•</span>
+                    <p>{(bullet || numbered)?.[1]}</p>
+                  </div>
+                );
+              }
+
+              return (
+                <p key={`${index}-${lineIndex}`}>
+                  {line}
+                </p>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export default function AIPage() {
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -559,7 +650,11 @@ export default function AIPage() {
                   : "명운 AI"}
               </small>
 
-              <p>{message.text}</p>
+              {message.who === "ai" ? (
+                  renderAIAnswer(message.text)
+                ) : (
+                 <p>{message.text}</p>
+                )}
             </div>
           ))}
 
@@ -980,6 +1075,114 @@ export default function AIPage() {
           font-size: 14px;
           line-height: 1.8;
           white-space: pre-wrap;
+          word-break: keep-all;
+        }
+
+        .aiAnswerPlain {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.85;
+          white-space: pre-wrap;
+          word-break: keep-all;
+        }
+
+        .aiAnswerStructured {
+          display: grid;
+          gap: 12px;
+        }
+
+        .aiAnswerIntro {
+          padding: 13px 14px;
+          border: 1px solid #eadfce;
+          border-radius: 11px;
+          background: #fffdf9;
+        }
+
+        .aiAnswerIntro p {
+          margin: 0;
+          color: #5f584e;
+          font-size: 14px;
+          line-height: 1.85;
+        }
+
+        .aiAnswerSection {
+          overflow: hidden;
+          border: 1px solid #e2d7c5;
+          border-radius: 12px;
+          background: #fffdf9;
+        }
+
+        .aiAnswerSectionHeader {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 11px 13px;
+          border-bottom: 1px solid #eadfce;
+          background:
+            linear-gradient(
+              135deg,
+              #f4ead7 0%,
+              #fffaf2 100%
+            );
+        }
+
+        .aiAnswerSectionHeader > span {
+          display: flex;
+          width: 30px;
+          height: 30px;
+          flex: 0 0 30px;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: #9a722e;
+          color: #fff;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.5px;
+        }
+
+        .aiAnswerSectionHeader strong {
+          color: #4a4033;
+          font-size: 13px;
+          line-height: 1.4;
+        }
+
+        .aiAnswerSectionBody {
+          display: grid;
+          gap: 9px;
+          padding: 13px 14px 15px;
+        }
+
+        .aiAnswerSectionBody > p {
+          margin: 0;
+          color: #5f584e;
+          font-size: 14px;
+          line-height: 1.85;
+          word-break: keep-all;
+        }
+
+        .aiAnswerPoint {
+          display: grid;
+          grid-template-columns: 14px 1fr;
+          gap: 7px;
+          align-items: start;
+          padding: 9px 10px;
+          border-radius: 9px;
+          background: #f7f2e9;
+        }
+
+        .aiAnswerPoint > span {
+          color: #9a722e;
+          font-size: 12px;
+          font-weight: 900;
+          line-height: 1.8;
+        }
+
+        .aiAnswerPoint > p {
+          margin: 0;
+          color: #5d564c;
+          font-size: 13px;
+          line-height: 1.8;
           word-break: keep-all;
         }
 
