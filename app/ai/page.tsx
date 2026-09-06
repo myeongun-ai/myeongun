@@ -57,7 +57,7 @@ function renderAIAnswer(text: string) {
   const normalized = text.replace(/\r\n/g, "\n").trim();
 
   const headingPattern =
-    /^(?:\d+[.)]\s*)?(핵심 답변|사주 근거|2026년 흐름(?:과 질문 주제 연결)?|질문 주제 해석|시기별(?: 또는 상황별)? 주의점|실전 조언)\s*:?\s*$/;
+    /^(?:0?\d+\s*[.)-]?\s*)?(핵심 답변|사주 근거|2026년 흐름(?:과 질문 주제 연결)?|질문 주제 해석|시기별(?: 또는 상황별)? 주의점|실전 조언)\s*:?\s*$/;
 
   const lines = normalized.split("\n");
   const sections: { title: string; content: string[] }[] = [];
