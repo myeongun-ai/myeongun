@@ -11,12 +11,34 @@ type SavedSaju = {
   calendar?: string;
 };
 
+type RecentAI = {
+  usedAt: string;
+  question: string;
+};
+
 export default function MyPage() {
   const [ready, setReady] = useState(false);
   const [saju, setSaju] = useState<SavedSaju | null>(null);
+  const [recentAI, setRecentAI] = useState<RecentAI | null>(null);
 
     useEffect(() => {
-       try {
+       try {         
+         const savedRecentAI =
+            localStorage.getItem("myeongun_recent_ai");
+
+         if (savedRecentAI) {
+           try {
+             const parsedRecentAI =
+                JSON.parse(savedRecentAI) as RecentAI;
+
+             if (parsedRecentAI?.usedAt) {
+               setRecentAI(parsedRecentAI);
+             }
+           } catch {
+             setRecentAI(null);
+           }
+         }
+
          const registered =
             localStorage.getItem("myeongun_my_saju_registered") === "1";
 
@@ -107,7 +129,9 @@ function removeMySaju() {
       href: "/ai",
       icon: "AI",
       title: "명운 AI 상담",
-      text: "실제 만세력을 바탕으로 궁금한 내용을 상담합니다.",
+      text: recentAI
+         ? `최근 상담 · ${new Date(recentAI.usedAt).toLocaleDateString("ko-KR")} · ${recentAI.question}`
+         : "실제 만세력을 바탕으로 궁금한 내용을 상담합니다.",
     },
   ];
 
