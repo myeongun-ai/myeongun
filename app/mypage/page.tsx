@@ -382,11 +382,11 @@ function removeMySaju() {
         }
 
         .infoGrid {
-          display: grid;
-          grid-template-columns:
-            repeat(4, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 24px;
+         display: grid;
+         grid-template-columns:
+            1fr 1.35fr 0.9fr 0.9fr;
+         gap: 10px;
+         margin-top: 24px;
         }
 
         .infoItem {
