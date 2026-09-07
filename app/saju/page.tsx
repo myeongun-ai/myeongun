@@ -369,6 +369,7 @@ export default function SajuPage() {
       }
 
       localStorage.setItem("myeongun_saju", JSON.stringify(payload));
+      localStorage.setItem("myeongun_my_saju_registered", "1");
       localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
 
       const resultText = String(parsed?.result || "").trim();

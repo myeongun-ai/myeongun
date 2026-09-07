@@ -16,9 +16,37 @@ export default function MyPage() {
   const [saju, setSaju] = useState<SavedSaju | null>(null);
 
     useEffect(() => {
-    setSaju(null);
-    setReady(true);
-  }, []);
+       try {
+         const registered =
+            localStorage.getItem("myeongun_my_saju_registered") === "1";
+
+         if   (!registered) {
+             setSaju(null);
+             return;
+         }
+
+         const saved =
+            localStorage.getItem("myeongun_saju");
+
+         if    (!saved) {
+             setSaju(null);
+             return;
+         }
+
+         const parsed =
+            JSON.parse(saved) as SavedSaju;
+
+          if  (parsed?.birth) {
+            setSaju(parsed);
+          } else {
+            setSaju(null);
+          }
+        } catch {
+          setSaju(null);
+        } finally {
+          setReady(true);
+        }
+       }, []);
 
   const displayName =
     saju?.name?.trim() || "명운 이용자";
