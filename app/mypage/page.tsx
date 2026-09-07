@@ -51,6 +51,14 @@ export default function MyPage() {
   const displayName =
     saju?.name?.trim() || "명운 이용자";
 
+function removeMySaju() {
+  localStorage.removeItem("myeongun_my_saju_registered");
+  localStorage.removeItem("myeongun_saju");
+  localStorage.removeItem("myeongun_saju_result");
+
+  setSaju(null);
+}
+
   const infoItems = [
     {
       label: "생년월일",
@@ -153,6 +161,13 @@ export default function MyPage() {
                   <strong>{item.value}</strong>
                 </div>
               ))}
+              <button
+                type="button"
+                className="removeSajuButton"
+                onClick={removeMySaju}
+              >
+                나의 사주 정보 삭제
+              </button>
             </div>
           ) : (
             <div className="emptyBox">
@@ -392,12 +407,33 @@ export default function MyPage() {
 
         .infoItem strong {
           display: block;
-          overflow: hidden;
           color: #3d3d36;
           font-size: 13px;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          line-height: 1.5;
+          white-space: normal;
+          word-break: keep-all;
+          overflow-wrap: anywhere;
         }
+
+        .removeSajuButton {
+          grid-column: 1 / -1;
+          justify-self: end;
+          margin-top: 4px;
+          padding: 9px 14px;
+          border: 1px solid #d9cdbc;
+          border-radius: 9px;
+          background: transparent;
+          color: #8a7560;
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+         }
+
+         .removeSajuButton:hover {
+           border-color: #b99a69;
+           background: #faf5eb;
+           color: #6f552d;
+         }
 
         .emptyBox {
           margin-top: 24px;
