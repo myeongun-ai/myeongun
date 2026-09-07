@@ -313,6 +313,14 @@ export default function AIPage() {
         throw new Error("AI 상담 답변이 비어 있습니다.");
       }
 
+      localStorage.setItem(
+         "myeongun_recent_ai",
+         JSON.stringify({
+           usedAt: new Date().toISOString(),
+           question: q,
+         })
+       );
+
       setMessages((previous) => [
         ...previous,
         {
