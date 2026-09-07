@@ -15,22 +15,9 @@ export default function MyPage() {
   const [ready, setReady] = useState(false);
   const [saju, setSaju] = useState<SavedSaju | null>(null);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("myeongun_saju");
-
-      if (saved) {
-        const parsed = JSON.parse(saved) as SavedSaju;
-
-        if (parsed?.birth) {
-          setSaju(parsed);
-        }
-      }
-    } catch {
-      setSaju(null);
-    } finally {
-      setReady(true);
-    }
+    useEffect(() => {
+    setSaju(null);
+    setReady(true);
   }, []);
 
   const displayName =
@@ -234,11 +221,10 @@ export default function MyPage() {
 
           <p>
             현재 나의 명운은 로그인 계정 방식이
-            아니라 현재 브라우저에 저장된 사주
-            정보를 기준으로 표시됩니다.
-            다른 기기에서 결제한 상세 사주를
-            다시 보려면 재열람 코드를 이용해
-            주세요.
+            아니며, 개인정보를 자동으로 불러오지 않습니다.
+            사주 정보는 각 서비스에서 직접 입력해 이용해주세요.
+            다른 기기에서 결제한 상세 사주를 다시 보려면
+            재열람 코드를 이용해 주세요.
           </p>
         </section>
       </div>
