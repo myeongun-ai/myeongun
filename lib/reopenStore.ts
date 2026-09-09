@@ -1,4 +1,4 @@
-import {
+﻿import {
   createCipheriv,
   createDecipheriv,
   createHash,
@@ -254,12 +254,11 @@ export async function redeemCrossDeviceReopen(input: {
   const sameName =
     String(saju.name || "").trim() === String(input.name || "").trim();
 
-  if (input.calendar) {
-    if (!sameName || !isSameActualBirthDate(saju, input.birth, input.calendar)) {
-      return null;
-    }
-  } else if (!exactMatch) {
-    if (!sameName || !isSameActualBirthDate(saju, input.birth)) {
+  if (!exactMatch) {
+    const sameActualBirthDate =
+      isSameActualBirthDate(saju, input.birth, input.calendar);
+
+    if (!sameName || !sameActualBirthDate) {
       return null;
     }
   }
@@ -273,3 +272,4 @@ export async function redeemCrossDeviceReopen(input: {
         : String(row.expires_at),
   };
 }
+
