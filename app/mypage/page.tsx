@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -21,12 +21,20 @@ type RecentBusiness = {
   name: string;
 };
 
+type RecentCompatibility = {
+  date: string;
+  meName: string;
+  partnerName: string;
+};
+
 export default function MyPage() {
   const [ready, setReady] = useState(false);
   const [saju, setSaju] = useState<SavedSaju | null>(null);
   const [recentAI, setRecentAI] = useState<RecentAI | null>(null);
   const [recentBusiness, setRecentBusiness] =
      useState<RecentBusiness | null>(null);
+  const [recentCompatibility, setRecentCompatibility] =
+     useState<RecentCompatibility | null>(null);
 
     useEffect(() => {
        try {         
@@ -59,6 +67,22 @@ export default function MyPage() {
              }
            } catch {
              setRecentBusiness(null);
+           }
+         }
+
+         const savedRecentCompatibility =
+            localStorage.getItem("myeongun_recent_compatibility");
+
+         if (savedRecentCompatibility) {
+           try {
+             const parsedRecentCompatibility =
+                JSON.parse(savedRecentCompatibility) as RecentCompatibility;
+
+             if (parsedRecentCompatibility?.date) {
+               setRecentCompatibility(parsedRecentCompatibility);
+             }
+           } catch {
+             setRecentCompatibility(null);
            }
          }
 
@@ -142,7 +166,9 @@ function removeMySaju() {
       href: "/compatibility",
       icon: "緣",
       title: "궁합",
-      text: "두 사람의 사주를 바탕으로 궁합을 분석합니다.",
+      text: recentCompatibility
+        ? `최근 분석 · ${new Date(recentCompatibility.date).toLocaleDateString("ko-KR")} · ${recentCompatibility.meName} ↔ ${recentCompatibility.partnerName}`
+        : "두 사람의 사주를 바탕으로 궁합을 분석합니다.",
     },
     {
       href: "/fortune/2026",
