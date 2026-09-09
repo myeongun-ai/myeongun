@@ -400,6 +400,23 @@ function removeMySaju() {
                   : "/payment/reopen"
               }
               className="premiumButton"
+              style={{
+                display: "inline-flex",
+                minHeight: "46px",
+                padding: "0 20px",
+                alignItems: "center",
+                justifyContent: "center",
+                boxSizing: "border-box",
+                border: "1px solid #d5b568",
+                borderRadius: "11px",
+                background: "#d5b568",
+                color: "#242820",
+                fontSize: "12px",
+                fontWeight: 800,
+                lineHeight: 1.4,
+                textAlign: "center",
+                textDecoration: "none",
+              }}
             >
               {hasPaidSaju && hasPaidSession
                 ? "결제한 상세 사주 바로 보기"
@@ -409,6 +426,23 @@ function removeMySaju() {
             <Link
               href="/payment/reopen"
               className="secondaryButton"
+              style={{
+                display: "inline-flex",
+                minHeight: "46px",
+                padding: "0 20px",
+                alignItems: "center",
+                justifyContent: "center",
+                boxSizing: "border-box",
+                border: "1px solid rgba(255, 255, 255, 0.32)",
+                borderRadius: "11px",
+                background: "rgba(255, 255, 255, 0.08)",
+                color: "#ffffff",
+                fontSize: "12px",
+                fontWeight: 800,
+                lineHeight: 1.4,
+                textAlign: "center",
+                textDecoration: "none",
+              }}
             >
               재열람 코드로 다시 보기
             </Link>
@@ -909,6 +943,7 @@ function removeMySaju() {
     </main>
   );
 }
+
 
 
 
