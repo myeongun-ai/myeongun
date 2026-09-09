@@ -303,7 +303,7 @@ function removeMySaju() {
           ? "/fortune/detail"
           : hasPaidSaju
             ? "/payment/reopen"
-            : "/payment",
+            : saju?.birth ? "/payment" : "/saju",
       icon: "貴",
       title: hasPaidSaju
         ? "결제한 상세 사주"
@@ -457,7 +457,7 @@ function removeMySaju() {
                   ? hasPaidSession
                     ? "/fortune/detail"
                     : "/payment/reopen"
-                  : "/payment"
+                  : saju?.birth ? "/payment" : "/saju"
               }
               className="premiumButton"
               style={{
@@ -1009,6 +1009,7 @@ function removeMySaju() {
     </main>
   );
 }
+
 
 
 

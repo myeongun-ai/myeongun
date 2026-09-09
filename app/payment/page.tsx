@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Script from "next/script";
 import { useState } from "react";
@@ -14,6 +14,33 @@ export default function PaymentPage() {
 
   const handlePayment = async () => {
     try {
+      const savedSaju =
+        localStorage.getItem("myeongun_saju");
+
+      if (!savedSaju) {
+        alert("먼저 사주 정보를 입력해주세요.");
+        window.location.href = "/saju";
+        return;
+      }
+
+      try {
+        const parsedSaju = JSON.parse(savedSaju);
+
+        if (
+          !parsedSaju?.name ||
+          !parsedSaju?.birth ||
+          !parsedSaju?.time
+        ) {
+          alert("먼저 사주 정보를 입력해주세요.");
+          window.location.href = "/saju";
+          return;
+        }
+      } catch {
+        alert("먼저 사주 정보를 입력해주세요.");
+        window.location.href = "/saju";
+        return;
+      }
+
       setLoading(true);
 
       const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
