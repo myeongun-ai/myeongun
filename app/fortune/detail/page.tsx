@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -84,14 +84,21 @@ export default function FortuneDetailPage() {
           return;
         }
 
-        const saved = localStorage.getItem("myeongun_saju");
+        const saved =
+          localStorage.getItem("myeongun_paid_saju") ||
+          localStorage.getItem("myeongun_saju");
 
         if (!saved) {
-          router.replace("/saju");
+          router.replace("/payment/reopen");
           return;
         }
 
         const parsedSaju = JSON.parse(saved) as SajuForm;
+
+        localStorage.setItem(
+          "myeongun_saju",
+          JSON.stringify(parsedSaju)
+        );
 
         const accessResponse = await fetch("/api/payment/access", {
           method: "POST",
