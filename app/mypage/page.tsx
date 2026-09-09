@@ -220,6 +220,20 @@ function removeMySaju() {
          ? `최근 상담 · ${new Date(recentAI.usedAt).toLocaleDateString("ko-KR")} · ${recentAI.question}`
          : "실제 만세력을 바탕으로 궁금한 내용을 상담합니다.",
     },
+    {
+      href:
+        hasPaidSaju && hasPaidSession
+          ? "/fortune/detail"
+          : "/payment/reopen",
+      icon: "貴",
+      title: "결제한 상세 사주",
+      text:
+        hasPaidSaju && hasPaidSession
+          ? "결제한 상세 사주를 바로 확인할 수 있습니다."
+          : hasPaidSaju
+            ? "재열람 코드를 입력해 결제한 상세 사주를 다시 확인합니다."
+            : "결제한 상세 사주가 있다면 재열람 코드로 다시 확인할 수 있습니다.",
+    },
   ];
 
   return (
@@ -851,5 +865,6 @@ function removeMySaju() {
     </main>
   );
 }
+
 
 
