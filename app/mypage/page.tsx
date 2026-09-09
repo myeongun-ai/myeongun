@@ -42,6 +42,8 @@ export default function MyPage() {
      useState<RecentCompatibility | null>(null);
   const [recent2026, setRecent2026] =
      useState<Recent2026 | null>(null);
+  const [hasPaidSaju, setHasPaidSaju] = useState(false);
+  const [hasPaidSession, setHasPaidSession] = useState(false);
 
     useEffect(() => {
        try {         
@@ -108,6 +110,15 @@ export default function MyPage() {
              setRecent2026(null);
            }
          }
+
+         const paidSaju =
+            localStorage.getItem("myeongun_paid_saju");
+
+         const paidSession =
+            sessionStorage.getItem("myeongun_session_active") === "1";
+
+         setHasPaidSaju(Boolean(paidSaju));
+         setHasPaidSession(paidSession);
 
          const registered =
             localStorage.getItem("myeongun_my_saju_registered") === "1";
@@ -328,34 +339,46 @@ function removeMySaju() {
             MYEONGUN PREMIUM
           </div>
 
-          <h2>결제한 상세 사주가 있으신가요?</h2>
+          <h2>
+            {hasPaidSaju
+              ? "결제한 상세 사주가 있습니다."
+              : "결제한 상세 사주가 있으신가요?"}
+          </h2>
 
           <p>
-            결제 완료 후 발급받은 8자리
-            재열람 코드를 이용하면 결제한
-            상세 사주를 다시 확인할 수 있습니다.
+            {hasPaidSaju
+              ? hasPaidSession
+                ? "현재 브라우저에서 결제한 상세 사주를 바로 확인할 수 있습니다."
+                : "결제 기록이 확인되었습니다. 재열람 코드를 이용하면 상세 사주를 다시 열 수 있습니다."
+              : "결제 완료 후 발급받은 8자리 재열람 코드를 이용하면 결제한 상세 사주를 다시 확인할 수 있습니다."}
           </p>
 
           <div className="premiumActions">
             <Link
-              href="/payment/reopen"
+              href={
+                hasPaidSaju && hasPaidSession
+                  ? "/fortune/detail"
+                  : "/payment/reopen"
+              }
               className="premiumButton"
             >
-              결제한 상세 사주 다시 보기
+              {hasPaidSaju && hasPaidSession
+                ? "결제한 상세 사주 바로 보기"
+                : "결제한 상세 사주 다시 보기"}
             </Link>
 
             <Link
-              href="/fortune/detail"
+              href="/payment/reopen"
               className="secondaryButton"
             >
-              상세 사주 페이지
+              재열람 코드로 다시 보기
             </Link>
           </div>
 
           <small>
-            재열람은 기존 결제 정보와 일치하는
-            경우에만 가능하며, 발급된 재열람
-            코드의 유효기간이 적용됩니다.
+            {hasPaidSaju && hasPaidSession
+              ? "현재 브라우저의 결제 세션이 유지되는 동안 바로 열람할 수 있습니다."
+              : "재열람은 기존 결제 정보와 일치하는 경우에만 가능하며, 발급된 재열람 코드의 유효기간이 적용됩니다."}
           </small>
         </section>
 
@@ -828,4 +851,5 @@ function removeMySaju() {
     </main>
   );
 }
+
 
