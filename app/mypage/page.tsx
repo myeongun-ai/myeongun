@@ -27,6 +27,11 @@ type RecentCompatibility = {
   partnerName: string;
 };
 
+type Recent2026 = {
+  usedAt: string;
+  name: string;
+};
+
 export default function MyPage() {
   const [ready, setReady] = useState(false);
   const [saju, setSaju] = useState<SavedSaju | null>(null);
@@ -35,6 +40,8 @@ export default function MyPage() {
      useState<RecentBusiness | null>(null);
   const [recentCompatibility, setRecentCompatibility] =
      useState<RecentCompatibility | null>(null);
+  const [recent2026, setRecent2026] =
+     useState<Recent2026 | null>(null);
 
     useEffect(() => {
        try {         
@@ -83,6 +90,22 @@ export default function MyPage() {
              }
            } catch {
              setRecentCompatibility(null);
+           }
+         }
+
+         const savedRecent2026 =
+            localStorage.getItem("myeongun_recent_2026");
+
+         if (savedRecent2026) {
+           try {
+             const parsedRecent2026 =
+                JSON.parse(savedRecent2026) as Recent2026;
+
+             if (parsedRecent2026?.usedAt) {
+               setRecent2026(parsedRecent2026);
+             }
+           } catch {
+             setRecent2026(null);
            }
          }
 
@@ -174,7 +197,9 @@ function removeMySaju() {
       href: "/fortune/2026",
       icon: "運",
       title: "2026 운세",
-      text: "2026년의 전체 흐름과 주요 운세를 확인합니다.",
+      text: recent2026
+        ? `최근 분석 · ${new Date(recent2026.usedAt).toLocaleDateString("ko-KR")} · ${recent2026.name}`
+        : "2026년의 전체 흐름과 주요 운세를 확인합니다.",
     },
     {
       href: "/ai",
@@ -803,3 +828,4 @@ function removeMySaju() {
     </main>
   );
 }
+
