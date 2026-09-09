@@ -261,7 +261,7 @@ function removeMySaju() {
       href: "/saju",
       icon: "命",
       title: "나의 사주",
-      text: recentSaju
+      text: saju && recentSaju
         ? `최근 분석 · ${new Date(recentSaju.usedAt).toLocaleDateString("ko-KR")} · ${recentSaju.name}`
         : "사주 정보를 입력하고 무료 종합 분석을 확인합니다.",
     },
@@ -269,7 +269,7 @@ function removeMySaju() {
       href: "/fortune/business",
       icon: "財",
       title: "재물 · 사업",
-      text: recentBusiness
+      text: saju && recentBusiness
         ? `최근 분석 · ${new Date(recentBusiness.usedAt).toLocaleDateString("ko-KR")} · ${recentBusiness.name}`
         : "재물운과 사업운의 흐름을 확인합니다.",
     },
@@ -277,7 +277,7 @@ function removeMySaju() {
       href: "/compatibility",
       icon: "緣",
       title: "궁합",
-      text: recentCompatibility
+      text: saju && recentCompatibility
         ? `최근 분석 · ${new Date(recentCompatibility.date).toLocaleDateString("ko-KR")} · ${recentCompatibility.meName} ↔ ${recentCompatibility.partnerName}`
         : "두 사람의 사주를 바탕으로 궁합을 분석합니다.",
     },
@@ -285,7 +285,7 @@ function removeMySaju() {
       href: "/fortune/2026",
       icon: "運",
       title: "2026 운세",
-      text: recent2026
+      text: saju && recent2026
         ? `최근 분석 · ${new Date(recent2026.usedAt).toLocaleDateString("ko-KR")} · ${recent2026.name}`
         : "2026년의 전체 흐름과 주요 운세를 확인합니다.",
     },
@@ -293,7 +293,7 @@ function removeMySaju() {
       href: "/ai",
       icon: "AI",
       title: "명운 AI 상담",
-      text: recentAI
+      text: saju && recentAI
          ? `최근 상담 · ${new Date(recentAI.usedAt).toLocaleDateString("ko-KR")} · ${recentAI.question}`
          : "실제 만세력을 바탕으로 궁금한 내용을 상담합니다.",
     },
@@ -1009,6 +1009,7 @@ function removeMySaju() {
     </main>
   );
 }
+
 
 
 
