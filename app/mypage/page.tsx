@@ -32,9 +32,16 @@ type Recent2026 = {
   name: string;
 };
 
+type RecentSaju = {
+  usedAt: string;
+  name: string;
+};
+
 export default function MyPage() {
   const [ready, setReady] = useState(false);
   const [saju, setSaju] = useState<SavedSaju | null>(null);
+  const [recentSaju, setRecentSaju] =
+     useState<RecentSaju | null>(null);
   const [recentAI, setRecentAI] = useState<RecentAI | null>(null);
   const [recentBusiness, setRecentBusiness] =
      useState<RecentBusiness | null>(null);
@@ -47,6 +54,22 @@ export default function MyPage() {
 
     useEffect(() => {
        try {         
+         const savedRecentSaju =
+            localStorage.getItem("myeongun_recent_saju");
+
+         if (savedRecentSaju) {
+           try {
+             const parsedRecentSaju =
+                JSON.parse(savedRecentSaju) as RecentSaju;
+
+             if (parsedRecentSaju?.usedAt) {
+               setRecentSaju(parsedRecentSaju);
+             }
+           } catch {
+             setRecentSaju(null);
+           }
+         }
+
          const savedRecentAI =
             localStorage.getItem("myeongun_recent_ai");
 
@@ -186,7 +209,9 @@ function removeMySaju() {
       href: "/saju",
       icon: "命",
       title: "나의 사주",
-      text: "사주 정보를 입력하고 무료 종합 분석을 확인합니다.",
+      text: recentSaju
+        ? `최근 분석 · ${new Date(recentSaju.usedAt).toLocaleDateString("ko-KR")} · ${recentSaju.name}`
+        : "사주 정보를 입력하고 무료 종합 분석을 확인합니다.",
     },
     {
       href: "/fortune/business",
@@ -865,6 +890,8 @@ function removeMySaju() {
     </main>
   );
 }
+
+
 
 
 
