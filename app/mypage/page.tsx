@@ -299,21 +299,23 @@ function removeMySaju() {
     },
     {
       href:
-        hasPaidSaju && hasPaidSession
-          ? "/fortune/detail"
-          : hasPaidSaju
-            ? "/payment/reopen"
-            : saju?.birth ? "/payment" : "/saju",
+        !saju
+          ? "/saju"
+          : hasPaidSaju && hasPaidSession
+            ? "/fortune/detail"
+            : hasPaidSaju
+              ? "/payment/reopen"
+              : "/payment",
       icon: "貴",
-      title: hasPaidSaju
-        ? "결제한 상세 사주"
-        : "상세 사주 분석",
-      text:
-        hasPaidSaju && hasPaidSession
-          ? "결제한 상세 사주를 바로 확인할 수 있습니다."
-          : hasPaidSaju
-            ? "재열람 코드를 입력해 결제한 상세 사주를 다시 확인합니다."
-            : "더 깊고 자세한 프리미엄 사주 분석을 이용할 수 있습니다.",
+      title: saju && hasPaidSaju
+  ? "결제한 상세 사주"
+  : "상세 사주 분석",
+text:
+  saju && hasPaidSaju && hasPaidSession
+    ? "결제한 상세 사주를 바로 확인할 수 있습니다."
+    : saju && hasPaidSaju
+      ? "재열람 코드를 입력해 결제한 상세 사주를 다시 확인합니다."
+      : "더 깊고 자세한 프리미엄 사주 분석을 이용할 수 있습니다.",
     },
   ];
 
