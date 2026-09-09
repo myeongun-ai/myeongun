@@ -174,6 +174,58 @@ export default function MyPage() {
         }
        }, []);
 
+  useEffect(() => {
+    const paidSaju =
+      localStorage.getItem("myeongun_paid_saju");
+
+    if (!paidSaju) {
+      setHasPaidSession(false);
+      sessionStorage.removeItem("myeongun_session_active");
+      return;
+    }
+
+    try {
+      const parsedPaidSaju =
+        JSON.parse(paidSaju) as SavedSaju;
+
+      fetch("/api/payment/access", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          saju: parsedPaidSaju,
+        }),
+      })
+        .then(async (response) => {
+          const result = await response.json();
+
+          if (response.ok && result?.paid) {
+            setHasPaidSession(true);
+            sessionStorage.setItem(
+              "myeongun_session_active",
+              "1"
+            );
+          } else {
+            setHasPaidSession(false);
+            sessionStorage.removeItem(
+              "myeongun_session_active"
+            );
+          }
+        })
+        .catch(() => {
+          setHasPaidSession(false);
+          sessionStorage.removeItem(
+            "myeongun_session_active"
+          );
+        });
+    } catch {
+      setHasPaidSession(false);
+      sessionStorage.removeItem("myeongun_session_active");
+    }
+  }, []);
+
   const displayName =
     saju?.name?.trim() || "명운 이용자";
 
