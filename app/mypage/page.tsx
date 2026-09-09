@@ -16,10 +16,17 @@ type RecentAI = {
   question: string;
 };
 
+type RecentBusiness = {
+  usedAt: string;
+  name: string;
+};
+
 export default function MyPage() {
   const [ready, setReady] = useState(false);
   const [saju, setSaju] = useState<SavedSaju | null>(null);
   const [recentAI, setRecentAI] = useState<RecentAI | null>(null);
+  const [recentBusiness, setRecentBusiness] =
+     useState<RecentBusiness | null>(null);
 
     useEffect(() => {
        try {         
@@ -36,6 +43,22 @@ export default function MyPage() {
              }
            } catch {
              setRecentAI(null);
+           }
+         }
+
+         const savedRecentBusiness =
+            localStorage.getItem("myeongun_recent_business");
+
+         if (savedRecentBusiness) {
+           try {
+             const parsedRecentBusiness =
+                JSON.parse(savedRecentBusiness) as RecentBusiness;
+
+             if (parsedRecentBusiness?.usedAt) {
+               setRecentBusiness(parsedRecentBusiness);
+             }
+           } catch {
+             setRecentBusiness(null);
            }
          }
 
@@ -111,7 +134,9 @@ function removeMySaju() {
       href: "/fortune/business",
       icon: "財",
       title: "재물 · 사업",
-      text: "재물운과 사업운의 흐름을 확인합니다.",
+      text: recentBusiness
+        ? `최근 분석 · ${new Date(recentBusiness.usedAt).toLocaleDateString("ko-KR")} · ${recentBusiness.name}`
+        : "재물운과 사업운의 흐름을 확인합니다.",
     },
     {
       href: "/compatibility",
