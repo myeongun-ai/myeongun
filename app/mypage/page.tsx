@@ -775,6 +775,25 @@ function removeMySaju() {
           margin-top: 22px;
         }
 
+        .premiumButton,
+        .secondaryButton {
+          display: inline-flex;
+          min-height: 46px;
+          padding: 0 20px;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+          border-radius: 11px;
+          font-size: 12px;
+          font-weight: 800;
+          line-height: 1.4;
+          text-align: center;
+          text-decoration: none;
+          transition:
+            transform 0.18s ease,
+            opacity 0.18s ease;
+        }
+
         .premiumButton {
           background: #d5b568;
           color: #242820;
