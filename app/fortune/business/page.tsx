@@ -375,6 +375,14 @@ export default function BusinessFortunePage() {
         throw new Error("재물·사업운 분석 결과가 비어 있습니다.");
       }
 
+      localStorage.setItem(
+         "myeongun_recent_business",
+         JSON.stringify({
+            usedAt: new Date().toISOString(),
+            name: payload.name,
+         })
+       );
+
       setResult(resultText);
       setYongshin(data?.yongshin || null);
     } catch (err) {
