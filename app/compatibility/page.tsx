@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
@@ -448,6 +448,17 @@ export default function CompatibilityPage() {
       if (!resultText) {
         throw new Error("궁합 분석 결과가 비어 있습니다.");
       }
+
+      try {
+        localStorage.setItem(
+          "myeongun_recent_compatibility",
+          JSON.stringify({
+            date: new Date().toISOString(),
+            meName: me.name.trim(),
+            partnerName: partner.name.trim(),
+          })
+        );
+      } catch {}
 
       setResult(resultText);
       setPeople(data?.people || null);
