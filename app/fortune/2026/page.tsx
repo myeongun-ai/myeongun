@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
@@ -401,6 +401,16 @@ export default function Fortune2026Page() {
       if (!resultText) {
         throw new Error("2026년 운세 분석 결과가 비어 있습니다.");
       }
+
+      try {
+        localStorage.setItem(
+          "myeongun_recent_2026",
+          JSON.stringify({
+            usedAt: new Date().toISOString(),
+            name: form.name.trim(),
+          })
+        );
+      } catch {}
 
       setResult(resultText);
       setProfile(data?.profile || null);
