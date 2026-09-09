@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -377,6 +377,14 @@ export default function SajuPage() {
       if (!resultText) {
         throw new Error("무료 사주 결과를 불러오지 못했습니다.");
       }
+
+      localStorage.setItem(
+        "myeongun_recent_saju",
+        JSON.stringify({
+          usedAt: new Date().toISOString(),
+          name: payload.name,
+        })
+      );
 
       setFreeResult(resultText);
       setYongshin(parsed?.yongshin || null);
