@@ -301,15 +301,19 @@ function removeMySaju() {
       href:
         hasPaidSaju && hasPaidSession
           ? "/fortune/detail"
-          : "/payment/reopen",
+          : hasPaidSaju
+            ? "/payment/reopen"
+            : "/payment",
       icon: "貴",
-      title: "결제한 상세 사주",
+      title: hasPaidSaju
+        ? "결제한 상세 사주"
+        : "상세 사주 분석",
       text:
         hasPaidSaju && hasPaidSession
           ? "결제한 상세 사주를 바로 확인할 수 있습니다."
           : hasPaidSaju
             ? "재열람 코드를 입력해 결제한 상세 사주를 다시 확인합니다."
-            : "결제한 상세 사주가 있다면 재열람 코드로 다시 확인할 수 있습니다.",
+            : "더 깊고 자세한 프리미엄 사주 분석을 이용할 수 있습니다.",
     },
   ];
 
@@ -432,24 +436,28 @@ function removeMySaju() {
 
           <h2>
             {hasPaidSaju
-              ? "결제한 상세 사주가 있습니다."
-              : "결제한 상세 사주가 있으신가요?"}
+              ? hasPaidSession
+                ? "결제한 상세 사주가 있습니다."
+                : "결제한 상세 사주를 다시 보시겠어요?"
+              : "상세 사주 분석이 필요하신가요?"}
           </h2>
 
           <p>
             {hasPaidSaju
               ? hasPaidSession
-                ? "현재 브라우저에서 결제한 상세 사주를 바로 확인할 수 있습니다."
-                : "결제 기록이 확인되었습니다. 재열람 코드를 이용하면 상세 사주를 다시 열 수 있습니다."
-              : "결제 완료 후 발급받은 8자리 재열람 코드를 이용하면 결제한 상세 사주를 다시 확인할 수 있습니다."}
+                ? "현재 7일 이용권이 유효합니다. 결제한 상세 사주를 바로 확인할 수 있습니다."
+                : "결제 기록이 있습니다. 유효한 재열람 코드를 입력하면 상세 사주를 다시 확인할 수 있습니다."
+              : "무료 분석보다 더 깊고 자세한 프리미엄 상세 사주 분석을 이용할 수 있습니다."}
           </p>
 
           <div className="premiumActions">
             <Link
               href={
-                hasPaidSaju && hasPaidSession
-                  ? "/fortune/detail"
-                  : "/payment/reopen"
+                hasPaidSaju
+                  ? hasPaidSession
+                    ? "/fortune/detail"
+                    : "/payment/reopen"
+                  : "/payment"
               }
               className="premiumButton"
               style={{
@@ -470,40 +478,46 @@ function removeMySaju() {
                 textDecoration: "none",
               }}
             >
-              {hasPaidSaju && hasPaidSession
-                ? "결제한 상세 사주 바로 보기"
-                : "결제한 상세 사주 다시 보기"}
+              {hasPaidSaju
+                ? hasPaidSession
+                  ? "결제한 상세 사주 바로 보기"
+                  : "재열람 코드로 다시 보기"
+                : "상세 사주 결제하기"}
             </Link>
 
-            <Link
-              href="/payment/reopen"
-              className="secondaryButton"
-              style={{
-                display: "inline-flex",
-                minHeight: "46px",
-                padding: "0 20px",
-                alignItems: "center",
-                justifyContent: "center",
-                boxSizing: "border-box",
-                border: "1px solid rgba(255, 255, 255, 0.32)",
-                borderRadius: "11px",
-                background: "rgba(255, 255, 255, 0.08)",
-                color: "#ffffff",
-                fontSize: "12px",
-                fontWeight: 800,
-                lineHeight: 1.4,
-                textAlign: "center",
-                textDecoration: "none",
-              }}
-            >
-              재열람 코드로 다시 보기
-            </Link>
+            {hasPaidSaju && hasPaidSession && (
+              <Link
+                href="/payment/reopen"
+                className="secondaryButton"
+                style={{
+                  display: "inline-flex",
+                  minHeight: "46px",
+                  padding: "0 20px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxSizing: "border-box",
+                  border: "1px solid rgba(255, 255, 255, 0.32)",
+                  borderRadius: "11px",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  lineHeight: 1.4,
+                  textAlign: "center",
+                  textDecoration: "none",
+                }}
+              >
+                재열람 코드로 다시 보기
+              </Link>
+            )}
           </div>
 
           <small>
-            {hasPaidSaju && hasPaidSession
-              ? "현재 브라우저의 결제 세션이 유지되는 동안 바로 열람할 수 있습니다."
-              : "재열람은 기존 결제 정보와 일치하는 경우에만 가능하며, 발급된 재열람 코드의 유효기간이 적용됩니다."}
+            {hasPaidSaju
+              ? hasPaidSession
+                ? "상세 사주 이용권은 결제일로부터 7일 동안 유효합니다."
+                : "재열람은 결제 정보와 일치하고 재열람 코드가 유효한 경우에만 가능합니다."
+              : "상세 사주 결제 금액은 9,900원이며, 결제 후 7일 동안 이용할 수 있습니다."}
           </small>
         </section>
 
