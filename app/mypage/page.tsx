@@ -429,7 +429,7 @@ function removeMySaju() {
           </div>
         </section>
 
-        <section className="premiumCard">
+        {ready && saju && <section className="premiumCard">
           <div className="premiumBadge">
             MYEONGUN PREMIUM
           </div>
@@ -519,7 +519,7 @@ function removeMySaju() {
                 : "재열람은 결제 정보와 일치하고 재열람 코드가 유효한 경우에만 가능합니다."
               : "상세 사주 결제 금액은 9,900원이며, 결제 후 7일 동안 이용할 수 있습니다."}
           </small>
-        </section>
+        </section>}
 
         <section className="noticeCard">
           <strong>나의 명운 이용 안내</strong>
@@ -1009,11 +1009,3 @@ function removeMySaju() {
     </main>
   );
 }
-
-
-
-
-
-
-
-
