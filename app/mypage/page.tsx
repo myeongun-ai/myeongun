@@ -954,12 +954,16 @@ text:
           }
 
           .profileCard {
+            display: block;
             padding: 21px 17px;
             border-radius: 18px;
           }
 
           .profileTop {
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: 56px minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
           }
 
           .avatar {
@@ -969,8 +973,32 @@ text:
             font-size: 23px;
           }
 
+          .profileText {
+            min-width: 0;
+          }
+
           .profileText h2 {
+            margin-top: 5px;
             font-size: 18px;
+            line-height: 1.35;
+            word-break: keep-all;
+          }
+
+          .profileText p {
+            font-size: 12px;
+            line-height: 1.65;
+            word-break: keep-all;
+          }
+
+          .emptyBox {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 18px;
+            padding: 20px 16px;
+          }
+
+          .emptyBox p {
+            margin: 8px auto 15px;
           }
 
           .infoGrid {
