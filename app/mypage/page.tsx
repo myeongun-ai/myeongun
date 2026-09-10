@@ -779,12 +779,14 @@ text:
 
         .serviceCard {
           display: grid;
-          grid-template-columns: 48px 1fr auto;
-          gap: 14px;
+          grid-template-columns: 44px 1fr auto;
+          gap: 13px;
           align-items: center;
-          padding: 18px;
+          min-height: 82px;
+          box-sizing: border-box;
+          padding: 14px 16px;
           border: 1px solid #e0d6c7;
-          border-radius: 16px;
+          border-radius: 15px;
           background: #fffdf9;
           color: inherit;
           text-decoration: none;
@@ -802,14 +804,14 @@ text:
 
         .serviceIcon {
           display: grid;
-          width: 48px;
-          height: 48px;
+          width: 44px;
+          height: 44px;
           place-items: center;
-          border-radius: 13px;
+          border-radius: 12px;
           background: #f1e8d7;
           color: #8d6925;
           font-family: serif;
-          font-size: 17px;
+          font-size: 16px;
           font-weight: 900;
         }
 
@@ -970,6 +972,11 @@ text:
 
           .serviceGrid {
             grid-template-columns: 1fr;
+          }
+
+          .serviceCard {
+            min-height: 0;
+            padding: 16px;
           }
 
           .premiumCard {
