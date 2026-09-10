@@ -642,7 +642,7 @@ export default function AIPage() {
           </div>
         )}
 
-        <div className="messages">
+        <div className={`messages ${messages.length > 1 || loading ? "active" : "initial"}`}>
           {messages.map((message, index) => (
             <div
               key={`${index}-${message.text.slice(0, 20)}`}
@@ -1052,6 +1052,15 @@ export default function AIPage() {
           gap: 12px;
         }
 
+        .messages.initial {
+          min-height: 0;
+        }
+
+        .messages.active {
+          min-height: 220px;
+          align-content: start;
+        }
+
         .bubble {
           max-width: 82%;
           padding: 15px 17px;
@@ -1240,18 +1249,30 @@ export default function AIPage() {
 
         .chatInput button {
           min-width: 92px;
-          border: 0;
+          border: 1px solid #9a722e;
           border-radius: 11px;
-          background: #20251f;
+          background: #9a722e;
           color: #fff;
           font-size: 14px;
           font-weight: 900;
           cursor: pointer;
+          transition:
+            background 0.18s ease,
+            transform 0.18s ease;
+        }
+
+        .chatInput button:hover:not(:disabled) {
+          background: #876324;
+          transform: translateY(-1px);
         }
 
         .chatInput button:disabled {
+          border-color: #d8c7a7;
+          background: #e8dcc6;
+          color: #8d7b5d;
           cursor: not-allowed;
-          opacity: 0.45;
+          opacity: 1;
+          transform: none;
         }
 
         .errorBox {
