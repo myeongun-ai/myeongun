@@ -455,14 +455,7 @@ export default function SajuPage() {
 
           <label style={{ ...labelStyle, marginTop: "22px" }}>
             생년월일
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr auto",
-                gap: "8px",
-                alignItems: "stretch",
-              }}
-            >
+            <div className="birthDateRow">
               <input
                 name="birth"
                 type="text"
@@ -471,6 +464,7 @@ export default function SajuPage() {
                 value={form.birth}
                 placeholder="년-월-일"
                 onClick={openPicker}
+                className="birthDateInput"
                 style={{ ...fieldStyle, cursor: "pointer" }}
               />
 
@@ -744,17 +738,44 @@ export default function SajuPage() {
           font-size: 16px;
         }
 
-        .calendarButton {
-          min-width: 78px;
+        .birthDateRow {
+          width: 100%;
           min-height: 58px;
-          height: 58px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 78px;
+          align-items: stretch;
+          overflow: hidden;
           box-sizing: border-box;
-          align-self: stretch;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
           border: 1px solid #343847;
           border-radius: 12px;
+          background: #0d1017;
+        }
+
+        .birthDateInput {
+          min-width: 0;
+          min-height: 56px !important;
+          height: 56px;
+          border: 0 !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+        }
+
+        .calendarButton {
+          width: 78px;
+          min-width: 78px;
+          min-height: 56px;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          appearance: none;
+          -webkit-appearance: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 0;
+          border-left: 1px solid #343847;
+          border-radius: 0;
           background: #202636;
           color: #e8bf6c;
           font-size: 14px;
