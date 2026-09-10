@@ -392,63 +392,6 @@ export default function Home() {
           "Arial, 'Noto Sans KR', 'Malgun Gothic', sans-serif",
       }}
     >
-      {/* HEADER */}
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(7,8,13,0.88)",
-          backdropFilter: "blur(14px)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1180px",
-            margin: "0 auto",
-            padding: "18px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Link
-            href="/"
-            style={{
-              color: "#f5e7c2",
-              textDecoration: "none",
-              fontWeight: 800,
-              fontSize: "24px",
-              letterSpacing: "-1px",
-            }}
-          >
-            명운
-          </Link>
-
-          <nav
-            style={{
-              display: "flex",
-              gap: "22px",
-              fontSize: "14px",
-            }}
-          >
-            <Link href="/saju" style={navStyle}>
-              종합 사주
-            </Link>
-            <Link href="/fortune/business" style={navStyle}>
-              재물·사업
-            </Link>
-            <Link href="/compatibility" style={navStyle}>
-              궁합
-            </Link>
-            <Link href="/fortune/2026" style={navStyle}>
-              2026 운세
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       {/* HERO */}
       <section
         style={{
@@ -1273,34 +1216,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          padding: "30px 24px",
-          textAlign: "center",
-          color: "#666b79",
-          fontSize: "12px",
-        }}
-      >
-        <div style={{ marginBottom: "8px", color: "#969aa9" }}>
-          명운 · Myeongun
-        </div>
-
-        <div>
-          본 서비스는 사주와 운세에 대한 참고 정보를 제공합니다.
-          <br />
-          중요한 결정은 본인의 판단과 책임하에 이루어져야 합니다.
-        </div>
-      </footer>
     </main>
   );
 }
 
-const navStyle = {
-  color: "#aeb1bd",
-  textDecoration: "none",
-};
+
 
 const labelStyle = {
   display: "block",
