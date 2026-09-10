@@ -640,14 +640,31 @@ export default function CompatibilityPage() {
                 )}
               </div>              
 
-              <label className="field">
+              <div className="field">
                 <span>출생시간</span>
-                <input
-                  type="time"
-                  value={me.time}
-                  onChange={(e) => updateMe("time", e.target.value)}
-                />
-              </label>
+                <div className="timeFieldRow">
+                  <input
+                    type="time"
+                    value={me.time === "모름" ? "" : me.time}
+                    disabled={me.time === "모름"}
+                    onChange={(e) => updateMe("time", e.target.value)}
+                    aria-label="나의 출생시간"
+                  />
+                  <button
+                    type="button"
+                    className={
+                      me.time === "모름"
+                        ? "unknownTimeButton active"
+                        : "unknownTimeButton"
+                    }
+                    onClick={() =>
+                      updateMe("time", me.time === "모름" ? "" : "모름")
+                    }
+                  >
+                    모름
+                  </button>
+                </div>
+              </div>
 
               <label className="field">
                 <span>성별</span>
@@ -825,16 +842,36 @@ export default function CompatibilityPage() {
                 )}
               </div>
 
-              <label className="field">
+              <div className="field">
                 <span>출생시간</span>
-                <input
-                  type="time"
-                  value={partner.time}
-                  onChange={(e) =>
-                    updatePartner("time", e.target.value)
-                  }
-                />
-              </label>
+                <div className="timeFieldRow">
+                  <input
+                    type="time"
+                    value={partner.time === "모름" ? "" : partner.time}
+                    disabled={partner.time === "모름"}
+                    onChange={(e) =>
+                      updatePartner("time", e.target.value)
+                    }
+                    aria-label="상대방 출생시간"
+                  />
+                  <button
+                    type="button"
+                    className={
+                      partner.time === "모름"
+                        ? "unknownTimeButton active"
+                        : "unknownTimeButton"
+                    }
+                    onClick={() =>
+                      updatePartner(
+                        "time",
+                        partner.time === "모름" ? "" : "모름"
+                      )
+                    }
+                  >
+                    모름
+                  </button>
+                </div>
+              </div>
 
               <label className="field">
                 <span>성별</span>
@@ -1176,6 +1213,43 @@ export default function CompatibilityPage() {
           color: #39342d;
           font: inherit;
           font-size: 14px;
+        }
+
+        .timeFieldRow {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 72px;
+          gap: 8px;
+          align-items: stretch;
+        }
+
+        .timeFieldRow input {
+          min-width: 0;
+        }
+
+        .timeFieldRow input:disabled {
+          background: #f4efe6;
+          color: #9a9286;
+          cursor: not-allowed;
+          opacity: 1;
+        }
+
+        .unknownTimeButton {
+          min-height: 48px;
+          box-sizing: border-box;
+          border: 1px solid #dcd2c3;
+          border-radius: 10px;
+          background: #fff;
+          color: #71695e;
+          font: inherit;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .unknownTimeButton.active {
+          border-color: #9a722e;
+          background: #9a722e;
+          color: #fff;
         }
 
         .field input:focus,
@@ -1583,6 +1657,10 @@ export default function CompatibilityPage() {
 
           .fieldGrid {
             grid-template-columns: 1fr;
+          }
+
+          .timeFieldRow {
+            grid-template-columns: minmax(0, 1fr) 68px;
           }
 
           .field.full {

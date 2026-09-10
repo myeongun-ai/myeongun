@@ -460,6 +460,7 @@ export default function SajuPage() {
                 display: "grid",
                 gridTemplateColumns: "1fr auto",
                 gap: "8px",
+                alignItems: "stretch",
               }}
             >
               <input
@@ -745,12 +746,20 @@ export default function SajuPage() {
 
         .calendarButton {
           min-width: 78px;
+          min-height: 58px;
+          height: 58px;
+          box-sizing: border-box;
+          align-self: stretch;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           border: 1px solid #343847;
           border-radius: 12px;
           background: #202636;
           color: #e8bf6c;
           font-size: 14px;
           font-weight: 800;
+          line-height: 1;
           cursor: pointer;
         }
 
