@@ -439,26 +439,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HOME PROMO VIDEO */}
-      <section className="homePromoSection">
-        <div className="homePromoFrame">
-          <video
-            className="homePromoVideo"
-            src="/myeongun-home.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            controls
-            preload="metadata"
-          />
-        </div>
-
-        <p className="homePromoGuide">
-          영상은 자동 재생 시 음소거됩니다. 자연소리는 영상의 소리 버튼을 눌러 들을 수 있습니다.
-        </p>
-      </section>
-
       {/* SERVICE CARDS */}
       <section className="homeServiceSection">
         <div className="homeServiceGrid">
@@ -486,12 +466,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/* HOME PROMO VIDEO */}
+      <section className="homePromoSection">
+        <div className="homePromoFrame">
+          <video
+            className="homePromoVideo"
+            src="/myeongun-home.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+          />
+        </div>
+
+        <p className="homePromoGuide">
+          영상은 자동 재생 시 음소거됩니다. 자연소리는 영상의 소리 버튼을 눌러 들을 수 있습니다.
+        </p>
+      </section>
+
       {/* PAID REOPEN */}
       <section
         style={{
           maxWidth: "760px",
           margin: "0 auto",
-          padding: "0 24px 26px",
+          padding: "0 24px 20px",
         }}
       >
         <div
@@ -570,7 +570,7 @@ export default function Home() {
         style={{
           maxWidth: "760px",
           margin: "0 auto",
-          padding: "30px 24px 80px",
+          padding: "24px 24px 68px",
         }}
       >
         <div
@@ -1194,29 +1194,30 @@ export default function Home() {
         .homeServiceSection {
           max-width: 1180px;
           margin: 0 auto;
-          padding: 18px 24px 54px;
+          padding: 30px 24px 34px;
         }
         .homeServiceGrid {
           display: grid;
           grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 14px;
+          gap: 16px;
         }
         .homeServiceCard {
           overflow: hidden;
           border-radius: 20px;
-          border: 1px solid rgba(218,170,88,0.18);
-          background: #f7f4ee;
+          border: 1px solid rgba(218,170,88,0.24);
+          background: linear-gradient(180deg, #fbf8f2 0%, #f3eee5 100%);
           color: #111827;
           text-decoration: none;
-          box-shadow: 0 16px 35px rgba(0,0,0,0.16);
-          transition: transform .2s ease, box-shadow .2s ease;
+          box-shadow: 0 16px 34px rgba(0,0,0,0.18);
+          transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
         }
         .homeServiceCard:hover {
           transform: translateY(-5px);
+          border-color: rgba(218,170,88,0.58);
           box-shadow: 0 22px 44px rgba(0,0,0,0.24);
         }
         .homeServiceImageWrap {
-          aspect-ratio: 1 / 1;
+          aspect-ratio: 1 / 0.92;
           overflow: hidden;
           background: #e9e7e3;
         }
@@ -1227,46 +1228,49 @@ export default function Home() {
           object-fit: cover;
         }
         .homeServiceBody {
-          padding: 16px 15px 15px;
+          padding: 17px 16px 16px;
         }
         .homeServiceBody h3 {
-          margin: 0 0 7px;
+          margin: 0 0 8px;
           color: #111827;
-          font-size: 18px;
+          font-size: 19px;
+          font-weight: 900;
+          letter-spacing: -0.4px;
         }
         .homeServiceBody p {
-          min-height: 60px;
+          min-height: 62px;
           margin: 0;
-          color: #667085;
+          color: #475467;
           font-size: 13px;
-          line-height: 1.55;
+          line-height: 1.6;
         }
         .homeServiceButton {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 36px;
-          margin-top: 13px;
-          border: 1px solid #d9a544;
+          min-height: 38px;
+          margin-top: 14px;
+          border: 1px solid #d5a13f;
           border-radius: 999px;
-          color: #7c5720;
+          background: rgba(218,170,88,0.08);
+          color: #6f4b16;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 900;
         }
 
         .homePromoSection {
-          max-width: 1180px;
+          max-width: 1040px;
           margin: 0 auto;
-          padding: 0 24px 54px;
+          padding: 4px 24px 42px;
         }
         .homePromoFrame {
           width: 100%;
-          aspect-ratio: 16 / 9;
+          aspect-ratio: 16 / 7.6;
           overflow: hidden;
-          border-radius: 24px;
-          border: 1px solid rgba(218,170,88,0.24);
+          border-radius: 22px;
+          border: 1px solid rgba(218,170,88,0.28);
           background: #090a10;
-          box-shadow: 0 24px 70px rgba(0,0,0,0.34);
+          box-shadow: 0 20px 52px rgba(0,0,0,0.30);
         }
         .homePromoVideo {
           display: block;
@@ -1276,9 +1280,9 @@ export default function Home() {
           background: #090a10;
         }
         .homePromoGuide {
-          margin: 10px 4px 0;
+          margin: 8px 4px 0;
           color: #858997;
-          font-size: 12px;
+          font-size: 11px;
           line-height: 1.6;
           text-align: right;
         }
@@ -1379,24 +1383,26 @@ export default function Home() {
             max-height: 330px;
           }
           .homeServiceSection {
-            padding: 16px 14px 38px;
+            padding: 18px 14px 28px;
           }
           .homeServiceGrid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
+            gap: 11px;
           }
           .homeServiceCard:last-child {
             grid-column: 1 / -1;
           }
           .homeServiceBody {
-            padding: 12px 11px 12px;
+            padding: 13px 12px 13px;
           }
           .homeServiceBody h3 {
             font-size: 16px;
+            margin-bottom: 6px;
           }
           .homeServiceBody p {
-            min-height: 58px;
+            min-height: 56px;
             font-size: 12px;
+            line-height: 1.55;
           }
           .homeServiceButton {
             min-height: 32px;
@@ -1404,10 +1410,11 @@ export default function Home() {
             font-size: 11px;
           }
           .homePromoSection {
-            padding: 0 16px 38px;
+            padding: 0 14px 30px;
           }
           .homePromoFrame {
-            border-radius: 17px;
+            aspect-ratio: 16 / 10;
+            border-radius: 16px;
           }
           .homePromoGuide {
             margin-top: 8px;
