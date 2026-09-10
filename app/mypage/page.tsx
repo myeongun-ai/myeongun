@@ -774,22 +774,20 @@ text:
           display: grid;
           grid-template-columns:
             repeat(2, minmax(0, 1fr));
-          grid-auto-rows: 88px;
           align-items: start;
           gap: 12px;
         }
 
         .serviceCard {
           display: grid;
-          grid-template-columns: 44px 1fr auto;
+          grid-template-columns: 44px minmax(0, 1fr) auto;
           gap: 13px;
           align-items: center;
           width: 100%;
-          height: 88px;
-          min-height: 88px;
+          min-height: 92px;
           align-self: start;
           box-sizing: border-box;
-          padding: 10px 16px;
+          padding: 14px 16px;
           border: 1px solid #e0d6c7;
           border-radius: 15px;
           background: #fffdf9;
@@ -799,6 +797,10 @@ text:
             transform 0.18s ease,
             box-shadow 0.18s ease,
             border-color 0.18s ease;
+        }
+
+        .serviceCard > div:nth-child(2) {
+          min-width: 0;
         }
 
         .serviceCard:hover {
@@ -830,8 +832,9 @@ text:
           margin: 5px 0 0;
           color: #898277;
           font-size: 11px;
-          line-height: 1.65;
+          line-height: 1.5;
           word-break: keep-all;
+          overflow-wrap: anywhere;
         }
 
         .arrow {
@@ -977,11 +980,9 @@ text:
 
           .serviceGrid {
             grid-template-columns: 1fr;
-            grid-auto-rows: auto;
           }
 
           .serviceCard {
-            height: auto;
             min-height: 0;
             padding: 16px;
           }
