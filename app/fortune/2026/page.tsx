@@ -1109,8 +1109,13 @@ export default function Fortune2026Page() {
         }
 
         .analyzeButton:disabled {
+          border: 1px solid #d8c7a7;
+          background: #e8dcc6;
+          color: #8d7b5d;
           cursor: not-allowed;
-          opacity: 0.45;
+          opacity: 1;
+          box-shadow: none;
+          transform: none;
         }
 
         .privacyText {
