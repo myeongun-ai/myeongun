@@ -1275,6 +1275,58 @@ export default function Home() {
         </div>
       </section>
 
+      {/* COMPANY FOOTER */}
+      <footer
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background: "#090a10",
+          padding: "42px 24px 46px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1180px",
+            margin: "0 auto",
+            textAlign: "center",
+            color: "#8f93a0",
+            fontSize: "12px",
+            lineHeight: 1.9,
+          }}
+        >
+          <div
+            style={{
+              color: "#dbaa58",
+              fontSize: "17px",
+              fontWeight: 800,
+              marginBottom: "14px",
+            }}
+          >
+            명운 MYEONGUN
+          </div>
+
+          <div>(주)오르디 · 대표 이은석</div>
+          <div>사업자등록번호 106-86-79134</div>
+          <div>
+            경기도 고양시 덕양구 향동로 217, DMC플렉스데시앙 3층 F306호
+          </div>
+          <div>
+            대표전화 02-6085-5868 · 팩스 02-3272-4948
+          </div>
+          <div>이메일 eunseok4948@naver.com</div>
+          <div>통신판매업 신고번호 제2024-고양덕양구-0888호</div>
+          <div>개인정보보호책임자 이은석</div>
+
+          <div
+            style={{
+              marginTop: "18px",
+              color: "#626672",
+            }}
+          >
+            © 2026 MYEONGUN. All rights reserved.
+          </div>
+        </div>
+      </footer>
+
     </main>
   );
 }
