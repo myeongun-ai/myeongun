@@ -782,9 +782,9 @@ text:
           grid-template-columns: 44px 1fr auto;
           gap: 13px;
           align-items: center;
-          min-height: 82px;
+          min-height: 68px;
           box-sizing: border-box;
-          padding: 14px 16px;
+          padding: 10px 16px;
           border: 1px solid #e0d6c7;
           border-radius: 15px;
           background: #fffdf9;
