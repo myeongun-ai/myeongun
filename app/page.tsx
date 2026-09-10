@@ -705,34 +705,61 @@ export default function Home() {
             {/* BIRTH */}
             <label style={labelStyle}>생년월일</label>
 
-            <div style={{ position: "relative" }}>
+            <div
+              style={{
+                width: "100%",
+                minHeight: "52px",
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) 72px",
+                alignItems: "stretch",
+                overflow: "hidden",
+                boxSizing: "border-box",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "12px",
+                background: "#0f1119",
+              }}
+            >
               <input
-                  name="birth"
-                  value={form.birth}
-                  type="text"
-                  readOnly
-                  placeholder="년-월-일"
-                  onClick={() => setCalendarOpen(true)}
-                  style={{
-                    ...inputStyle,
-                    cursor: "pointer",
-                    paddingRight: "86px",
-                  }}
-                />
+                name="birth"
+                value={form.birth}
+                type="text"
+                readOnly
+                placeholder="년-월-일"
+                onClick={() => setCalendarOpen(true)}
+                style={{
+                  ...inputStyle,
+                  minWidth: 0,
+                  minHeight: "50px",
+                  height: "50px",
+                  border: "0",
+                  borderRadius: 0,
+                  background: "transparent",
+                  cursor: "pointer",
+                }}
+              />
 
               <button
                 type="button"
                 onClick={() => setCalendarOpen(true)}
                 style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "8px",
-                  height: "44px",
+                  width: "72px",
+                  minWidth: "72px",
+                  minHeight: "50px",
+                  height: "100%",
+                  margin: 0,
+                  padding: 0,
+                  boxSizing: "border-box",
                   border: "0",
-                  borderRadius: "10px",
+                  borderLeft: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 0,
                   background: "#242735",
                   color: "#f5e7c2",
-                  padding: "0 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "14px",
+                  fontWeight: 800,
+                  lineHeight: 1,
                   cursor: "pointer",
                 }}
               >
