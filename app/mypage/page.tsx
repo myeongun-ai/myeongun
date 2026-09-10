@@ -774,6 +774,8 @@ text:
           display: grid;
           grid-template-columns:
             repeat(2, minmax(0, 1fr));
+          grid-auto-rows: 88px;
+          align-items: start;
           gap: 12px;
         }
 
@@ -782,7 +784,10 @@ text:
           grid-template-columns: 44px 1fr auto;
           gap: 13px;
           align-items: center;
-          min-height: 68px;
+          width: 100%;
+          height: 88px;
+          min-height: 88px;
+          align-self: start;
           box-sizing: border-box;
           padding: 10px 16px;
           border: 1px solid #e0d6c7;
@@ -972,9 +977,11 @@ text:
 
           .serviceGrid {
             grid-template-columns: 1fr;
+            grid-auto-rows: auto;
           }
 
           .serviceCard {
+            height: auto;
             min-height: 0;
             padding: 16px;
           }
