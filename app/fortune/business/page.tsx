@@ -1013,13 +1013,24 @@ export default function BusinessFortunePage() {
           width: 100%;
           min-height: 58px;
           margin-top: 28px;
-          border: 0;
+          border: 1px solid #a97b2b;
           border-radius: 12px;
-          background: #252a23;
+          background: #a97b2b;
           color: #fff;
           font-size: 16px;
           font-weight: 800;
           cursor: pointer;
+          box-shadow: 0 8px 20px rgba(169, 123, 43, 0.16);
+          transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease;
+        }
+
+        .analyzeButton:hover:not(:disabled) {
+          background: #956b24;
+          box-shadow: 0 10px 24px rgba(169, 123, 43, 0.22);
+          transform: translateY(-1px);
         }
 
         .analyzeButton:disabled {
