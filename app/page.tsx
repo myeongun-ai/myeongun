@@ -444,6 +444,26 @@ export default function Home() {
         </p>
       </section>
 
+      {/* HOME PROMO VIDEO */}
+      <section className="homePromoSection">
+        <div className="homePromoFrame">
+          <video
+            className="homePromoVideo"
+            src="/myeongun-home.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+          />
+        </div>
+
+        <p className="homePromoGuide">
+          영상은 자동 재생 시 음소거됩니다. 자연소리는 영상의 소리 버튼을 눌러 들을 수 있습니다.
+        </p>
+      </section>
+
       {/* SERVICE CARDS */}
       <section
         style={{
@@ -1088,6 +1108,34 @@ export default function Home() {
       )}
 
       <style jsx>{`
+        .homePromoSection {
+          max-width: 1180px;
+          margin: 0 auto;
+          padding: 0 24px 54px;
+        }
+        .homePromoFrame {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          overflow: hidden;
+          border-radius: 24px;
+          border: 1px solid rgba(218,170,88,0.24);
+          background: #090a10;
+          box-shadow: 0 24px 70px rgba(0,0,0,0.34);
+        }
+        .homePromoVideo {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          background: #090a10;
+        }
+        .homePromoGuide {
+          margin: 10px 4px 0;
+          color: #858997;
+          font-size: 12px;
+          line-height: 1.6;
+          text-align: right;
+        }
         .homeResultText {
           padding: 24px;
           border-radius: 16px;
@@ -1129,6 +1177,17 @@ export default function Home() {
           font-weight: 800;
         }
         @media (max-width: 640px) {
+          .homePromoSection {
+            padding: 0 16px 38px;
+          }
+          .homePromoFrame {
+            border-radius: 17px;
+          }
+          .homePromoGuide {
+            margin-top: 8px;
+            font-size: 11px;
+            text-align: center;
+          }
           .homeResultText {
             padding: 18px;
             font-size: 14px;
