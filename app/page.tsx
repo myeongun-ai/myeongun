@@ -1489,93 +1489,137 @@ export default function Home() {
         }
 
         .homeSupportSection {
-          padding: 46px 24px 54px;
+          position: relative;
+          padding: 54px 24px 60px;
           background:
-            radial-gradient(circle at 15% 10%, rgba(218,170,88,0.06), transparent 26%),
-            linear-gradient(180deg, #0d1018 0%, #080a10 100%);
+            radial-gradient(circle at 18% 8%, rgba(218,170,88,.08), transparent 24%),
+            radial-gradient(circle at 86% 30%, rgba(68,91,160,.10), transparent 26%),
+            linear-gradient(180deg, #0d111b 0%, #090c13 100%);
+          border-top: 1px solid rgba(218,170,88,.08);
+        }
+        .homeSupportSection::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 0;
+          width: min(1040px, calc(100% - 48px));
+          height: 1px;
+          transform: translateX(-50%);
+          background: linear-gradient(90deg, transparent, rgba(218,170,88,.26), transparent);
         }
         .homeSupportGrid {
+          position: relative;
+          z-index: 1;
           max-width: 1040px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
-          gap: 20px;
+          grid-template-columns: minmax(0, 1.5fr) minmax(300px, .72fr);
+          gap: 18px;
           align-items: stretch;
         }
         .homeSupportVideoCard,
         .homeSupportCard {
-          border: 1px solid rgba(218,170,88,0.20);
-          background: linear-gradient(145deg, rgba(24,27,39,.96), rgba(13,15,23,.96));
+          border: 1px solid rgba(218,170,88,.22);
+          background:
+            linear-gradient(145deg, rgba(24,29,43,.98), rgba(12,15,24,.98));
           box-shadow: 0 20px 48px rgba(0,0,0,.20);
         }
         .homeSupportVideoCard {
-          padding: 22px;
-          border-radius: 22px;
+          padding: 20px;
+          border-radius: 20px;
         }
         .homeSupportHeading {
-          margin-bottom: 16px;
+          margin-bottom: 14px;
         }
         .homeSupportHeading > span,
         .homeSupportCard > span {
           display: block;
           color: #dbaa58;
-          font-size: 10px;
-          letter-spacing: 1.8px;
+          font-size: 9px;
+          letter-spacing: 1.9px;
           font-weight: 900;
         }
         .homeSupportHeading h2 {
           margin: 7px 0 5px;
-          color: #f4ead2;
-          font-size: 22px;
+          color: #f5e6bd;
+          font-size: 21px;
+          letter-spacing: -.4px;
         }
         .homeSupportHeading p {
           margin: 0;
-          color: #969daa;
-          font-size: 12px;
+          color: #9098a8;
+          font-size: 11px;
           line-height: 1.65;
         }
         .homeSupportSide {
           display: grid;
           grid-template-rows: 1fr 1fr;
-          gap: 16px;
+          gap: 14px;
         }
         .homeSupportCard {
-          padding: 24px;
-          border-radius: 20px;
+          position: relative;
+          overflow: hidden;
+          padding: 22px;
+          border-radius: 18px;
           display: flex;
           flex-direction: column;
           justify-content: center;
         }
+        .homeSupportCard::after {
+          content: "";
+          position: absolute;
+          width: 120px;
+          height: 120px;
+          right: -46px;
+          top: -46px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(218,170,88,.13), transparent 68%);
+          pointer-events: none;
+        }
         .homeSupportCard h3 {
+          position: relative;
+          z-index: 1;
           margin: 8px 0 7px;
           color: #f5e7c2;
-          font-size: 18px;
+          font-size: 17px;
           line-height: 1.45;
+          letter-spacing: -.3px;
         }
         .homeSupportCard p {
-          margin: 0 0 16px;
-          color: #9ca2ae;
-          font-size: 12px;
+          position: relative;
+          z-index: 1;
+          margin: 0 0 15px;
+          color: #9ca4b3;
+          font-size: 11px;
           line-height: 1.7;
         }
         .homeSupportCard a {
+          position: relative;
+          z-index: 1;
           align-self: flex-start;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           min-height: 38px;
           padding: 0 15px;
-          border: 1px solid rgba(218,170,88,0.54);
-          border-radius: 10px;
-          background: rgba(218,170,88,0.08);
+          border: 1px solid rgba(218,170,88,.56);
+          border-radius: 999px;
+          background: rgba(218,170,88,.08);
           color: #efc979;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 900;
           text-decoration: none;
+          transition: background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+        .homeSupportCard a:hover {
+          transform: translateY(-1px);
+          border-color: rgba(229,185,102,.86);
+          background: rgba(218,170,88,.14);
         }
         .homeSupportAi {
           background:
-            radial-gradient(circle at 88% 20%, rgba(75,103,179,.16), transparent 28%),
-            linear-gradient(145deg, rgba(25,29,44,.97), rgba(13,15,23,.97));
+            radial-gradient(circle at 92% 12%, rgba(82,114,201,.18), transparent 30%),
+            linear-gradient(145deg, rgba(25,30,47,.98), rgba(13,16,25,.98));
         }
 
         .homePromoSection {
@@ -1585,12 +1629,12 @@ export default function Home() {
         }
         .homePromoFrame {
           width: 100%;
-          aspect-ratio: 16 / 7.6;
+          aspect-ratio: 16 / 8.4;
           overflow: hidden;
-          border-radius: 22px;
-          border: 1px solid rgba(218,170,88,0.34);
+          border-radius: 16px;
+          border: 1px solid rgba(218,170,88,.30);
           background: #090a10;
-          box-shadow: 0 18px 46px rgba(0,0,0,0.24);
+          box-shadow: 0 14px 34px rgba(0,0,0,.22);
         }
         .homePromoVideo {
           display: block;
@@ -1600,10 +1644,10 @@ export default function Home() {
           background: #090a10;
         }
         .homePromoGuide {
-          margin: 8px 4px 0;
-          color: #858997;
-          font-size: 11px;
-          line-height: 1.6;
+          margin: 8px 2px 0;
+          color: #777f8e;
+          font-size: 10px;
+          line-height: 1.55;
           text-align: right;
         }
         .homeResultText {
@@ -2004,6 +2048,49 @@ export default function Home() {
           }
           .homeSupportCard {
             padding: 20px;
+          }
+        }
+
+
+        @media (max-width: 900px) {
+          .homeSupportSection {
+            padding: 42px 18px 46px;
+          }
+          .homeSupportGrid {
+            grid-template-columns: 1fr;
+          }
+          .homeSupportSide {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .homeSupportSection {
+            padding: 32px 12px 38px;
+          }
+          .homeSupportVideoCard {
+            padding: 14px;
+          }
+          .homeSupportHeading h2 {
+            font-size: 18px;
+          }
+          .homeSupportSide {
+            grid-template-columns: 1fr;
+          }
+          .homeSupportCard {
+            padding: 18px;
+          }
+          .homeSupportCard h3 {
+            font-size: 16px;
+          }
+          .homePromoFrame {
+            aspect-ratio: 16 / 10;
+            border-radius: 14px;
+          }
+          .homePromoGuide {
+            text-align: center;
+            font-size: 9px;
           }
         }
 
