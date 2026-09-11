@@ -438,7 +438,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="homeQuickPanelWrap">
+        <div className="homeQuickPanelWrap" id="free-saju">
           <div className="homeQuickPanel">
             <div className="homeQuickTabs">
               <a className="active" href="#free-saju">사주보기</a>
@@ -447,18 +447,155 @@ export default function Home() {
               <Link href="/ai">AI 상담</Link>
             </div>
 
-            <div className="homeQuickContent">
-              <div className="homeQuickInfo">
-                <div><span>01</span><strong>이름</strong><small>기본 정보를 입력하세요</small></div>
-                <div><span>02</span><strong>생년월일</strong><small>태어난 날짜를 선택하세요</small></div>
-                <div><span>03</span><strong>출생시간</strong><small>모르면 ‘모름’도 가능합니다</small></div>
-                <div><span>04</span><strong>성별·달력</strong><small>양력·음력 기준을 선택하세요</small></div>
+            <form className="homeQuickForm" onSubmit={handleSubmit}>
+              <div className="homeQuickField">
+                <label>이름</label>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="이름을 입력하세요"
+                />
               </div>
 
-              <a className="homeQuickButton" href="#free-saju">
-                내 사주 무료로 보기 <span>→</span>
-              </a>
-            </div>
+              <div className="homeQuickField">
+                <label>생년월일</label>
+                <button
+                  type="button"
+                  className="homeQuickBirthButton"
+                  onClick={() => setCalendarOpen((prev) => !prev)}
+                >
+                  <span>{form.birth || "생년월일 선택"}</span>
+                  <b>달력</b>
+                </button>
+              </div>
+
+              <div className="homeQuickField">
+                <label>출생시간</label>
+                <select
+                  name="time"
+                  value={form.time}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>시간을 선택하세요</option>
+                  {TIME_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="homeQuickField homeQuickFieldSmall">
+                <label>성별</label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                >
+                  <option value="남성">남성</option>
+                  <option value="여성">여성</option>
+                </select>
+              </div>
+
+              <div className="homeQuickField homeQuickFieldSmall">
+                <label>달력 기준</label>
+                <select
+                  name="calendar"
+                  value={form.calendar}
+                  onChange={handleChange}
+                >
+                  <option value="양력">양력</option>
+                  <option value="음력">음력(평달)</option>
+                  <option value="음력(윤달)">음력(윤달)</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="homeQuickSubmit"
+                disabled={loading}
+              >
+                {loading ? "분석 중..." : "내 사주 무료로 보기"}
+                {!loading && <span>→</span>}
+              </button>
+
+              {calendarOpen && (
+                <div className="homeQuickCalendar">
+                  <div className="homeQuickCalendarHead">
+                    <button type="button" onClick={previousMonth}>‹</button>
+
+                    <div>
+                      <select
+                        aria-label="연도 선택"
+                        value={year}
+                        onChange={(e) =>
+                          setViewDate(new Date(Number(e.target.value), month, 1))
+                        }
+                      >
+                        {Array.from(
+                          { length: new Date().getFullYear() - 1930 + 1 },
+                          (_, i) => new Date().getFullYear() - i
+                        ).map((itemYear) => (
+                          <option key={itemYear} value={itemYear}>
+                            {itemYear}년
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        aria-label="월 선택"
+                        value={month}
+                        onChange={(e) =>
+                          setViewDate(new Date(year, Number(e.target.value), 1))
+                        }
+                      >
+                        {Array.from({ length: 12 }, (_, i) => i).map(
+                          (itemMonth) => (
+                            <option key={itemMonth} value={itemMonth}>
+                              {itemMonth + 1}월
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </div>
+
+                    <button type="button" onClick={nextMonth}>›</button>
+                  </div>
+
+                  <div className="homeQuickCalendarGrid">
+                    {daysOfWeek.map((day) => (
+                      <div className="homeQuickCalendarWeek" key={day}>
+                        {day}
+                      </div>
+                    ))}
+
+                    {calendarDays.map((day, index) =>
+                      day === null ? (
+                        <div key={`empty-${index}`} />
+                      ) : (
+                        <button
+                          key={day}
+                          type="button"
+                          className={
+                            form.birth ===
+                            `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                              ? "selected"
+                              : ""
+                          }
+                          onClick={() => selectDate(day)}
+                        >
+                          {day}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {error && <p className="homeQuickError">{error}</p>}
+            </form>
 
             <div className="homeQuickBottom">
               <span>🔒 입력하신 정보는 사주 분석을 위한 용도로 사용됩니다.</span>
@@ -536,497 +673,64 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HOME PROMO VIDEO */}
-      <section className="homePromoSection">
-        <div className="homePromoFrame">
-          <video
-            className="homePromoVideo"
-            src="/myeongun-home.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            controls
-            preload="metadata"
-          />
-        </div>
-
-        <p className="homePromoGuide">
-          영상은 자동 재생 시 음소거됩니다. 자연소리는 영상의 소리 버튼을 눌러 들을 수 있습니다.
-        </p>
-      </section>
-
-      {/* PAID REOPEN */}
-      <section
-        style={{
-          maxWidth: "760px",
-          margin: "0 auto",
-          padding: "12px 24px 16px",
-        }}
-      >
-        <div
-          style={{
-            padding: "22px 24px",
-            borderRadius: "18px",
-            border: "1px solid rgba(218,170,88,0.2)",
-            background:
-              "linear-gradient(135deg, rgba(218,170,88,0.09), rgba(255,255,255,0.025))",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "18px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                color: "#dbaa58",
-                fontSize: "11px",
-                letterSpacing: "1.8px",
-                marginBottom: "7px",
-              }}
-            >
-              PAID SAJU REOPEN
+      {/* SUPPORT AREA */}
+      <section className="homeSupportSection">
+        <div className="homeSupportGrid">
+          <div className="homeSupportVideoCard">
+            <div className="homeSupportHeading">
+              <span>MYEONGUN STORY</span>
+              <h2>명운을 영상으로 만나보세요</h2>
+              <p>명운이 전하는 이야기와 서비스의 흐름을 짧은 영상으로 확인하실 수 있습니다.</p>
             </div>
 
-            <div
-              style={{
-                color: "#f5e7c2",
-                fontSize: "17px",
-                fontWeight: 800,
-                marginBottom: "5px",
-              }}
-            >
-              이미 상세 사주를 결제하셨나요?
-            </div>
-
-            <div
-              style={{
-                color: "#969aa9",
-                fontSize: "13px",
-                lineHeight: 1.65,
-              }}
-            >
-              결제 후 7일 동안 재열람 코드로 PC와 휴대폰에서 다시 볼 수 있습니다.
-            </div>
-          </div>
-
-          <Link
-            href="/payment/reopen"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "46px",
-              padding: "0 20px",
-              borderRadius: "11px",
-              border: "1px solid rgba(218,170,88,0.55)",
-              background: "rgba(218,170,88,0.08)",
-              color: "#f1cf8b",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 800,
-              whiteSpace: "nowrap",
-            }}
-          >
-            결제한 상세 사주 다시 보기 →
-          </Link>
-        </div>
-      </section>
-
-      {/* SAJU FORM */}
-      <section
-        id="free-saju"
-        style={{
-          maxWidth: "760px",
-          margin: "0 auto",
-          padding: "28px 24px 52px",
-          scrollMarginTop: "90px",
-        }}
-      >
-        <div
-          style={{
-            background: "#151722",
-            border: "1px solid rgba(218,170,88,0.2)",
-            borderRadius: "26px",
-            padding: "32px",
-            boxShadow: "0 25px 70px rgba(0,0,0,0.3)",
-          }}
-        >
-          <div style={{ textAlign: "center", marginBottom: "30px" }}>
-            <div
-              style={{
-                color: "#dbaa58",
-                fontSize: "13px",
-                letterSpacing: "2px",
-              }}
-            >
-              FREE SAJU
-            </div>
-
-            <h2
-              style={{
-                margin: "10px 0",
-                fontSize: "28px",
-              }}
-            >
-              무료 사주 분석
-            </h2>
-
-            <p
-              style={{
-                color: "#969aa9",
-                lineHeight: 1.7,
-                margin: 0,
-              }}
-            >
-              생년월일과 출생시간을 입력해주세요.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            {/* NAME */}
-            <label style={labelStyle}>이름</label>
-
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="이름을 입력하세요"
-              style={inputStyle}
-            />
-
-            {/* BIRTH */}
-            <label style={labelStyle}>생년월일</label>
-
-            <div
-              style={{
-                width: "100%",
-                minHeight: "52px",
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) 72px",
-                alignItems: "stretch",
-                overflow: "hidden",
-                boxSizing: "border-box",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
-                background: "#0f1119",
-              }}
-            >
-              <input
-                name="birth"
-                value={form.birth}
-                type="text"
-                readOnly
-                placeholder="년-월-일"
-                onClick={() => setCalendarOpen(true)}
-                style={{
-                  ...inputStyle,
-                  minWidth: 0,
-                  minHeight: "50px",
-                  height: "50px",
-                  border: "0",
-                  borderRadius: 0,
-                  background: "transparent",
-                  cursor: "pointer",
-                }}
+            <div className="homePromoFrame">
+              <video
+                className="homePromoVideo"
+                src="/myeongun-home.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+                preload="metadata"
               />
-
-              <button
-                type="button"
-                onClick={() => setCalendarOpen(true)}
-                style={{
-                  width: "72px",
-                  minWidth: "72px",
-                  minHeight: "50px",
-                  height: "100%",
-                  margin: 0,
-                  padding: 0,
-                  boxSizing: "border-box",
-                  border: "0",
-                  borderLeft: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 0,
-                  background: "#242735",
-                  color: "#f5e7c2",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "14px",
-                  fontWeight: 800,
-                  lineHeight: 1,
-                  cursor: "pointer",
-                }}
-              >
-                달력
-              </button>
             </div>
 
-            {/* CUSTOM CALENDAR */}
-            {calendarOpen && (
-              <div
-                style={{
-                  marginTop: "12px",
-                  padding: "20px",
-                  background: "#0f1119",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "18px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "18px",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={previousMonth}
-                    style={calendarButtonStyle}
-                  >
-                    ‹
-                  </button>
-
-                  <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "8px",
-                        minWidth: "210px",
-                      }}
-                    >
-                      <select
-                        aria-label="연도 선택"
-                        value={year}
-                        onChange={(e) =>
-                          setViewDate(
-                            new Date(Number(e.target.value), month, 1)
-                          )
-                        }
-                        style={{
-                          minWidth: 0,
-                          height: "38px",
-                          border: "1px solid rgba(255,255,255,0.14)",
-                          borderRadius: "9px",
-                          background: "#171a24",
-                          color: "#fff",
-                          padding: "0 8px",
-                          fontSize: "14px",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {Array.from(
-                          {
-                            length:
-                              new Date().getFullYear() - 1930 + 1,
-                          },
-                          (_, i) => new Date().getFullYear() - i
-                        ).map((itemYear) => (
-                          <option key={itemYear} value={itemYear}>
-                            {itemYear}년
-                          </option>
-                        ))}
-                      </select>
-
-                      <select
-                        aria-label="월 선택"
-                        value={month}
-                        onChange={(e) =>
-                          setViewDate(
-                            new Date(year, Number(e.target.value), 1)
-                          )
-                        }
-                        style={{
-                          minWidth: 0,
-                          height: "38px",
-                          border: "1px solid rgba(255,255,255,0.14)",
-                          borderRadius: "9px",
-                          background: "#171a24",
-                          color: "#fff",
-                          padding: "0 8px",
-                          fontSize: "14px",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {Array.from({ length: 12 }, (_, i) => i).map(
-                          (itemMonth) => (
-                            <option key={itemMonth} value={itemMonth}>
-                              {itemMonth + 1}월
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </div>
-
-                  <button
-                    type="button"
-                    onClick={nextMonth}
-                    style={calendarButtonStyle}
-                  >
-                    ›
-                  </button>
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(7, 1fr)",
-                    gap: "6px",
-                    textAlign: "center",
-                  }}
-                >
-                  {daysOfWeek.map((day) => (
-                    <div
-                      key={day}
-                      style={{
-                        padding: "8px 0",
-                        color: "#dbaa58",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {day}
-                    </div>
-                  ))}
-
-                  {calendarDays.map((day, index) =>
-                    day === null ? (
-                      <div key={`empty-${index}`} />
-                    ) : (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => selectDate(day)}
-                        style={{
-                          border: "0",
-                          borderRadius: "9px",
-                          padding: "9px 0",
-                          background:
-                            form.birth ===
-                            `${year}-${String(month + 1).padStart(
-                              2,
-                              "0"
-                            )}-${String(day).padStart(2, "0")}`
-                              ? "#dbaa58"
-                              : "rgba(255,255,255,0.05)",
-                          color:
-                            form.birth ===
-                            `${year}-${String(month + 1).padStart(
-                              2,
-                              "0"
-                            )}-${String(day).padStart(2, "0")}`
-                              ? "#111"
-                              : "#ddd",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {day}
-                      </button>
-                    )
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* TIME */}
-            <label style={labelStyle}>출생시간</label>
-
-            <select
-              name="time"
-              value={form.time}
-              onChange={handleChange}
-              style={inputStyle}
-              required
-            >
-              <option value="" disabled>
-                시간을 선택하세요
-              </option>
-
-              {TIME_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* GENDER */}
-            <label style={labelStyle}>성별</label>
-
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              style={inputStyle}
-            >
-              <option value="남성">남성</option>
-              <option value="여성">여성</option>
-            </select>
-
-            {/* CALENDAR TYPE */}
-            <label style={labelStyle}>달력 기준</label>
-
-            <select
-              name="calendar"
-              value={form.calendar}
-              onChange={handleChange}
-              style={inputStyle}
-            >
-              <option value="양력">양력</option>
-              <option value="음력">음력(평달)</option>
-              <option value="음력(윤달)">음력(윤달)</option>
-            </select>
-
-            {error && (
-              <p
-                style={{
-                  margin: "18px 0 0",
-                  color: "#ff8f85",
-                  fontSize: "13px",
-                  lineHeight: 1.7,
-                }}
-              >
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                marginTop: "24px",
-                padding: "17px",
-                border: "0",
-                borderRadius: "14px",
-                background: loading ? "#65583e" : "#dbaa58",
-                color: "#111",
-                fontSize: "16px",
-                fontWeight: 800,
-                cursor: loading ? "default" : "pointer",
-              }}
-            >
-              {loading ? "분석 중입니다..." : "무료 사주 분석 시작"}
-            </button>
-
-            <p
-              style={{
-                textAlign: "center",
-                color: "#777b88",
-                fontSize: "12px",
-                marginTop: "14px",
-                marginBottom: 0,
-              }}
-            >
-              입력하신 정보는 사주 분석을 위한 용도로 사용됩니다.
+            <p className="homePromoGuide">
+              영상은 자동 재생 시 음소거됩니다. 소리 버튼으로 음성을 들을 수 있습니다.
             </p>
-          </form>
+          </div>
+
+          <div className="homeSupportSide">
+            <div className="homeSupportCard">
+              <span>PAID SAJU REOPEN</span>
+              <h3>이미 상세 사주를 결제하셨나요?</h3>
+              <p>
+                결제 후 7일 동안 재열람 코드로 PC와 휴대폰에서 다시 볼 수 있습니다.
+              </p>
+              <Link href="/payment/reopen">
+                결제한 상세 사주 다시 보기 →
+              </Link>
+            </div>
+
+            <div className="homeSupportCard homeSupportAi">
+              <span>MYEONGUN AI</span>
+              <h3>사주에 대해 궁금한 것이 있나요?</h3>
+              <p>
+                재물, 사업, 직업, 연애, 인간관계 등 궁금한 내용을 AI와 대화해보세요.
+              </p>
+              <Link href="/ai">
+                AI 상담 시작 →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* RESULT */}
       {freeResult && (
         <section
+          id="free-saju-result"
           style={{
             maxWidth: "900px",
             margin: "0 auto",
@@ -1606,6 +1310,248 @@ export default function Home() {
           white-space: nowrap;
         }
 
+        .homeQuickForm {
+          position: relative;
+          padding: 18px;
+          display: grid;
+          grid-template-columns: 1.05fr 1.15fr 1.35fr .72fr .9fr 1.2fr;
+          gap: 10px;
+          align-items: end;
+        }
+        .homeQuickField {
+          min-width: 0;
+        }
+        .homeQuickField label {
+          display: block;
+          margin: 0 0 6px 2px;
+          color: #616a76;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: .4px;
+        }
+        .homeQuickField input,
+        .homeQuickField select,
+        .homeQuickBirthButton {
+          width: 100%;
+          height: 48px;
+          box-sizing: border-box;
+          border: 1px solid #ded8cf;
+          border-radius: 11px;
+          background: #fff;
+          color: #172033;
+          outline: none;
+          padding: 0 12px;
+          font-size: 12px;
+          font-family: inherit;
+        }
+        .homeQuickField input::placeholder {
+          color: #a3a9b1;
+        }
+        .homeQuickField select {
+          cursor: pointer;
+        }
+        .homeQuickBirthButton {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          cursor: pointer;
+          text-align: left;
+        }
+        .homeQuickBirthButton span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: #606a77;
+        }
+        .homeQuickBirthButton b {
+          flex: 0 0 auto;
+          color: #9a691e;
+          font-size: 10px;
+        }
+        .homeQuickSubmit {
+          height: 48px;
+          border: 0;
+          border-radius: 13px;
+          background: linear-gradient(135deg, #efc46c, #e6ad45);
+          color: #2c1f0b;
+          font-size: 13px;
+          font-weight: 900;
+          cursor: pointer;
+          font-family: inherit;
+        }
+        .homeQuickSubmit:disabled {
+          opacity: .65;
+          cursor: default;
+        }
+        .homeQuickSubmit span {
+          margin-left: 8px;
+          font-size: 17px;
+        }
+        .homeQuickCalendar {
+          grid-column: 1 / -1;
+          margin-top: 2px;
+          padding: 16px;
+          border: 1px solid #d9d1c4;
+          border-radius: 16px;
+          background: #fffdf8;
+          box-shadow: 0 18px 42px rgba(26,31,43,0.14);
+        }
+        .homeQuickCalendarHead {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+        .homeQuickCalendarHead > button {
+          width: 34px;
+          height: 34px;
+          border: 1px solid #ddd4c5;
+          border-radius: 9px;
+          background: #f7f1e6;
+          color: #74501b;
+          font-size: 20px;
+          cursor: pointer;
+        }
+        .homeQuickCalendarHead > div {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          min-width: 220px;
+        }
+        .homeQuickCalendarHead select {
+          height: 36px;
+          border: 1px solid #ddd4c5;
+          border-radius: 9px;
+          background: #fff;
+          color: #283244;
+          padding: 0 8px;
+          font-weight: 800;
+        }
+        .homeQuickCalendarGrid {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 5px;
+          text-align: center;
+        }
+        .homeQuickCalendarWeek {
+          padding: 6px 0;
+          color: #9a691e;
+          font-size: 11px;
+          font-weight: 900;
+        }
+        .homeQuickCalendarGrid button {
+          min-height: 34px;
+          border: 0;
+          border-radius: 8px;
+          background: #f4f1eb;
+          color: #303948;
+          cursor: pointer;
+        }
+        .homeQuickCalendarGrid button.selected {
+          background: #e5b153;
+          color: #201605;
+          font-weight: 900;
+        }
+        .homeQuickError {
+          grid-column: 1 / -1;
+          margin: 2px 0 0;
+          color: #b7443d;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .homeSupportSection {
+          padding: 46px 24px 54px;
+          background:
+            radial-gradient(circle at 15% 10%, rgba(218,170,88,0.06), transparent 26%),
+            linear-gradient(180deg, #0d1018 0%, #080a10 100%);
+        }
+        .homeSupportGrid {
+          max-width: 1040px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+          gap: 20px;
+          align-items: stretch;
+        }
+        .homeSupportVideoCard,
+        .homeSupportCard {
+          border: 1px solid rgba(218,170,88,0.20);
+          background: linear-gradient(145deg, rgba(24,27,39,.96), rgba(13,15,23,.96));
+          box-shadow: 0 20px 48px rgba(0,0,0,.20);
+        }
+        .homeSupportVideoCard {
+          padding: 22px;
+          border-radius: 22px;
+        }
+        .homeSupportHeading {
+          margin-bottom: 16px;
+        }
+        .homeSupportHeading > span,
+        .homeSupportCard > span {
+          display: block;
+          color: #dbaa58;
+          font-size: 10px;
+          letter-spacing: 1.8px;
+          font-weight: 900;
+        }
+        .homeSupportHeading h2 {
+          margin: 7px 0 5px;
+          color: #f4ead2;
+          font-size: 22px;
+        }
+        .homeSupportHeading p {
+          margin: 0;
+          color: #969daa;
+          font-size: 12px;
+          line-height: 1.65;
+        }
+        .homeSupportSide {
+          display: grid;
+          grid-template-rows: 1fr 1fr;
+          gap: 16px;
+        }
+        .homeSupportCard {
+          padding: 24px;
+          border-radius: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .homeSupportCard h3 {
+          margin: 8px 0 7px;
+          color: #f5e7c2;
+          font-size: 18px;
+          line-height: 1.45;
+        }
+        .homeSupportCard p {
+          margin: 0 0 16px;
+          color: #9ca2ae;
+          font-size: 12px;
+          line-height: 1.7;
+        }
+        .homeSupportCard a {
+          align-self: flex-start;
+          display: inline-flex;
+          align-items: center;
+          min-height: 38px;
+          padding: 0 15px;
+          border: 1px solid rgba(218,170,88,0.54);
+          border-radius: 10px;
+          background: rgba(218,170,88,0.08);
+          color: #efc979;
+          font-size: 11px;
+          font-weight: 900;
+          text-decoration: none;
+        }
+        .homeSupportAi {
+          background:
+            radial-gradient(circle at 88% 20%, rgba(75,103,179,.16), transparent 28%),
+            linear-gradient(145deg, rgba(25,29,44,.97), rgba(13,15,23,.97));
+        }
+
         .homePromoSection {
           max-width: 960px;
           margin: 0 auto;
@@ -1973,81 +1919,69 @@ export default function Home() {
           }
         }
 
+
+        @media (max-width: 1080px) {
+          .homeQuickForm {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+          .homeQuickSubmit {
+            min-height: 48px;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .homeSupportGrid {
+            grid-template-columns: 1fr;
+          }
+          .homeSupportSide {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .homeQuickForm {
+            padding: 12px;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+          }
+          .homeQuickField:nth-child(1),
+          .homeQuickField:nth-child(2),
+          .homeQuickField:nth-child(3),
+          .homeQuickSubmit {
+            grid-column: 1 / -1;
+          }
+          .homeQuickField input,
+          .homeQuickField select,
+          .homeQuickBirthButton,
+          .homeQuickSubmit {
+            height: 46px;
+          }
+          .homeQuickCalendar {
+            padding: 11px;
+          }
+          .homeQuickCalendarHead > div {
+            min-width: 0;
+            width: 100%;
+          }
+          .homeSupportSection {
+            padding: 30px 12px 38px;
+          }
+          .homeSupportVideoCard {
+            padding: 14px;
+          }
+          .homeSupportHeading h2 {
+            font-size: 19px;
+          }
+          .homeSupportSide {
+            grid-template-columns: 1fr;
+          }
+          .homeSupportCard {
+            padding: 20px;
+          }
+        }
+
       `}</style>
-
-      {/* AI BANNER */}
-      <section
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "0 24px 58px",
-        }}
-      >
-        <div
-          style={{
-            padding: "30px",
-            borderRadius: "22px",
-            background:
-              "linear-gradient(135deg, #191b28, #10121b)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "24px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                color: "#dbaa58",
-                fontSize: "12px",
-                letterSpacing: "2px",
-                marginBottom: "8px",
-              }}
-            >
-              명운 AI
-            </div>
-
-            <h2
-              style={{
-                margin: "0 0 8px",
-                fontSize: "23px",
-              }}
-            >
-              사주에 대해 궁금한 것이 있나요?
-            </h2>
-
-            <p
-              style={{
-                color: "#969aa9",
-                margin: 0,
-                lineHeight: 1.7,
-              }}
-            >
-              재물, 사업, 직업, 연애, 인간관계 등
-              <br />
-              궁금한 내용을 AI와 대화해보세요.
-            </p>
-          </div>
-
-          <Link
-            href="/ai"
-            style={{
-              display: "inline-block",
-              padding: "14px 24px",
-              borderRadius: "12px",
-              background: "#dbaa58",
-              color: "#111",
-              textDecoration: "none",
-              fontWeight: 800,
-              whiteSpace: "nowrap",
-            }}
-          >
-            AI 상담 시작 →
-          </Link>
-        </div>
-      </section>
 
     </main>
   );
