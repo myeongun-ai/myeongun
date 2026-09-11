@@ -1232,7 +1232,7 @@ export default function Home() {
         }
         .homeServiceBody h3 {
           margin: 0 0 8px;
-          color: #0b1220;
+          color: #f3d58a;
           font-size: 19px;
           font-weight: 900;
           letter-spacing: -0.4px;
@@ -1241,7 +1241,7 @@ export default function Home() {
         .homeServiceBody p {
           min-height: 62px;
           margin: 0;
-          color: #344054;
+          color: #c7cbd6;
           font-size: 13px;
           line-height: 1.65;
           font-weight: 600;
