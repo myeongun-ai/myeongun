@@ -2326,6 +2326,71 @@ export default function Home() {
           }
         }
 
+
+        /* STEP 4B: final mobile structure corrections */
+        @media (max-width: 640px) {
+          /* Give the character and quick form a cleaner visual handoff. */
+          .homeHeroCharacterWrap {
+            margin-bottom: 8px;
+          }
+          .homeQuickForm {
+            margin-top: 4px;
+          }
+
+          /* Keep the first four service cards as a balanced 2 x 2 grid. */
+          .homeServiceGrid {
+            grid-auto-flow: row;
+            align-items: stretch;
+          }
+          .homeServiceCard:nth-child(-n+4) {
+            height: 100%;
+          }
+          .homeServiceCard:nth-child(-n+4) .homeServiceBody {
+            min-height: 138px;
+          }
+
+          /* The fifth service (AI 상담) spans the full mobile width. */
+          .homeServiceGrid > .homeServiceCard:nth-child(5) {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            max-width: none !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 42%) minmax(0, 58%) !important;
+            align-items: stretch;
+          }
+          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceImageWrap {
+            width: 100%;
+            height: 100%;
+            min-height: 154px;
+            aspect-ratio: auto !important;
+          }
+          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceImage {
+            height: 100%;
+            object-fit: cover;
+          }
+          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceBody {
+            min-width: 0;
+            min-height: 154px;
+            padding: 14px 13px;
+            justify-content: center;
+          }
+          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceBody p {
+            min-height: 0;
+            margin-bottom: 12px;
+          }
+          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceButton {
+            width: 100%;
+          }
+
+          /* Slightly tighten the transition into the guide/message area. */
+          .homeUtilityGrid {
+            margin-top: 12px;
+          }
+          .homeQuoteBanner {
+            margin-top: 12px;
+          }
+        }
+
       `}</style>
 
     </main>
