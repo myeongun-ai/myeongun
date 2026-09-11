@@ -1232,17 +1232,19 @@ export default function Home() {
         }
         .homeServiceBody h3 {
           margin: 0 0 8px;
-          color: #111827;
+          color: #0b1220;
           font-size: 19px;
           font-weight: 900;
           letter-spacing: -0.4px;
+          text-shadow: 0 1px 0 rgba(255,255,255,0.55);
         }
         .homeServiceBody p {
           min-height: 62px;
           margin: 0;
-          color: #475467;
+          color: #344054;
           font-size: 13px;
-          line-height: 1.6;
+          line-height: 1.65;
+          font-weight: 600;
         }
         .homeServiceButton {
           display: flex;
@@ -1250,10 +1252,10 @@ export default function Home() {
           justify-content: center;
           min-height: 38px;
           margin-top: 14px;
-          border: 1px solid #d5a13f;
+          border: 1px solid #c8922f;
           border-radius: 999px;
-          background: rgba(218,170,88,0.08);
-          color: #6f4b16;
+          background: rgba(218,170,88,0.16);
+          color: #5f3f0f;
           font-size: 12px;
           font-weight: 900;
         }
