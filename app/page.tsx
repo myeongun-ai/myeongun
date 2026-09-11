@@ -847,7 +847,7 @@ export default function Home() {
         .homeHero {
           position: relative;
           overflow: hidden;
-          min-height: 710px;
+          min-height: 690px;
           border-bottom: 1px solid rgba(218,170,88,0.14);
           background:
             radial-gradient(circle at 78% 16%, rgba(247,214,146,0.20), transparent 15%),
@@ -873,17 +873,29 @@ export default function Home() {
           pointer-events: none;
           background: linear-gradient(180deg, transparent, rgba(5,8,15,0.62));
         }
+        .homeHeroGlowOne::after {
+          content: "";
+          position: absolute;
+          width: 150px;
+          height: 150px;
+          right: 70px;
+          top: 80px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 38% 35%, #fff4cf 0%, #ead49c 48%, #c9ad6d 100%);
+          box-shadow: 0 0 70px rgba(239,205,132,.28);
+          opacity: .55;
+        }
         .homeHeroInner {
           position: relative;
           z-index: 2;
-          max-width: 1180px;
-          min-height: 545px;
+          max-width: 1280px;
+          min-height: 525px;
           margin: 0 auto;
-          padding: 42px 24px 20px;
+          padding: 34px 34px 18px;
           display: grid;
-          grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.05fr);
+          grid-template-columns: minmax(390px, 0.92fr) minmax(0, 1.08fr);
           align-items: center;
-          gap: 42px;
+          gap: 54px;
         }
         .homeHeroText {
           padding: 20px 0 34px;
@@ -898,7 +910,7 @@ export default function Home() {
         .homeHero h1 {
           margin: 0;
           color: #fffaf0;
-          font-size: clamp(48px, 6vw, 76px);
+          font-size: clamp(50px, 5.4vw, 74px);
           line-height: 1.08;
           letter-spacing: -4px;
           font-weight: 900;
@@ -942,7 +954,7 @@ export default function Home() {
           letter-spacing: 0.2px;
         }
         .homeHeroCharacterWrap {
-          min-height: 470px;
+          min-height: 500px;
           display: flex;
           align-items: flex-end;
           justify-content: center;
@@ -964,8 +976,8 @@ export default function Home() {
           position: relative;
           z-index: 2;
           display: block;
-          width: min(100%, 500px);
-          max-height: 510px;
+          width: min(100%, 540px);
+          max-height: 540px;
           object-fit: contain;
           object-position: center bottom;
           filter: drop-shadow(0 28px 44px rgba(0,0,0,0.38));
@@ -995,21 +1007,21 @@ export default function Home() {
         .homeQuickPanelWrap {
           position: relative;
           z-index: 5;
-          max-width: 1180px;
-          margin: -34px auto 0;
-          padding: 0 24px 34px;
+          max-width: 1280px;
+          margin: -46px auto 0;
+          padding: 0 34px 34px;
         }
         .homeQuickPanel {
           overflow: hidden;
-          border-radius: 24px;
+          border-radius: 22px;
           border: 1px solid rgba(206,173,111,0.52);
           background: rgba(250,247,240,0.98);
           box-shadow: 0 24px 60px rgba(0,0,0,0.30);
           color: #172033;
         }
         .homeQuickTabs {
-          min-height: 58px;
-          padding: 0 18px;
+          min-height: 52px;
+          padding: 0 20px;
           display: flex;
           align-items: center;
           gap: 8px;
@@ -1312,10 +1324,10 @@ export default function Home() {
 
         .homeQuickForm {
           position: relative;
-          padding: 18px;
+          padding: 16px 20px 18px;
           display: grid;
-          grid-template-columns: 1.05fr 1.15fr 1.35fr .72fr .9fr 1.2fr;
-          gap: 10px;
+          grid-template-columns: 1.12fr 1.18fr 1.42fr .72fr .86fr 1.28fr;
+          gap: 9px;
           align-items: end;
         }
         .homeQuickField {
@@ -1333,7 +1345,7 @@ export default function Home() {
         .homeQuickField select,
         .homeQuickBirthButton {
           width: 100%;
-          height: 48px;
+          height: 52px;
           box-sizing: border-box;
           border: 1px solid #ded8cf;
           border-radius: 11px;
@@ -1370,7 +1382,7 @@ export default function Home() {
           font-size: 10px;
         }
         .homeQuickSubmit {
-          height: 48px;
+          height: 52px;
           border: 0;
           border-radius: 13px;
           background: linear-gradient(135deg, #efc46c, #e6ad45);
