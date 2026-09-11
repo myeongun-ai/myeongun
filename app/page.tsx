@@ -2094,6 +2094,238 @@ export default function Home() {
           }
         }
 
+
+        /* STEP 4: mobile layout optimization only */
+        @media (max-width: 640px) {
+          .homeHero {
+            min-height: auto;
+            padding-bottom: 20px;
+          }
+          .homeHeroInner {
+            padding: 24px 16px 0;
+            gap: 8px;
+          }
+          .homeHeroCopy {
+            padding-top: 0;
+            text-align: center;
+          }
+          .homeHeroCopy h1 {
+            margin-top: 7px;
+            font-size: clamp(32px, 10vw, 43px);
+            line-height: 1.03;
+          }
+          .homeHeroCopy > p {
+            margin-top: 10px;
+            font-size: 12px;
+          }
+          .homeHeroBenefits {
+            max-width: 330px;
+            margin: 18px auto 0;
+            gap: 10px 8px;
+          }
+          .homeHeroBenefit {
+            min-height: 48px;
+          }
+          .homeHeroQuote {
+            margin: 14px auto 0;
+          }
+          .homeHeroCharacterWrap {
+            min-height: 210px;
+            margin-top: -4px;
+          }
+          .homeHeroCharacter {
+            max-height: 235px;
+            object-position: center bottom;
+          }
+
+          .homeQuickForm {
+            width: calc(100% - 20px);
+            margin: -2px auto 0;
+            border-radius: 16px;
+          }
+          .homeQuickTabs {
+            min-height: 38px;
+            padding: 0 9px;
+            gap: 9px;
+          }
+          .homeQuickTabs button,
+          .homeQuickTabs a {
+            font-size: 10px;
+          }
+          .homeQuickFields {
+            padding: 11px 10px 8px;
+            gap: 8px;
+          }
+          .homeQuickField label {
+            margin-bottom: 5px;
+            font-size: 9px;
+          }
+          .homeQuickField input,
+          .homeQuickField select,
+          .homeQuickDateButton {
+            min-height: 40px;
+            font-size: 11px;
+          }
+          .homeQuickSubmit {
+            min-height: 42px;
+            margin-top: 2px;
+          }
+          .homeQuickNotice {
+            padding: 0 10px 10px;
+            font-size: 8px;
+          }
+
+          .homeServiceSection {
+            padding: 40px 12px 38px;
+          }
+          .homeSectionHeading {
+            margin-bottom: 22px;
+          }
+          .homeSectionHeading h2 {
+            font-size: 24px;
+          }
+          .homeSectionHeading p {
+            padding: 0 8px;
+            font-size: 11px;
+          }
+          .homeServiceGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+          }
+          .homeServiceCard {
+            border-radius: 14px;
+          }
+          .homeServiceCard:last-child {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 42% 58%;
+          }
+          .homeServiceCard:last-child .homeServiceImageWrap {
+            aspect-ratio: auto;
+            min-height: 150px;
+          }
+          .homeServiceCard:last-child .homeServiceBody {
+            justify-content: center;
+          }
+          .homeServiceImageWrap {
+            aspect-ratio: 1.14 / 1;
+          }
+          .homeServiceBody {
+            padding: 11px 10px 10px;
+          }
+          .homeServiceBody h3 {
+            font-size: 15px;
+          }
+          .homeServiceBody p {
+            min-height: 52px;
+            margin-bottom: 10px;
+            font-size: 10px;
+            line-height: 1.55;
+          }
+          .homeServiceButton {
+            min-height: 34px;
+            font-size: 10px;
+          }
+
+          .homeUtilityGrid {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            margin-top: 14px;
+          }
+          .homeUtilityItem {
+            min-height: 64px;
+            padding: 0 10px;
+            border-bottom: 1px solid #e7e1d8;
+          }
+          .homeUtilityItem:nth-child(2) {
+            border-right: 0;
+          }
+          .homeUtilityItem:nth-child(3),
+          .homeUtilityItem:nth-child(4) {
+            border-bottom: 0;
+          }
+          .homeUtilityItem b {
+            width: 30px;
+            height: 30px;
+            flex-basis: 30px;
+          }
+          .homeUtilityItem strong {
+            font-size: 11px;
+          }
+          .homeUtilityItem span {
+            font-size: 9px;
+          }
+
+          .homeQuoteBanner {
+            min-height: 112px;
+            padding: 15px 12px 48px 96px;
+          }
+          .homeQuoteCharacter {
+            left: 4px;
+            bottom: -42px;
+            width: 92px;
+            height: 142px;
+          }
+          .homeQuoteBanner strong {
+            font-size: 15px;
+          }
+          .homeQuoteBanner p {
+            font-size: 9px;
+          }
+          .homeQuoteBanner > a {
+            right: 12px;
+            top: auto;
+            bottom: 10px;
+            transform: none;
+            min-width: 104px;
+            min-height: 32px;
+            font-size: 9px;
+          }
+
+          .homeSupportSection {
+            padding: 30px 10px 36px;
+          }
+          .homeSupportGrid {
+            gap: 12px;
+          }
+          .homeSupportVideoCard {
+            padding: 13px;
+            border-radius: 16px;
+          }
+          .homeSupportHeading {
+            margin-bottom: 10px;
+          }
+          .homeSupportHeading h2 {
+            font-size: 17px;
+          }
+          .homeSupportHeading p {
+            font-size: 10px;
+          }
+          .homePromoFrame {
+            aspect-ratio: 16 / 10;
+            border-radius: 13px;
+          }
+          .homeSupportSide {
+            gap: 10px;
+          }
+          .homeSupportCard {
+            min-height: 150px;
+            padding: 17px;
+            border-radius: 15px;
+          }
+          .homeSupportCard h3 {
+            font-size: 15px;
+          }
+          .homeSupportCard p {
+            margin-bottom: 12px;
+            font-size: 10px;
+          }
+          .homeSupportCard a {
+            min-height: 34px;
+            padding: 0 13px;
+            font-size: 9px;
+          }
+        }
+
       `}</style>
 
     </main>
