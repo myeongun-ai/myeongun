@@ -392,7 +392,7 @@ export default function Home() {
       style={{
         minHeight: "100vh",
         background:
-          "radial-gradient(circle at top, #1c2035 0%, #0c0d14 45%, #07080d 100%)",
+          "linear-gradient(180deg, #0b0e16 0%, #090b12 72%, #07080d 100%)",
         color: "#ffffff",
         fontFamily:
           "Arial, 'Noto Sans KR', 'Malgun Gothic', sans-serif",
@@ -561,7 +561,7 @@ export default function Home() {
         style={{
           maxWidth: "760px",
           margin: "0 auto",
-          padding: "0 24px 20px",
+          padding: "12px 24px 16px",
         }}
       >
         <div
@@ -641,7 +641,7 @@ export default function Home() {
         style={{
           maxWidth: "760px",
           margin: "0 auto",
-          padding: "36px 24px 68px",
+          padding: "28px 24px 52px",
           scrollMarginTop: "90px",
         }}
       >
@@ -1156,7 +1156,6 @@ export default function Home() {
           inset: 0;
           pointer-events: none;
           background:
-            radial-gradient(circle at 81% 18%, rgba(255,238,184,0.28) 0 58px, transparent 60px),
             linear-gradient(180deg, rgba(2,7,17,0.02), rgba(2,7,17,0.38));
           opacity: .9;
         }
@@ -1608,18 +1607,18 @@ export default function Home() {
         }
 
         .homePromoSection {
-          max-width: 1040px;
+          max-width: 960px;
           margin: 0 auto;
-          padding: 4px 24px 42px;
+          padding: 46px 24px 28px;
         }
         .homePromoFrame {
           width: 100%;
           aspect-ratio: 16 / 7.6;
           overflow: hidden;
           border-radius: 22px;
-          border: 1px solid rgba(218,170,88,0.28);
+          border: 1px solid rgba(218,170,88,0.34);
           background: #090a10;
-          box-shadow: 0 20px 52px rgba(0,0,0,0.30);
+          box-shadow: 0 18px 46px rgba(0,0,0,0.24);
         }
         .homePromoVideo {
           display: block;
@@ -1775,7 +1774,7 @@ export default function Home() {
             font-size: 11px;
           }
           .homePromoSection {
-            padding: 0 14px 30px;
+            padding: 30px 14px 22px;
           }
           .homePromoFrame {
             aspect-ratio: 16 / 10;
@@ -1981,7 +1980,7 @@ export default function Home() {
         style={{
           maxWidth: "900px",
           margin: "0 auto",
-          padding: "0 24px 90px",
+          padding: "0 24px 58px",
         }}
       >
         <div
