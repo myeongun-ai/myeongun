@@ -1118,62 +1118,66 @@ export default function Home() {
 
         .homeServiceArea {
           background:
-            radial-gradient(circle at 8% 20%, rgba(217,170,88,0.08), transparent 18%),
-            linear-gradient(180deg, #f2efe8 0%, #ebe8e1 100%);
+            radial-gradient(circle at 50% 0%, rgba(255,255,255,.96), transparent 34%),
+            linear-gradient(180deg, #faf7f0 0%, #f1ebe1 100%);
           color: #111827;
-          border-bottom: 1px solid rgba(139,106,54,0.18);
+          border-bottom: 1px solid rgba(139,106,54,.16);
         }
         .homeServiceSection {
-          max-width: 1180px;
+          max-width: 1280px;
           margin: 0 auto;
-          padding: 54px 24px 44px;
+          padding: 62px 34px 52px;
         }
         .homeSectionHeading {
           text-align: center;
-          margin: 0 auto 28px;
+          margin: 0 auto 30px;
         }
         .homeSectionHeading > span {
           color: #a17025;
-          font-size: 11px;
-          letter-spacing: 2.2px;
+          font-size: 10px;
+          letter-spacing: 2.4px;
           font-weight: 900;
         }
         .homeSectionHeading h2 {
           margin: 8px 0 8px;
           color: #162033;
-          font-size: 30px;
+          font-size: 31px;
           letter-spacing: -1.2px;
         }
         .homeSectionHeading p {
           margin: 0;
           color: #717a87;
-          font-size: 14px;
+          font-size: 13px;
           line-height: 1.7;
         }
         .homeServiceGrid {
           display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
+          grid-template-columns: repeat(5, minmax(0,1fr));
           gap: 14px;
+          align-items: stretch;
         }
         .homeServiceCard {
+          display: flex;
+          min-width: 0;
+          flex-direction: column;
           overflow: hidden;
+          border: 1px solid #e1d9cd;
           border-radius: 18px;
-          border: 1px solid #ded8ce;
-          background: #fff;
+          background: rgba(255,255,255,.94);
           color: #111827;
           text-decoration: none;
-          box-shadow: 0 12px 28px rgba(25,31,43,0.08);
+          box-shadow: 0 13px 30px rgba(35,28,18,.075);
           transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
         }
         .homeServiceCard:hover {
           transform: translateY(-5px);
-          border-color: #d4a958;
-          box-shadow: 0 18px 36px rgba(25,31,43,0.14);
+          border-color: rgba(197,142,48,.55);
+          box-shadow: 0 20px 42px rgba(35,28,18,.13);
         }
         .homeServiceImageWrap {
-          aspect-ratio: 1 / 0.82;
+          aspect-ratio: 1.22 / 1;
           overflow: hidden;
-          background: #ece9e3;
+          background: #ebe8e2;
         }
         .homeServiceImage {
           display: block;
@@ -1182,49 +1186,52 @@ export default function Home() {
           object-fit: cover;
         }
         .homeServiceBody {
-          padding: 16px 14px 15px;
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+          padding: 16px 16px 15px;
         }
         .homeServiceBody h3 {
           margin: 0 0 7px;
-          color: #162033;
-          font-size: 19px;
+          color: #101828;
+          font-size: 18px;
           font-weight: 900;
-          letter-spacing: -0.4px;
-          text-shadow: none;
+          letter-spacing: -.45px;
         }
         .homeServiceBody p {
-          min-height: 58px;
-          margin: 0;
-          color: #5f6978;
-          font-size: 13px;
-          line-height: 1.6;
+          min-height: 60px;
+          margin: 0 0 14px;
+          color: #667085;
+          font-size: 12px;
+          line-height: 1.65;
           font-weight: 600;
         }
         .homeServiceButton {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 35px;
-          margin-top: 13px;
-          border: 1px solid #d3a34c;
+          min-height: 38px;
+          margin-top: auto;
+          border: 1px solid #d8a34a;
           border-radius: 999px;
-          background: #fffaf0;
-          color: #694812;
-          font-size: 12px;
+          background: linear-gradient(180deg,#fffdf8,#fbf2df);
+          color: #765019;
+          font-size: 11px;
           font-weight: 900;
         }
         .homeUtilityGrid {
           margin-top: 18px;
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: repeat(4,minmax(0,1fr));
           overflow: hidden;
-          border: 1px solid #dfd9ce;
-          border-radius: 18px;
-          background: rgba(255,255,255,0.86);
+          border: 1px solid #e1d9cc;
+          border-radius: 16px;
+          background: rgba(255,255,255,.88);
+          box-shadow: 0 10px 26px rgba(35,28,18,.05);
         }
         .homeUtilityItem {
-          min-height: 84px;
-          padding: 17px 18px;
+          min-height: 74px;
+          padding: 0 18px;
           display: flex;
           align-items: center;
           gap: 12px;
@@ -1237,50 +1244,50 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 36px;
-          height: 36px;
-          flex: 0 0 36px;
-          border-radius: 12px;
-          background: #f4ead6;
-          color: #98671b;
-          font-size: 11px;
+          width: 34px;
+          height: 34px;
+          flex: 0 0 34px;
+          border-radius: 11px;
+          background: #f8eedc;
+          color: #a66f19;
+          font-size: 10px;
+          box-shadow: inset 0 0 0 1px rgba(205,158,78,.12);
         }
         .homeUtilityItem strong,
         .homeUtilityItem span {
           display: block;
         }
         .homeUtilityItem strong {
-          color: #263244;
-          font-size: 14px;
+          color: #263143;
+          font-size: 12px;
           margin-bottom: 3px;
         }
         .homeUtilityItem span {
-          color: #8a929d;
-          font-size: 11px;
+          color: #8a919c;
+          font-size: 10px;
         }
         .homeQuoteBanner {
           position: relative;
           overflow: hidden;
-          min-height: 126px;
+          min-height: 104px;
           margin-top: 18px;
-          padding: 22px 28px 22px 210px;
+          padding: 18px 156px 18px 148px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border-radius: 20px;
+          border: 1px solid rgba(218,170,88,.24);
+          border-radius: 18px;
           background:
-            radial-gradient(circle at 18% 30%, rgba(235,184,92,0.20), transparent 25%),
-            linear-gradient(120deg, #1b2942, #111a2d);
+            radial-gradient(circle at 12% 80%, rgba(82,112,184,.18), transparent 24%),
+            linear-gradient(110deg,#17233b 0%,#0d1b32 64%,#10192b 100%);
           color: #fff;
-          box-shadow: 0 14px 32px rgba(25,31,43,0.14);
+          box-shadow: 0 18px 36px rgba(24,30,43,.15);
         }
         .homeQuoteCharacter {
           position: absolute;
-          left: 24px;
-          bottom: -74px;
-          width: 175px;
-          height: 210px;
+          left: 18px;
+          bottom: -54px;
+          width: 120px;
+          height: 158px;
           object-fit: contain;
           object-position: center bottom;
         }
@@ -1290,33 +1297,40 @@ export default function Home() {
         }
         .homeQuoteBanner div > span {
           display: block;
-          color: #d7a94e;
-          font-size: 10px;
-          letter-spacing: 2px;
-          margin-bottom: 6px;
+          color: #d8aa57;
+          font-size: 9px;
+          letter-spacing: 1.8px;
+          margin-bottom: 5px;
+          font-weight: 900;
         }
         .homeQuoteBanner strong {
           display: block;
-          color: #f7dfaa;
-          font-size: 23px;
+          color: #f2d58e;
+          font-size: 19px;
           margin-bottom: 5px;
         }
         .homeQuoteBanner p {
           margin: 0;
-          color: #c7cbd4;
-          font-size: 12px;
+          color: #aeb8c8;
+          font-size: 10px;
         }
         .homeQuoteBanner > a {
-          position: relative;
+          position: absolute;
           z-index: 2;
+          right: 20px;
+          top: 50%;
+          transform: translateY(-50%);
           display: inline-flex;
           align-items: center;
-          min-height: 42px;
-          padding: 0 18px;
-          border: 1px solid rgba(232,181,84,0.62);
+          justify-content: center;
+          min-width: 118px;
+          min-height: 38px;
+          padding: 0 15px;
+          border: 1px solid rgba(222,174,91,.62);
           border-radius: 999px;
-          color: #f1cd85;
-          font-size: 12px;
+          background: rgba(218,170,88,.07);
+          color: #efc76f;
+          font-size: 11px;
           font-weight: 900;
           text-decoration: none;
           white-space: nowrap;
