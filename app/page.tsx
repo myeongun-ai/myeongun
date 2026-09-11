@@ -398,12 +398,20 @@ export default function Home() {
           "Arial, 'Noto Sans KR', 'Malgun Gothic', sans-serif",
       }}
     >
-      {/* HERO */}
+      {/* HERO - LARGE STRUCTURE */}
       <section className="homeHero">
         <div className="homeHeroGlow homeHeroGlowOne" />
         <div className="homeHeroGlow homeHeroGlowTwo" />
 
         <div className="homeHeroInner">
+          <div className="homeHeroCharacterWrap">
+            <img
+              className="homeHeroCharacter"
+              src="/characters/myeongun-hero.png"
+              alt="명운 한복 캐릭터"
+            />
+          </div>
+
           <div className="homeHeroText">
             <div className="homeHeroEyebrow">
               사람의 운명에는 언제나 좋은 흐름이 있습니다.
@@ -428,41 +436,103 @@ export default function Home() {
               “좋은 날은 언제나 옵니다.”
             </div>
           </div>
+        </div>
 
-          <div className="homeHeroCharacterWrap">
-            <img
-              className="homeHeroCharacter"
-              src="/characters/myeongun-hero.png"
-              alt="명운 한복 캐릭터"
-            />
+        <div className="homeQuickPanelWrap">
+          <div className="homeQuickPanel">
+            <div className="homeQuickTabs">
+              <a className="active" href="#free-saju">사주보기</a>
+              <Link href="/compatibility">궁합보기</Link>
+              <Link href="/fortune/2026">2026 운세</Link>
+              <Link href="/ai">AI 상담</Link>
+            </div>
+
+            <div className="homeQuickContent">
+              <div className="homeQuickInfo">
+                <div><span>01</span><strong>이름</strong><small>기본 정보를 입력하세요</small></div>
+                <div><span>02</span><strong>생년월일</strong><small>태어난 날짜를 선택하세요</small></div>
+                <div><span>03</span><strong>출생시간</strong><small>모르면 ‘모름’도 가능합니다</small></div>
+                <div><span>04</span><strong>성별·달력</strong><small>양력·음력 기준을 선택하세요</small></div>
+              </div>
+
+              <a className="homeQuickButton" href="#free-saju">
+                내 사주 무료로 보기 <span>→</span>
+              </a>
+            </div>
+
+            <div className="homeQuickBottom">
+              <span>🔒 입력하신 정보는 사주 분석을 위한 용도로 사용됩니다.</span>
+              <span>무료 분석 · 상세 분석 · 결제 사주 재열람 지원</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* SERVICE CARDS */}
-      <section className="homeServiceSection">
-        <div className="homeServiceGrid">
-          {cards.map((card) => (
-            <Link
-              key={card.title}
-              href={card.href}
-              className="homeServiceCard"
-            >
-              <div className="homeServiceImageWrap">
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="homeServiceImage"
-                />
-              </div>
+      <section className="homeServiceArea">
+        <div className="homeServiceSection">
+          <div className="homeSectionHeading">
+            <span>MYEONGUN SERVICES</span>
+            <h2>명운의 주요 서비스</h2>
+            <p>사주부터 재물·사업, 궁합, 연간 운세와 AI 상담까지 한 곳에서 확인하세요.</p>
+          </div>
 
-              <div className="homeServiceBody">
-                <h3>{card.title}</h3>
-                <p>{card.text}</p>
-                <span className="homeServiceButton">바로가기 →</span>
-              </div>
-            </Link>
-          ))}
+          <div className="homeServiceGrid">
+            {cards.map((card) => (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="homeServiceCard"
+              >
+                <div className="homeServiceImageWrap">
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className="homeServiceImage"
+                  />
+                </div>
+
+                <div className="homeServiceBody">
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                  <span className="homeServiceButton">바로가기 →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="homeUtilityGrid">
+            <div className="homeUtilityItem">
+              <b>01</b>
+              <div><strong>이용안내</strong><span>처음 이용하시는 분</span></div>
+            </div>
+            <div className="homeUtilityItem">
+              <b>02</b>
+              <div><strong>결제안내</strong><span>간편하고 안전하게</span></div>
+            </div>
+            <div className="homeUtilityItem">
+              <b>03</b>
+              <div><strong>자주 묻는 질문</strong><span>궁금한 점을 확인하세요</span></div>
+            </div>
+            <div className="homeUtilityItem">
+              <b>04</b>
+              <div><strong>고객센터</strong><span>평일 09:00 - 18:00</span></div>
+            </div>
+          </div>
+
+          <div className="homeQuoteBanner">
+            <img
+              src="/characters/myeongun-hero.png"
+              alt=""
+              className="homeQuoteCharacter"
+            />
+            <div>
+              <span>MYEONGUN MESSAGE</span>
+              <strong>“좋은 날은 언제나 옵니다.”</strong>
+              <p>명운이 당신의 오늘과 더 나은 내일을 함께하겠습니다.</p>
+            </div>
+            <a href="#free-saju">무료 사주 시작 →</a>
+          </div>
         </div>
       </section>
 
@@ -567,10 +637,12 @@ export default function Home() {
 
       {/* SAJU FORM */}
       <section
+        id="free-saju"
         style={{
           maxWidth: "760px",
           margin: "0 auto",
-          padding: "24px 24px 68px",
+          padding: "36px 24px 68px",
+          scrollMarginTop: "90px",
         }}
       >
         <div
@@ -1071,57 +1143,69 @@ export default function Home() {
         .homeHero {
           position: relative;
           overflow: hidden;
-          min-height: 520px;
-          border-bottom: 1px solid rgba(218,170,88,0.12);
+          min-height: 710px;
+          border-bottom: 1px solid rgba(218,170,88,0.14);
           background:
-            radial-gradient(circle at 78% 28%, rgba(244,205,126,0.18), transparent 17%),
-            radial-gradient(circle at 26% 18%, rgba(74,92,157,0.22), transparent 28%),
-            linear-gradient(135deg, #10172b 0%, #111b32 46%, #09101f 100%);
+            radial-gradient(circle at 78% 16%, rgba(247,214,146,0.20), transparent 15%),
+            radial-gradient(circle at 18% 36%, rgba(69,92,157,0.20), transparent 28%),
+            linear-gradient(135deg, #111b31 0%, #14233f 50%, #0b1426 100%);
         }
-        .homeHero::after {
+        .homeHero::before {
           content: "";
           position: absolute;
           inset: 0;
           pointer-events: none;
           background:
-            linear-gradient(180deg, transparent 58%, rgba(4,7,14,0.42) 100%),
-            radial-gradient(circle at 84% 14%, rgba(255,229,168,0.14), transparent 9%);
+            radial-gradient(circle at 81% 18%, rgba(255,238,184,0.28) 0 58px, transparent 60px),
+            linear-gradient(180deg, rgba(2,7,17,0.02), rgba(2,7,17,0.38));
+          opacity: .9;
+        }
+        .homeHero::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 180px;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent, rgba(5,8,15,0.62));
         }
         .homeHeroInner {
           position: relative;
           z-index: 2;
           max-width: 1180px;
-          min-height: 520px;
+          min-height: 545px;
           margin: 0 auto;
-          padding: 54px 24px 28px;
+          padding: 42px 24px 20px;
           display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+          grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.05fr);
           align-items: center;
-          gap: 20px;
+          gap: 42px;
         }
         .homeHeroText {
-          padding: 12px 0 22px;
+          padding: 20px 0 34px;
         }
         .homeHeroEyebrow {
-          color: #e9e0cf;
-          font-size: 16px;
+          color: #f1eadf;
+          font-size: 17px;
           line-height: 1.7;
-          margin-bottom: 14px;
+          margin-bottom: 15px;
+          letter-spacing: -0.2px;
         }
         .homeHero h1 {
           margin: 0;
-          color: #f8f4ea;
-          font-size: clamp(44px, 6vw, 72px);
-          line-height: 1.1;
+          color: #fffaf0;
+          font-size: clamp(48px, 6vw, 76px);
+          line-height: 1.08;
           letter-spacing: -4px;
           font-weight: 900;
         }
         .homeHero h1 span {
-          color: #e5b153;
+          color: #efbd60;
         }
         .homeHeroLead {
-          margin: 22px 0 0;
-          color: #ddd5c8;
+          margin: 20px 0 0;
+          color: #ded8cc;
           font-size: 19px;
           line-height: 1.7;
         }
@@ -1134,92 +1218,247 @@ export default function Home() {
         }
         .homeHeroBenefits > div {
           text-align: center;
-          color: #e7e0d4;
+          color: #eee8dd;
           font-size: 12px;
           line-height: 1.5;
         }
         .homeHeroBenefits strong {
           display: block;
-          color: #e7b85c;
-          font-size: 26px;
+          color: #efbd60;
+          font-size: 27px;
           line-height: 1;
-          margin-bottom: 8px;
+          margin-bottom: 9px;
         }
         .homeHeroQuote {
           display: inline-block;
           margin-top: 28px;
-          padding-top: 12px;
-          border-top: 1px solid rgba(231,184,92,0.55);
-          color: #e8c879;
-          font-size: 15px;
+          padding: 12px 0 0;
+          border-top: 1px solid rgba(239,189,96,0.62);
+          color: #f2ce82;
+          font-size: 16px;
           letter-spacing: 0.2px;
         }
         .homeHeroCharacterWrap {
-          min-height: 430px;
+          min-height: 470px;
           display: flex;
           align-items: flex-end;
           justify-content: center;
           position: relative;
         }
+        .homeHeroCharacterWrap::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          bottom: 16px;
+          width: 78%;
+          height: 50px;
+          transform: translateX(-50%);
+          border-radius: 50%;
+          background: rgba(0,0,0,0.28);
+          filter: blur(18px);
+        }
         .homeHeroCharacter {
+          position: relative;
+          z-index: 2;
           display: block;
           width: min(100%, 500px);
-          max-height: 500px;
+          max-height: 510px;
           object-fit: contain;
           object-position: center bottom;
-          filter: drop-shadow(0 26px 40px rgba(0,0,0,0.35));
+          filter: drop-shadow(0 28px 44px rgba(0,0,0,0.38));
         }
         .homeHeroGlow {
           position: absolute;
           border-radius: 999px;
-          filter: blur(50px);
-          opacity: .5;
+          filter: blur(60px);
+          opacity: .55;
           pointer-events: none;
         }
         .homeHeroGlowOne {
-          width: 260px;
-          height: 260px;
-          right: 6%;
-          top: 5%;
-          background: rgba(225,177,83,.12);
+          width: 300px;
+          height: 300px;
+          right: 4%;
+          top: -40px;
+          background: rgba(225,177,83,.13);
         }
         .homeHeroGlowTwo {
-          width: 340px;
-          height: 340px;
-          left: -90px;
-          bottom: -160px;
-          background: rgba(60,85,165,.18);
+          width: 380px;
+          height: 380px;
+          left: -120px;
+          bottom: -170px;
+          background: rgba(60,85,165,.22);
         }
 
+        .homeQuickPanelWrap {
+          position: relative;
+          z-index: 5;
+          max-width: 1180px;
+          margin: -34px auto 0;
+          padding: 0 24px 34px;
+        }
+        .homeQuickPanel {
+          overflow: hidden;
+          border-radius: 24px;
+          border: 1px solid rgba(206,173,111,0.52);
+          background: rgba(250,247,240,0.98);
+          box-shadow: 0 24px 60px rgba(0,0,0,0.30);
+          color: #172033;
+        }
+        .homeQuickTabs {
+          min-height: 58px;
+          padding: 0 18px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          border-bottom: 1px solid #e5ded1;
+        }
+        .homeQuickTabs a {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 38px;
+          padding: 0 22px;
+          border-radius: 10px;
+          color: #536070;
+          font-size: 14px;
+          font-weight: 800;
+          text-decoration: none;
+        }
+        .homeQuickTabs a.active {
+          background: linear-gradient(135deg, #f3ca76, #e8b554);
+          color: #36240a;
+        }
+        .homeQuickContent {
+          padding: 18px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 230px;
+          gap: 18px;
+          align-items: stretch;
+        }
+        .homeQuickInfo {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .homeQuickInfo > div {
+          min-width: 0;
+          padding: 14px 13px;
+          border: 1px solid #e2ddd4;
+          border-radius: 13px;
+          background: #fff;
+        }
+        .homeQuickInfo span {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          margin-bottom: 8px;
+          border-radius: 999px;
+          background: #f4ead7;
+          color: #9d6b1e;
+          font-size: 10px;
+          font-weight: 900;
+        }
+        .homeQuickInfo strong {
+          display: block;
+          color: #1d2939;
+          font-size: 14px;
+          margin-bottom: 4px;
+        }
+        .homeQuickInfo small {
+          display: block;
+          overflow: hidden;
+          color: #7b8492;
+          font-size: 11px;
+          line-height: 1.45;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+        .homeQuickButton {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          min-height: 100%;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #efc46c, #e6ad45);
+          color: #2e210d;
+          font-size: 16px;
+          font-weight: 900;
+          text-decoration: none;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .homeQuickButton span {
+          font-size: 21px;
+        }
+        .homeQuickBottom {
+          padding: 0 20px 16px;
+          display: flex;
+          justify-content: space-between;
+          gap: 14px;
+          color: #7a8490;
+          font-size: 11px;
+        }
+
+        .homeServiceArea {
+          background:
+            radial-gradient(circle at 8% 20%, rgba(217,170,88,0.08), transparent 18%),
+            linear-gradient(180deg, #f2efe8 0%, #ebe8e1 100%);
+          color: #111827;
+          border-bottom: 1px solid rgba(139,106,54,0.18);
+        }
         .homeServiceSection {
           max-width: 1180px;
           margin: 0 auto;
-          padding: 30px 24px 34px;
+          padding: 54px 24px 44px;
+        }
+        .homeSectionHeading {
+          text-align: center;
+          margin: 0 auto 28px;
+        }
+        .homeSectionHeading > span {
+          color: #a17025;
+          font-size: 11px;
+          letter-spacing: 2.2px;
+          font-weight: 900;
+        }
+        .homeSectionHeading h2 {
+          margin: 8px 0 8px;
+          color: #162033;
+          font-size: 30px;
+          letter-spacing: -1.2px;
+        }
+        .homeSectionHeading p {
+          margin: 0;
+          color: #717a87;
+          font-size: 14px;
+          line-height: 1.7;
         }
         .homeServiceGrid {
           display: grid;
           grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 16px;
+          gap: 14px;
         }
         .homeServiceCard {
           overflow: hidden;
-          border-radius: 20px;
-          border: 1px solid rgba(218,170,88,0.24);
-          background: linear-gradient(180deg, #fbf8f2 0%, #f3eee5 100%);
+          border-radius: 18px;
+          border: 1px solid #ded8ce;
+          background: #fff;
           color: #111827;
           text-decoration: none;
-          box-shadow: 0 16px 34px rgba(0,0,0,0.18);
+          box-shadow: 0 12px 28px rgba(25,31,43,0.08);
           transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
         }
         .homeServiceCard:hover {
           transform: translateY(-5px);
-          border-color: rgba(218,170,88,0.58);
-          box-shadow: 0 22px 44px rgba(0,0,0,0.24);
+          border-color: #d4a958;
+          box-shadow: 0 18px 36px rgba(25,31,43,0.14);
         }
         .homeServiceImageWrap {
-          aspect-ratio: 1 / 0.92;
+          aspect-ratio: 1 / 0.82;
           overflow: hidden;
-          background: #e9e7e3;
+          background: #ece9e3;
         }
         .homeServiceImage {
           display: block;
@@ -1228,36 +1467,144 @@ export default function Home() {
           object-fit: cover;
         }
         .homeServiceBody {
-          padding: 17px 16px 16px;
+          padding: 16px 14px 15px;
         }
         .homeServiceBody h3 {
-          margin: 0 0 8px;
-          color: #f3d58a;
+          margin: 0 0 7px;
+          color: #162033;
           font-size: 19px;
           font-weight: 900;
           letter-spacing: -0.4px;
-          text-shadow: 0 1px 0 rgba(255,255,255,0.55);
+          text-shadow: none;
         }
         .homeServiceBody p {
-          min-height: 62px;
+          min-height: 58px;
           margin: 0;
-          color: #c7cbd6;
+          color: #5f6978;
           font-size: 13px;
-          line-height: 1.65;
+          line-height: 1.6;
           font-weight: 600;
         }
         .homeServiceButton {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 38px;
-          margin-top: 14px;
-          border: 1px solid #c8922f;
+          min-height: 35px;
+          margin-top: 13px;
+          border: 1px solid #d3a34c;
           border-radius: 999px;
-          background: rgba(218,170,88,0.16);
-          color: #5f3f0f;
+          background: #fffaf0;
+          color: #694812;
           font-size: 12px;
           font-weight: 900;
+        }
+        .homeUtilityGrid {
+          margin-top: 18px;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          overflow: hidden;
+          border: 1px solid #dfd9ce;
+          border-radius: 18px;
+          background: rgba(255,255,255,0.86);
+        }
+        .homeUtilityItem {
+          min-height: 84px;
+          padding: 17px 18px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border-right: 1px solid #e7e1d8;
+        }
+        .homeUtilityItem:last-child {
+          border-right: 0;
+        }
+        .homeUtilityItem b {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          flex: 0 0 36px;
+          border-radius: 12px;
+          background: #f4ead6;
+          color: #98671b;
+          font-size: 11px;
+        }
+        .homeUtilityItem strong,
+        .homeUtilityItem span {
+          display: block;
+        }
+        .homeUtilityItem strong {
+          color: #263244;
+          font-size: 14px;
+          margin-bottom: 3px;
+        }
+        .homeUtilityItem span {
+          color: #8a929d;
+          font-size: 11px;
+        }
+        .homeQuoteBanner {
+          position: relative;
+          overflow: hidden;
+          min-height: 126px;
+          margin-top: 18px;
+          padding: 22px 28px 22px 210px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          border-radius: 20px;
+          background:
+            radial-gradient(circle at 18% 30%, rgba(235,184,92,0.20), transparent 25%),
+            linear-gradient(120deg, #1b2942, #111a2d);
+          color: #fff;
+          box-shadow: 0 14px 32px rgba(25,31,43,0.14);
+        }
+        .homeQuoteCharacter {
+          position: absolute;
+          left: 24px;
+          bottom: -74px;
+          width: 175px;
+          height: 210px;
+          object-fit: contain;
+          object-position: center bottom;
+        }
+        .homeQuoteBanner div {
+          position: relative;
+          z-index: 2;
+        }
+        .homeQuoteBanner div > span {
+          display: block;
+          color: #d7a94e;
+          font-size: 10px;
+          letter-spacing: 2px;
+          margin-bottom: 6px;
+        }
+        .homeQuoteBanner strong {
+          display: block;
+          color: #f7dfaa;
+          font-size: 23px;
+          margin-bottom: 5px;
+        }
+        .homeQuoteBanner p {
+          margin: 0;
+          color: #c7cbd4;
+          font-size: 12px;
+        }
+        .homeQuoteBanner > a {
+          position: relative;
+          z-index: 2;
+          display: inline-flex;
+          align-items: center;
+          min-height: 42px;
+          padding: 0 18px;
+          border: 1px solid rgba(232,181,84,0.62);
+          border-radius: 999px;
+          color: #f1cd85;
+          font-size: 12px;
+          font-weight: 900;
+          text-decoration: none;
+          white-space: nowrap;
         }
 
         .homePromoSection {
@@ -1328,6 +1675,22 @@ export default function Home() {
           color: #fff0c9;
           font-weight: 800;
         }
+        @media (max-width: 1080px) {
+          .homeQuickContent {
+            grid-template-columns: 1fr;
+          }
+          .homeQuickButton {
+            min-height: 54px;
+          }
+          .homeServiceGrid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+          .homeServiceCard:nth-child(4),
+          .homeServiceCard:nth-child(5) {
+            min-width: 0;
+          }
+        }
+
         @media (max-width: 900px) {
           .homeHeroInner {
             grid-template-columns: 1fr;
@@ -1434,6 +1797,183 @@ export default function Home() {
             font-size: 18px;
           }
         }
+
+        @media (max-width: 900px) {
+          .homeHero {
+            min-height: auto;
+          }
+          .homeHeroInner {
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding-top: 38px;
+            gap: 0;
+          }
+          .homeHeroText {
+            order: 1;
+            padding-bottom: 8px;
+          }
+          .homeHeroCharacterWrap {
+            order: 2;
+            min-height: 330px;
+          }
+          .homeHeroCharacter {
+            max-height: 385px;
+          }
+          .homeHeroBenefits {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .homeQuickPanelWrap {
+            margin-top: -12px;
+          }
+          .homeQuickInfo {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .homeQuickBottom {
+            flex-direction: column;
+          }
+          .homeUtilityGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .homeUtilityItem:nth-child(2) {
+            border-right: 0;
+          }
+          .homeUtilityItem:nth-child(-n+2) {
+            border-bottom: 1px solid #e7e1d8;
+          }
+          .homeServiceGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .homeServiceCard:last-child {
+            grid-column: 1 / -1;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .homeHeroInner {
+            padding: 30px 16px 8px;
+          }
+          .homeHeroEyebrow {
+            font-size: 13px;
+          }
+          .homeHero h1 {
+            font-size: 41px;
+            letter-spacing: -2.4px;
+          }
+          .homeHeroLead {
+            margin-top: 13px;
+            font-size: 15px;
+          }
+          .homeHeroBenefits {
+            margin-top: 22px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px 8px;
+          }
+          .homeHeroQuote {
+            margin-top: 20px;
+          }
+          .homeHeroCharacterWrap {
+            min-height: 275px;
+          }
+          .homeHeroCharacter {
+            width: min(92%, 360px);
+            max-height: 320px;
+          }
+          .homeQuickPanelWrap {
+            padding: 0 12px 24px;
+          }
+          .homeQuickTabs {
+            overflow-x: auto;
+            padding: 9px 10px;
+            gap: 5px;
+          }
+          .homeQuickTabs a {
+            flex: 0 0 auto;
+            padding: 0 14px;
+            font-size: 12px;
+          }
+          .homeQuickContent {
+            padding: 12px;
+          }
+          .homeQuickInfo {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+          }
+          .homeQuickInfo > div {
+            padding: 11px 10px;
+          }
+          .homeQuickInfo small {
+            white-space: normal;
+          }
+          .homeQuickBottom {
+            padding: 0 13px 13px;
+            font-size: 10px;
+          }
+          .homeServiceSection {
+            padding: 38px 12px 30px;
+          }
+          .homeSectionHeading {
+            margin-bottom: 20px;
+          }
+          .homeSectionHeading h2 {
+            font-size: 25px;
+          }
+          .homeSectionHeading p {
+            font-size: 12px;
+          }
+          .homeServiceGrid {
+            gap: 10px;
+          }
+          .homeServiceImageWrap {
+            aspect-ratio: 1 / .9;
+          }
+          .homeServiceBody {
+            padding: 12px 10px;
+          }
+          .homeServiceBody h3 {
+            font-size: 16px;
+          }
+          .homeServiceBody p {
+            min-height: 54px;
+            font-size: 11px;
+          }
+          .homeServiceButton {
+            min-height: 32px;
+            margin-top: 9px;
+            font-size: 10px;
+          }
+          .homeUtilityGrid {
+            grid-template-columns: 1fr;
+          }
+          .homeUtilityItem,
+          .homeUtilityItem:nth-child(2) {
+            border-right: 0;
+            border-bottom: 1px solid #e7e1d8;
+          }
+          .homeUtilityItem:last-child {
+            border-bottom: 0;
+          }
+          .homeQuoteBanner {
+            min-height: 170px;
+            padding: 20px 18px 20px 112px;
+            align-items: flex-start;
+            flex-direction: column;
+            justify-content: center;
+          }
+          .homeQuoteCharacter {
+            left: -18px;
+            bottom: -52px;
+            width: 135px;
+            height: 180px;
+          }
+          .homeQuoteBanner strong {
+            font-size: 18px;
+          }
+          .homeQuoteBanner > a {
+            min-height: 36px;
+          }
+        }
+
       `}</style>
 
       {/* AI BANNER */}
