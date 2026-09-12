@@ -2394,6 +2394,53 @@ export default function Home() {
           }
         }
 
+
+        @media (max-width: 640px) {
+          .homeServiceGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+
+          .homeServiceGrid .homeServiceAiCard {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 42%) minmax(0, 58%) !important;
+            overflow: hidden !important;
+          }
+
+          .homeServiceGrid .homeServiceAiCard .homeServiceImageWrap {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 154px !important;
+            aspect-ratio: auto !important;
+          }
+
+          .homeServiceGrid .homeServiceAiCard .homeServiceImage {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+          }
+
+          .homeServiceGrid .homeServiceAiCard .homeServiceBody {
+            width: 100% !important;
+            min-width: 0 !important;
+            min-height: 154px !important;
+            padding: 14px 13px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+
+          .homeServiceGrid .homeServiceAiCard .homeServiceBody p {
+            min-height: 0 !important;
+            margin-bottom: 12px !important;
+          }
+
+          .homeServiceGrid .homeServiceAiCard .homeServiceButton {
+            width: 100% !important;
+          }
+        }
       `}</style>
 
     </main>
