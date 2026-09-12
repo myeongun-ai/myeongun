@@ -732,7 +732,16 @@ export default function AIPage() {
           width: min(980px, calc(100% - 32px));
           margin: 0 auto;
           padding: 68px 0 90px;
-          color: #342f28;
+          color: #142137;
+        }
+
+        .aiPage::before {
+          content: "";
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          background: #fbf8f1;
+          pointer-events: none;
         }
 
         .aiHero {
@@ -752,7 +761,7 @@ export default function AIPage() {
 
         .aiHero h1 {
           margin: 0;
-          color: #28241f;
+          color: #142137;
           font-size: 42px;
           line-height: 1.25;
         }
@@ -760,7 +769,7 @@ export default function AIPage() {
         .aiHero p {
           max-width: 700px;
           margin: 17px auto 0;
-          color: #777066;
+          color: #687080;
           font-size: 15px;
           line-height: 1.9;
           word-break: keep-all;
@@ -797,7 +806,7 @@ export default function AIPage() {
         .cardTitle h2,
         .chatHeader h2 {
           margin: 7px 0 0;
-          color: #302b24;
+          color: #142137;
           font-size: 22px;
         }
 
@@ -818,7 +827,7 @@ export default function AIPage() {
         .field > span {
           display: block;
           margin-bottom: 8px;
-          color: #625b50;
+          color: #4f5969;
           font-size: 13px;
           font-weight: 800;
         }
@@ -833,7 +842,7 @@ export default function AIPage() {
           outline: none;
           background: #fff;
           padding: 0 13px;
-          color: #39342d;
+          color: #142137;
           font: inherit;
           font-size: 14px;
         }
@@ -855,7 +864,7 @@ export default function AIPage() {
           border-radius: 10px;
           background: #fff;
           padding: 0 13px;
-          color: #39342d;
+          color: #142137;
           font: inherit;
           font-size: 14px;
           cursor: pointer;
@@ -902,7 +911,7 @@ export default function AIPage() {
           border-radius: 8px;
           background: #fff;
           padding: 0 8px;
-          color: #39342d;
+          color: #142137;
           font-size: 14px;
         }
 
@@ -935,7 +944,7 @@ export default function AIPage() {
           border: 0;
           border-radius: 8px;
           background: transparent;
-          color: #51493e;
+          color: #142137;
           font-size: 13px;
           cursor: pointer;
         }
@@ -982,16 +991,16 @@ export default function AIPage() {
           border: 1px solid #dcd2c3;
           border-radius: 10px;
           background: #fff;
-          color: #71695e;
+          color: #566071;
           font-size: 14px;
           font-weight: 800;
           cursor: pointer;
         }
 
         .toggleGroup button.active {
-          border-color: #9a722e;
-          background: #9a722e;
-          color: #fff;
+          border-color: #c79a45;
+          background: #d4ad62;
+          color: #142137;
         }
 
         .sajuGuide {
@@ -1005,14 +1014,14 @@ export default function AIPage() {
         .sajuGuide strong {
           display: block;
           margin-top: 7px;
-          color: #3d372f;
+          color: #142137;
           font-size: 16px;
         }
 
         .sajuGuide p {
           max-width: 760px;
           margin: 8px auto 0;
-          color: #777066;
+          color: #687080;
           font-size: 13px;
           line-height: 1.8;
           word-break: keep-all;
@@ -1030,8 +1039,8 @@ export default function AIPage() {
           flex: 0 0 auto;
           padding: 8px 12px;
           border-radius: 999px;
-          background: #9a722e;
-          color: #fff;
+          background: #d4ad62;
+          color: #142137;
           font-size: 11px;
           font-weight: 900;
         }
@@ -1041,7 +1050,7 @@ export default function AIPage() {
           padding: 14px 16px;
           border-radius: 11px;
           background: #f5f0e7;
-          color: #777066;
+          color: #687080;
           font-size: 13px;
           line-height: 1.7;
           text-align: center;
@@ -1117,7 +1126,7 @@ export default function AIPage() {
 
         .aiAnswerIntro p {
           margin: 0;
-          color: #5f584e;
+          color: #4f5969;
           font-size: 14px;
           line-height: 1.85;
         }
@@ -1159,7 +1168,7 @@ export default function AIPage() {
         }
 
         .aiAnswerSectionHeader strong {
-          color: #4a4033;
+          color: #142137;
           font-size: 13px;
           line-height: 1.4;
         }
@@ -1172,7 +1181,7 @@ export default function AIPage() {
 
         .aiAnswerSectionBody > p {
           margin: 0;
-          color: #5f584e;
+          color: #4f5969;
           font-size: 14px;
           line-height: 1.85;
           word-break: keep-all;
@@ -1197,7 +1206,7 @@ export default function AIPage() {
 
         .aiAnswerPoint > p {
           margin: 0;
-          color: #5d564c;
+          color: #4f5969;
           font-size: 13px;
           line-height: 1.8;
           word-break: keep-all;
@@ -1215,7 +1224,7 @@ export default function AIPage() {
           border: 1px solid #d8cdbc;
           border-radius: 11px;
           background: #fffdf8;
-          color: #4b453c;
+          color: #142137;
           padding: 9px 12px;
           font-size: 13px;
           line-height: 1.5;
@@ -1223,8 +1232,11 @@ export default function AIPage() {
         }
 
         .quickQuestions button:disabled {
-          cursor: not-allowed;
-          opacity: 0.45;
+          border-color: #d8c7a7;
+          background: #e8dcc6;
+          color: #142137;
+          cursor: default;
+          opacity: 1;
         }
 
         .chatInput {
@@ -1243,16 +1255,16 @@ export default function AIPage() {
           outline: none;
           padding: 0 14px;
           background: #fff;
-          color: #39342d;
+          color: #142137;
           font-size: 14px;
         }
 
         .chatInput button {
           min-width: 92px;
-          border: 1px solid #9a722e;
+          border: 1px solid #c79a45;
           border-radius: 11px;
-          background: #9a722e;
-          color: #fff;
+          background: #d4ad62;
+          color: #142137;
           font-size: 14px;
           font-weight: 900;
           cursor: pointer;
@@ -1262,15 +1274,15 @@ export default function AIPage() {
         }
 
         .chatInput button:hover:not(:disabled) {
-          background: #876324;
+          background: #c79a45;
           transform: translateY(-1px);
         }
 
         .chatInput button:disabled {
           border-color: #d8c7a7;
           background: #e8dcc6;
-          color: #8d7b5d;
-          cursor: not-allowed;
+          color: #142137;
+          cursor: default;
           opacity: 1;
           transform: none;
         }
@@ -1388,7 +1400,7 @@ export default function AIPage() {
 
         .aiAnswerIntro p {
           margin: 0;
-          color: #5f584e;
+          color: #4f5969;
           font-size: 14px;
           line-height: 1.85;
         }
@@ -1430,7 +1442,7 @@ export default function AIPage() {
         }
 
         .aiAnswerSectionHeader strong {
-          color: #4a4033;
+          color: #142137;
           font-size: 13px;
           line-height: 1.4;
         }
@@ -1443,7 +1455,7 @@ export default function AIPage() {
 
         .aiAnswerSectionBody > p {
           margin: 0;
-          color: #5f584e;
+          color: #4f5969;
           font-size: 14px;
           line-height: 1.85;
           word-break: keep-all;
@@ -1468,7 +1480,7 @@ export default function AIPage() {
 
         .aiAnswerPoint > p {
           margin: 0;
-          color: #5d564c;
+          color: #4f5969;
           font-size: 13px;
           line-height: 1.8;
           word-break: keep-all;
