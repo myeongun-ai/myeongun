@@ -418,32 +418,32 @@ export default function BusinessFortunePage() {
 
   const labelStyle = {
     display: "block",
-    fontSize: "14px",
-    fontWeight: 700,
-    color: "#4d473e",
+    fontSize: "15px",
+    fontWeight: 800,
+    color: "#17243a",
   } as const;
 
   const fieldStyle = {
     width: "100%",
-    minHeight: "52px",
+    minHeight: "56px",
     marginTop: "9px",
-    padding: "0 14px",
-    border: "1px solid #d8d0c3",
-    borderRadius: "10px",
-    background: "#fff",
-    color: "#302c26",
-    fontSize: "15px",
+    padding: "0 18px",
+    border: "1px solid #ddd2bf",
+    borderRadius: "12px",
+    background: "#fffdfa",
+    color: "#17243a",
+    fontSize: "16px",
     outline: "none",
     boxSizing: "border-box",
   } as const;
 
   const smallButtonStyle = {
     minHeight: "44px",
-    border: "1px solid #d8d0c3",
-    borderRadius: "9px",
-    background: "#fff",
-    color: "#4d473e",
-    fontWeight: 700,
+    border: "1px solid #d9c9ad",
+    borderRadius: "10px",
+    background: "#fffaf1",
+    color: "#8b651f",
+    fontWeight: 800,
     cursor: "pointer",
   } as const;
 
@@ -841,57 +841,58 @@ export default function BusinessFortunePage() {
       <style jsx>{`
         .businessPage {
           min-height: 100vh;
-          padding: 64px 20px 90px;
+          padding: 58px 20px 82px;
           background:
-            radial-gradient(
-              circle at top,
-              rgba(184, 145, 76, 0.1),
-              transparent 34%
-            ),
-            #f4f1eb;
+            radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
+            linear-gradient(180deg, #f7f2e8 0%, #fbf8f1 58%, #f5efe4 100%);
+          color: #17243a;
         }
 
         .businessHero {
-          max-width: 860px;
-          margin: 0 auto 32px;
+          max-width: 900px;
+          margin: 0 auto 28px;
           text-align: center;
         }
 
         .eyebrow,
         .cardTitle span {
-          display: block;
-          color: #9a722e;
+          color: #a97924;
           font-size: 12px;
           font-weight: 800;
-          letter-spacing: 2px;
+          letter-spacing: 3px;
         }
 
         .businessHero h1 {
-          margin: 12px 0;
-          color: #26231e;
-          font-size: clamp(32px, 5vw, 48px);
+          margin: 12px 0 10px;
+          color: #17243a;
+          font-size: 38px;
+          line-height: 1.25;
+          font-weight: 900;
+          letter-spacing: -0.04em;
         }
 
         .businessHero p {
-          max-width: 660px;
+          max-width: 720px;
           margin: 0 auto;
-          color: #70695e;
-          line-height: 1.8;
+          color: #786f64;
+          font-size: 16px;
+          line-height: 1.75;
         }
 
         .businessCard {
           width: 100%;
-          max-width: 860px;
-          margin: 20px auto 0;
-          padding: 34px;
-          border: 1px solid #ddd5c8;
-          border-radius: 20px;
-          background: #fffdf9;
-          box-shadow: 0 14px 38px rgba(61, 50, 33, 0.06);
+          max-width: 900px;
+          box-sizing: border-box;
+          margin: 0 auto 22px;
+          padding: 38px;
+          border: 1px solid #dfd4c2;
+          border-radius: 26px;
+          background: rgba(255, 253, 249, 0.97);
+          box-shadow: 0 24px 60px rgba(31, 39, 53, 0.09);
         }
 
         .inputCard {
-          max-width: 720px;
+          padding-top: 42px;
         }
 
         .cardTitle {
@@ -904,617 +905,287 @@ export default function BusinessFortunePage() {
         }
 
         .cardTitle h2 {
-          margin: 9px 0 8px;
-          color: #302b24;
-          font-size: 24px;
+          margin: 10px 0 8px;
+          color: #17243a;
+          font-size: 26px;
+          line-height: 1.35;
         }
 
         .cardTitle p {
           margin: 0;
-          color: #777065;
+          color: #786f64;
           font-size: 14px;
           line-height: 1.75;
         }
 
         .birthRow {
           display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 8px;
+          grid-template-columns: 1fr 78px;
+          gap: 10px;
         }
 
         .calendarButton {
-          min-width: 74px;
-          min-height: 52px;
+          min-height: 56px;
           margin-top: 9px;
-          padding: 0 15px;
-          border: 1px solid #d8d0c3;
-          border-radius: 10px;
-          background: #f7f2e9;
-          color: #5b5143;
-          font-weight: 800;
+          border: 1px solid #d9c9ad;
+          border-radius: 12px;
+          background: #f6efe2;
+          color: #8b651f;
+          font-size: 14px;
+          font-weight: 900;
           cursor: pointer;
         }
 
         .datePicker {
-          margin-top: 12px;
-          padding: 18px;
-          border: 1px solid #d8d0c3;
-          border-radius: 14px;
-          background: #faf7f1;
+          margin-top: 14px;
+          padding: 16px;
+          border: 1px solid #dfd4c2;
+          border-radius: 16px;
+          background: #fffaf1;
+          box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
         }
 
         .pickerTop {
           display: grid;
           grid-template-columns: 44px 1fr 1fr 44px;
           gap: 8px;
+          align-items: center;
         }
 
         .calendarGrid {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
-          gap: 5px;
-          margin-top: 16px;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          gap: 7px;
+          margin-top: 14px;
+          text-align: center;
         }
 
         .calendarDayName {
           padding: 8px 0;
-          color: #8a8175;
+          color: #a97924;
           font-size: 12px;
           font-weight: 800;
-          text-align: center;
         }
 
         .calendarDay {
-          min-height: 38px;
-          border: 0;
-          border-radius: 8px;
-          background: transparent;
-          color: #4c463e;
+          min-height: 42px;
+          border: 1px solid #eee4d4;
+          border-radius: 10px;
+          background: #fff;
+          color: #243148;
+          font-size: 14px;
           cursor: pointer;
         }
 
-        .calendarDay:hover {
-          background: #eee6d8;
-        }
-
         .calendarDay.selected {
-          background: #2f332b;
-          color: #fff;
-          font-weight: 800;
+          border-color: #c99535;
+          background: #dcae52;
+          color: #152136;
+          font-weight: 900;
         }
 
         .pickerBottom {
           display: flex;
-          justify-content: flex-end;
-          gap: 8px;
+          justify-content: space-between;
+          gap: 10px;
           margin-top: 14px;
         }
 
         .businessSelect {
           width: 100%;
-          min-height: 52px;
+          box-sizing: border-box;
+          min-height: 56px;
           margin-top: 9px;
-          padding: 0 14px;
-          border: 1px solid #d8d0c3;
-          border-radius: 10px;
+          padding: 0 18px;
+          border: 1px solid #ddd2bf;
+          border-radius: 12px;
+          background: #fffdfa;
+          color: #17243a;
+          font-size: 16px;
+          outline: none;
+          cursor: pointer;
+        }
+
+        .businessSelect:focus {
+          border-color: #b9862e;
+          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
+        }
+
+        .businessSelect option {
           background: #fff;
-          color: #302c26;
-          font-size: 15px;
+          color: #17243a;
         }
 
         .twoCol {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
           margin-top: 22px;
-        }
-
-        .analyzeButton {
-          width: 100%;
-          min-height: 58px;
-          margin-top: 28px;
-          border: 1px solid #a97b2b;
-          border-radius: 12px;
-          background: #a97b2b;
-          color: #fff;
-          font-size: 16px;
-          font-weight: 800;
-          cursor: pointer;
-          box-shadow: 0 8px 20px rgba(169, 123, 43, 0.16);
-          transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease,
-            background 0.18s ease;
-        }
-
-        .analyzeButton:hover:not(:disabled) {
-          background: #956b24;
-          box-shadow: 0 10px 24px rgba(169, 123, 43, 0.22);
-          transform: translateY(-1px);
-        }
-
-        .analyzeButton:disabled {
-          cursor: wait;
-          opacity: 0.65;
         }
 
         .errorMessage {
           margin: 18px 0 0;
-          color: #b0443c;
-          font-size: 14px;
+          color: #b44237;
+          font-size: 13px;
           line-height: 1.7;
-          text-align: center;
+        }
+
+        .analyzeButton {
+          width: 100%;
+          min-height: 60px;
+          margin-top: 28px;
+          border: 1px solid #c99535;
+          border-radius: 14px;
+          background: linear-gradient(90deg, #c89232 0%, #e6b95a 50%, #c89232 100%);
+          color: #142137;
+          font-size: 17px;
+          font-weight: 900;
+          cursor: pointer;
+          box-shadow: 0 12px 28px rgba(183, 132, 39, 0.17);
+        }
+
+        .analyzeButton:disabled {
+          opacity: 0.65;
+          cursor: wait;
         }
 
         .privacyText {
-          margin: 18px 0 0;
-          color: #928a7e;
+          margin: 17px 0 0;
+          text-align: center;
+          color: #8d857a;
           font-size: 12px;
           line-height: 1.7;
-          text-align: center;
         }
 
         .profileCard {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 12px;
         }
 
-        .profileCard div {
-          padding: 15px;
-          border-radius: 12px;
-          background: #f6f1e8;
+        .profileCard > div,
+        .elementGrid article {
+          padding: 18px;
+          border: 1px solid #e7dccb;
+          border-radius: 14px;
+          background: #f9f4eb;
         }
 
         .profileCard span,
         .elementGrid span {
           display: block;
-          color: #8c8376;
-          font-size: 11px;
-          font-weight: 700;
+          margin-bottom: 7px;
+          color: #9a762f;
+          font-size: 12px;
+          font-weight: 800;
         }
 
-        .profileCard strong {
-          display: block;
-          margin-top: 7px;
-          color: #332f29;
-          font-size: 14px;
-          word-break: break-word;
+        .profileCard strong,
+        .elementGrid strong {
+          color: #17243a;
+          font-size: 16px;
         }
 
         .elementGrid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 12px;
         }
 
-        .elementGrid article {
-          padding: 22px;
-          border-radius: 14px;
-          background: #f5f0e7;
-        }
-
-        .elementGrid strong {
-          display: block;
-          margin-top: 8px;
-          color: #342f27;
-          font-size: 26px;
-        }
-
-        .elementReason {
-          margin: 16px 0 0;
-          color: #777066;
-          font-size: 13px;
-          line-height: 1.8;
-        }
-
-        .reportCard {
-          background: transparent;
-          border: 0;
-          box-shadow: none;
-          padding-left: 0;
-          padding-right: 0;
-        }
-
-        .reportCard > .cardTitle {
-          max-width: 860px;
-          margin-left: auto;
-          margin-right: auto;
-          padding: 0 8px;
-        }
-
-        .reportCard .resultBody {
-          margin-top: 24px;
-        }
-
-        .businessSectionGrid {
-          gap: 24px;
-        }
-
-        .businessAnalysisCard {
-          border: 1px solid #d8c8ab;
-          background: #fffaf2;
-          box-shadow:
-            0 12px 30px rgba(79, 61, 31, 0.08);
-        }
-
-        .businessAnalysisHeader {
-          background:
-            linear-gradient(
-              135deg,
-              #f2e6cf 0%,
-              #fffaf2 100%
-            );
-          border-bottom: 1px solid #dcc9a9;
-        }
-
-        .businessSectionNumber {
-          background: #9a722e;
-          color: #fff;
-          border-color: #9a722e;
-          box-shadow:
-            0 5px 14px rgba(154, 114, 46, 0.18);
-        }
-
-        .businessAnalysisContent {
-          background: #fffdf9;
-        }
-
-        .businessAnalysisCard:last-child {
-          border: 2px solid #c5a66d;
-          background:
-            linear-gradient(
-              135deg,
-              #fff8e8,
-              #fffdf9
-            );
-        }
-
-        .businessAnalysisCard:last-child .businessAnalysisHeader {
-          background:
-            linear-gradient(
-              135deg,
-              #ead7ae,
-              #fff8e8
-            );
-        }
-
-        .businessAnalysisCard:last-child .businessSectionLabel {
-          color: #7b5b22;
-        }
-
-        @media (max-width: 680px) {
-          .reportCard {
-            padding-left: 0;
-            padding-right: 0;
-          }
-
-          .reportCard > .cardTitle {
-            padding: 0 4px;
-          }
-
-          .businessSectionGrid {
-            gap: 18px;
-          }
-
-          .businessAnalysisCard {
-            border-width: 1px;
-            box-shadow:
-              0 8px 20px rgba(79, 61, 31, 0.07);
-          }
-        }
-
-        .resultBody {
-          margin-top: 24px;
-        }
-
-        .premiumBusinessResult {
-          display: grid;
-          gap: 22px;
-        }
-
-        .businessIntroCard {
-          padding: 24px 26px;
-          border: 1px solid #e3d8c5;
+        .resultText {
+          padding: 24px;
+          border: 1px solid #e8dfd1;
           border-radius: 16px;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(183, 143, 72, 0.09),
-              rgba(255, 253, 249, 0.8)
-            );
+          background: #f8f3ea;
+          color: #4d4b47;
+          font-size: 15px;
+          line-height: 1.95;
         }
 
-        .businessIntroMark {
-          margin-bottom: 12px;
-          color: #9a722e;
-          font-size: 11px;
+        .resultText :global(h2),
+        .resultText :global(h3),
+        .resultText :global(h4) {
+          color: #17243a;
+        }
+
+        .resultText :global(strong) {
+          color: #17243a;
           font-weight: 900;
-          letter-spacing: 2px;
         }
 
-        .businessSectionGrid {
-          display: grid;
-          gap: 18px;
+        .resultText :global(li) {
+          margin-bottom: 7px;
         }
 
-        .businessAnalysisCard {
-          overflow: hidden;
-          border: 1px solid #e2d9ca;
-          border-radius: 18px;
-          background: #fffdf9;
-          box-shadow:
-            0 8px 24px rgba(61, 50, 33, 0.045);
-        }
-
-        .businessAnalysisHeader {
+        .actionRow {
           display: flex;
-          align-items: center;
-          gap: 18px;
-          padding: 22px 24px 19px;
-          border-bottom: 1px solid #ebe3d7;
-          background:
-            linear-gradient(
-              135deg,
-              #f8f3e9 0%,
-              #fffdf9 72%
-            );
-        }
-
-        .businessSectionNumber {
-          display: flex;
-          flex: 0 0 54px;
-          width: 54px;
-          height: 54px;
-          align-items: center;
           justify-content: center;
-          border: 1px solid #d7c49d;
-          border-radius: 50%;
-          background: #fffaf0;
-          color: #9a722e;
-          font-size: 17px;
-          font-weight: 900;
-          letter-spacing: 1px;
-        }
-
-        .businessSectionTitleWrap {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .businessSectionLabel {
-          display: block;
-          margin-bottom: 5px;
-          color: #a17a36;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 1.7px;
-        }
-
-        .businessAnalysisHeader .businessHeading {
-          margin: 0;
-          padding: 0;
-          border: 0;
-          color: #302b24;
-          font-size: 20px;
-          line-height: 1.45;
-        }
-
-        .businessAnalysisContent {
-          padding: 22px 26px 25px;
-        }
-
-        .businessAnalysisContent .businessParagraph {
-          margin: 0 0 13px;
-          color: #625b50;
-          font-size: 15px;
-          line-height: 1.95;
-          word-break: keep-all;
-        }
-
-        .businessAnalysisContent .businessParagraph:last-child {
-          margin-bottom: 0;
-        }
-
-        .businessAnalysisContent .businessHeadingSmall {
-          margin: 20px 0 10px;
-          color: #6f5527;
-          font-size: 16px;
-          line-height: 1.6;
-        }
-
-        .businessAnalysisContent .businessResultList {
-          display: grid;
-          gap: 9px;
-          margin: 15px 0 4px;
-          padding: 0;
-          list-style: none;
-        }
-
-        .businessAnalysisContent .businessResultList li {
-          position: relative;
-          margin: 0;
-          padding: 13px 15px 13px 38px;
-          border-radius: 11px;
-          background: #f7f2e9;
-          color: #5d564c;
-          font-size: 14px;
-          line-height: 1.75;
-        }
-
-        .businessAnalysisContent .businessResultList li::before {
-          content: "✓";
-          position: absolute;
-          top: 13px;
-          left: 15px;
-          color: #9a722e;
-          font-weight: 900;
-        }
-
-        @media (max-width: 680px) {
-          .premiumBusinessResult {
-            gap: 16px;
-          }
-
-          .businessIntroCard {
-            padding: 20px 18px;
-            border-radius: 14px;
-          }
-
-          .businessSectionGrid {
-            gap: 14px;
-          }
-
-          .businessAnalysisCard {
-            border-radius: 15px;
-          }
-
-          .businessAnalysisHeader {
-            align-items: flex-start;
-            gap: 12px;
-            padding: 18px 16px 16px;
-          }
-
-          .businessSectionNumber {
-            flex-basis: 44px;
-            width: 44px;
-            height: 44px;
-            font-size: 14px;
-          }
-
-          .businessSectionLabel {
-            font-size: 9px;
-            letter-spacing: 1.2px;
-          }
-
-          .businessAnalysisHeader .businessHeading {
-            font-size: 18px;
-          }
-
-          .businessAnalysisContent {
-            padding: 18px 16px 20px;
-          }
-
-          .businessAnalysisContent .businessParagraph {
-            font-size: 14px;
-            line-height: 1.9;
-            word-break: normal;
-          }
-
-          .businessAnalysisContent .businessResultList li {
-            padding: 12px 13px 12px 35px;
-            font-size: 13px;
-          }
-
-          .businessAnalysisContent .businessResultList li::before {
-            top: 12px;
-            left: 13px;
-          }
-        }
-
-        .businessHeadingLarge {
-          margin: 30px 0 14px;
-          color: #28241f;
-          font-size: 25px;
-        }
-
-        .businessHeading {
-          margin: 30px 0 12px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #e7dfd3;
-          color: #342f28;
-          font-size: 21px;
-          line-height: 1.5;
-        }
-
-        .businessHeadingSmall {
-          margin: 22px 0 9px;
-          color: #51493e;
-          font-size: 17px;
-        }
-
-        .businessParagraph {
-          margin: 9px 0;
-          color: #625b50;
-          font-size: 15px;
-          line-height: 1.95;
-        }
-
-        .businessResultList {
-          margin: 10px 0 20px;
-          padding-left: 22px;
-          color: #625b50;
-        }
-
-        .businessResultList li {
-          margin: 7px 0;
-          line-height: 1.85;
-        }
-
-        .noticeBox {
-          margin-top: 30px;
-          padding: 18px;
-          border-radius: 14px;
-          background: #f5f0e7;
-          color: #777066;
-          font-size: 12px;
-          line-height: 1.8;
+          gap: 10px;
+          max-width: 900px;
+          margin: 0 auto;
         }
 
         .resetButton {
-          display: block;
-          width: 100%;
-          min-height: 54px;
-          margin-top: 22px;
-          border: 1px solid #cdbd9e;
-          border-radius: 11px;
-          background: #fffaf0;
-          color: #765b29;
-          font-size: 14px;
+          min-height: 50px;
+          padding: 0 24px;
+          border: 1px solid #d3bd94;
+          border-radius: 12px;
+          background: #fffaf1;
+          color: #805d21;
           font-weight: 800;
           cursor: pointer;
         }
 
-        @media (max-width: 680px) {
+        @media (max-width: 640px) {
           .businessPage {
-            padding: 42px 14px 70px;
+            padding: 30px 12px 58px;
+          }
+
+          .businessHero {
+            margin-bottom: 22px;
+          }
+
+          .businessHero h1 {
+            font-size: 30px;
+          }
+
+          .businessHero p {
+            font-size: 14px;
           }
 
           .businessCard {
-            padding: 24px 18px;
-            border-radius: 16px;
+            padding: 30px 18px 26px;
+            border-radius: 20px;
           }
 
-          .twoCol {
-            grid-template-columns: 1fr;
+          .cardTitle {
+            margin-bottom: 24px;
           }
 
-          .profileCard {
-            grid-template-columns: 1fr 1fr;
+          .cardTitle h2 {
+            font-size: 23px;
           }
 
-          .pickerTop {
-            grid-template-columns: 40px 1fr 1fr 40px;
-            gap: 5px;
-          }
-
-          .datePicker {
-            padding: 12px 9px;
-          }
-
-          .calendarDay {
-            min-height: 36px;
-          }
-        }
-
-        @media (max-width: 420px) {
+          .twoCol,
           .profileCard,
           .elementGrid {
             grid-template-columns: 1fr;
           }
 
-          .businessHero h1 {
-            font-size: 34px;
+          .pickerTop {
+            grid-template-columns: 40px 1fr 1fr 40px;
+          }
+
+          .businessSelect {
+            font-size: 14px;
+          }
+
+          .actionRow {
+            padding: 0 6px;
+          }
+
+          .resetButton {
+            width: 100%;
           }
         }
       `}</style>
