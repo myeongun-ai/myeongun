@@ -614,12 +614,13 @@ export default function Home() {
             <p>사주부터 재물·사업, 궁합, 연간 운세와 AI 상담까지 한 곳에서 확인하세요.</p>
           </div>
 
-          <div className="homeServiceGrid">
+          {/* Desktop / tablet service cards */}
+          <div className="homeServiceGrid homeServiceDesktopOnly">
             {cards.map((card) => (
               <Link
-                key={card.title}
+                key={`desktop-${card.title}`}
                 href={card.href}
-                className={`homeServiceCard ${card.title === "AI 상담" ? "homeServiceAiCard" : ""}`}
+                className="homeServiceCard"
               >
                 <div className="homeServiceImageWrap">
                   <img
@@ -636,6 +637,52 @@ export default function Home() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Mobile service cards: first 4 are 2×2, AI is a separate full-width row */}
+          <div className="homeServiceMobileOnly">
+            <div className="homeServiceMobileGrid">
+              {cards.slice(0, 4).map((card) => (
+                <Link
+                  key={`mobile-${card.title}`}
+                  href={card.href}
+                  className="homeServiceCard homeServiceMobilePairCard"
+                >
+                  <div className="homeServiceImageWrap">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="homeServiceImage"
+                    />
+                  </div>
+
+                  <div className="homeServiceBody">
+                    <h3>{card.title}</h3>
+                    <p>{card.text}</p>
+                    <span className="homeServiceButton">바로가기 →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <Link
+              href="/ai"
+              className="homeServiceCard homeServiceMobileAiWide"
+            >
+              <div className="homeServiceImageWrap">
+                <img
+                  src="/characters/myeongun-ai.png"
+                  alt="AI 상담"
+                  className="homeServiceImage"
+                />
+              </div>
+
+              <div className="homeServiceBody">
+                <h3>AI 상담</h3>
+                <p>사주에 대한 궁금증을 언제든지 물어보세요</p>
+                <span className="homeServiceButton">바로가기 →</span>
+              </div>
+            </Link>
           </div>
 
           <div className="homeUtilityGrid">
@@ -1149,6 +1196,9 @@ export default function Home() {
           color: #717a87;
           font-size: 13px;
           line-height: 1.7;
+        }
+        .homeServiceMobileOnly {
+          display: none;
         }
         .homeServiceGrid {
           display: grid;
@@ -2441,6 +2491,78 @@ export default function Home() {
             width: 100% !important;
           }
         }
+
+        @media (max-width: 640px) {
+          .homeServiceDesktopOnly {
+            display: none !important;
+          }
+
+          .homeServiceMobileOnly {
+            display: block !important;
+            width: 100% !important;
+          }
+
+          .homeServiceMobileGrid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 11px !important;
+            width: 100% !important;
+          }
+
+          .homeServiceMobileGrid > .homeServiceMobilePairCard,
+          .homeServiceMobileGrid > .homeServiceMobilePairCard:last-child {
+            grid-column: auto !important;
+            width: 100% !important;
+            max-width: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+
+          .homeServiceMobileAiWide,
+          .homeServiceMobileAiWide:last-child {
+            width: 100% !important;
+            max-width: none !important;
+            margin-top: 11px !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 42%) minmax(0, 58%) !important;
+            overflow: hidden !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceImageWrap,
+          .homeServiceMobileAiWide:last-child .homeServiceImageWrap {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 154px !important;
+            aspect-ratio: auto !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceImage {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceBody,
+          .homeServiceMobileAiWide:last-child .homeServiceBody {
+            width: 100% !important;
+            min-width: 0 !important;
+            min-height: 154px !important;
+            padding: 14px 13px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceBody p {
+            min-height: 0 !important;
+            margin-bottom: 12px !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceButton {
+            width: 100% !important;
+          }
+        }
+
       `}</style>
 
     </main>
