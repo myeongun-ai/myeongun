@@ -790,13 +790,6 @@ export default function Fortune2026Page() {
           </button>
         </section>
       )}
-
-      <div className="homeLinkWrap">
-        <Link href="/" className="homeLink">
-          홈으로
-        </Link>
-      </div>
-
       <style jsx>{`
         .fortune2026Page {
           width: min(980px, calc(100% - 40px));
@@ -1120,7 +1113,7 @@ export default function Fortune2026Page() {
         .analyzeButton:disabled {
           border: 1px solid #d8c7a7;
           background: #e8dcc6;
-          color: #8d7b5d;
+          color: #142137;
           cursor: not-allowed;
           opacity: 1;
           box-shadow: none;
@@ -1244,20 +1237,7 @@ export default function Fortune2026Page() {
           font-weight: 900;
           cursor: pointer;
         }
-
-        .homeLinkWrap {
-          margin-top: 28px;
-          text-align: center;
-        }
-
-        .homeLink {
-          color: #82672f;
-          font-size: 13px;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        @media (max-width: 760px) {
+@media (max-width: 760px) {
           .profileGrid {
             grid-template-columns: 1fr 1fr;
           }

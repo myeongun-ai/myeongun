@@ -1052,13 +1052,6 @@ export default function CompatibilityPage() {
           </button>
         </section>
       )}
-
-      <div className="homeLinkWrap">
-        <Link href="/" className="homeLink">
-          홈으로
-        </Link>
-      </div>
-
       <style jsx>{`
         .compatPage {
           width: min(1120px, calc(100% - 40px));
@@ -1453,7 +1446,7 @@ export default function CompatibilityPage() {
         .analyzeButton:disabled {
           border: 1px solid #d8c7a7;
           background: #e8dcc6;
-          color: #8d7b5d;
+          color: #142137;
           cursor: not-allowed;
           opacity: 1;
           box-shadow: none;
@@ -1593,20 +1586,7 @@ export default function CompatibilityPage() {
           font-weight: 900;
           cursor: pointer;
         }
-
-        .homeLinkWrap {
-          margin-top: 28px;
-          text-align: center;
-        }
-
-        .homeLink {
-          color: #82672f;
-          font-size: 13px;
-          font-weight: 800;
-          text-decoration: none;
-        }
-
-        @media (max-width: 820px) {
+@media (max-width: 820px) {
           .personGrid,
           .summaryGrid {
             grid-template-columns: 1fr;
