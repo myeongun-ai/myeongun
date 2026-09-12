@@ -799,68 +799,73 @@ export default function Fortune2026Page() {
 
       <style jsx>{`
         .fortune2026Page {
-          width: min(980px, calc(100% - 32px));
+          width: min(980px, calc(100% - 40px));
           margin: 0 auto;
-          padding: 68px 0 90px;
-          color: #342f28;
+          padding: 58px 0 82px;
+          color: #17243a;
         }
 
         .fortune2026Hero {
           max-width: 760px;
-          margin: 0 auto 34px;
+          margin: 0 auto 30px;
           text-align: center;
         }
 
         .eyebrow {
           display: block;
           margin-bottom: 11px;
-          color: #a17a36;
-          font-size: 11px;
+          color: #a97924;
+          font-size: 12px;
           font-weight: 900;
-          letter-spacing: 2.2px;
+          letter-spacing: 2.6px;
         }
 
         .fortune2026Hero h1 {
           margin: 0;
-          color: #28241f;
-          font-size: 42px;
+          color: #17243a;
+          font-size: 38px;
           line-height: 1.25;
+          font-weight: 900;
+          letter-spacing: -0.04em;
         }
 
         .fortune2026Hero p {
-          max-width: 700px;
-          margin: 17px auto 0;
-          color: #777066;
-          font-size: 15px;
-          line-height: 1.9;
+          max-width: 690px;
+          margin: 14px auto 0;
+          color: #786f64;
+          font-size: 16px;
+          line-height: 1.8;
           word-break: keep-all;
         }
 
         .fortune2026Form {
-          padding: 30px;
-          border: 1px solid #e2d8c8;
-          border-radius: 22px;
-          background: #fffdf9;
-          box-shadow: 0 14px 38px rgba(66, 52, 30, 0.06);
+          padding: 34px;
+          border: 1px solid #dfd4c2;
+          border-radius: 26px;
+          background: rgba(255, 253, 249, 0.97);
+          box-shadow: 0 24px 60px rgba(31, 39, 53, 0.09);
         }
 
         .formTitle {
-          margin-bottom: 24px;
+          margin-bottom: 26px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #e4d8c6;
           text-align: center;
         }
 
         .formTitle span {
           display: block;
-          color: #a17a36;
-          font-size: 9px;
+          color: #a97924;
+          font-size: 10px;
           font-weight: 900;
           letter-spacing: 1.8px;
         }
 
         .formTitle h2 {
           margin: 7px 0 0;
-          color: #302b24;
-          font-size: 22px;
+          color: #17243a;
+          font-size: 21px;
+          line-height: 1.5;
         }
 
         .formGrid {
@@ -880,44 +885,44 @@ export default function Fortune2026Page() {
         .field > span {
           display: block;
           margin-bottom: 8px;
-          color: #625b50;
-          font-size: 13px;
+          color: #17243a;
+          font-size: 14px;
           font-weight: 800;
         }
 
         .field input,
         .field select {
           width: 100%;
-          min-height: 48px;
+          min-height: 54px;
           box-sizing: border-box;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
+          border: 1px solid #ddd2bf;
+          border-radius: 12px;
           outline: none;
-          background: #fff;
-          padding: 0 13px;
-          color: #39342d;
+          background: #fffdfa;
+          padding: 0 15px;
+          color: #17243a;
           font: inherit;
           font-size: 14px;
         }
 
         .field input:focus,
         .field select:focus {
-          border-color: #b49358;
-          box-shadow: 0 0 0 3px rgba(180, 147, 88, 0.1);
+          border-color: #b9862e;
+          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
         }
 
         .birthPickerButton {
           display: flex;
           width: 100%;
-          min-height: 48px;
+          min-height: 54px;
           box-sizing: border-box;
           align-items: center;
           justify-content: space-between;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
-          background: #fff;
-          padding: 0 13px;
-          color: #39342d;
+          border: 1px solid #ddd2bf;
+          border-radius: 12px;
+          background: #fffdfa;
+          padding: 0 15px;
+          color: #17243a;
           font: inherit;
           font-size: 14px;
           cursor: pointer;
@@ -925,17 +930,17 @@ export default function Fortune2026Page() {
 
         .birthPickerButton:focus {
           outline: none;
-          border-color: #b49358;
-          box-shadow: 0 0 0 3px rgba(180, 147, 88, 0.1);
+          border-color: #b9862e;
+          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
         }
 
         .birthPicker {
           margin-top: 8px;
           padding: 14px;
-          border: 1px solid #dcd2c3;
-          border-radius: 12px;
-          background: #fff;
-          box-shadow: 0 10px 25px rgba(66, 52, 30, 0.1);
+          border: 1px solid #dfd4c2;
+          border-radius: 14px;
+          background: #fffaf1;
+          box-shadow: 0 12px 28px rgba(31, 39, 53, 0.09);
         }
 
         .birthPickerHeader {
@@ -949,10 +954,10 @@ export default function Fortune2026Page() {
         .birthPickerHeader > button {
           width: 38px;
           height: 38px;
-          border: 1px solid #ddd2c0;
+          border: 1px solid #d9c9ad;
           border-radius: 9px;
-          background: #fffaf2;
-          color: #8b682d;
+          background: #fffaf1;
+          color: #8b651f;
           font-size: 22px;
           cursor: pointer;
         }
@@ -966,11 +971,11 @@ export default function Fortune2026Page() {
         .birthPickerSelects select {
           width: 100%;
           min-height: 38px;
-          border: 1px solid #ddd2c0;
+          border: 1px solid #ddd2bf;
           border-radius: 8px;
           background: #fff;
           padding: 0 8px;
-          color: #39342d;
+          color: #17243a;
           font-size: 14px;
         }
 
@@ -1013,27 +1018,24 @@ export default function Fortune2026Page() {
         }
 
         .birthPickerDays button.selected {
-          background: #9a722e;
+          background: #b9862e;
           color: #fff;
           font-weight: 900;
         }
 
-        .pickerBottom {
+        .birthPickerActions {
           display: flex;
           justify-content: flex-end;
-          gap: 8px;
-          margin-top: 12px;
-          padding-top: 12px;
-          border-top: 1px solid #eee4d5;
+          margin-top: 10px;
         }
 
-        .pickerBottom button {
+        .birthPickerActions button {
           min-height: 36px;
           padding: 0 15px;
-          border: 1px solid #d9cbb3;
-          border-radius: 8px;
-          background: #fffaf2;
-          color: #765b29;
+          border: 1px solid #d8c39d;
+          border-radius: 9px;
+          background: #fffaf1;
+          color: #805d21;
           font-size: 12px;
           font-weight: 800;
           cursor: pointer;
@@ -1046,33 +1048,34 @@ export default function Fortune2026Page() {
         }
 
         .toggleGroup button {
-          min-height: 46px;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
-          background: #fff;
-          color: #71695e;
+          min-height: 48px;
+          border: 1px solid #ddd2bf;
+          border-radius: 11px;
+          background: #fffdfa;
+          color: #6f685e;
           font-size: 14px;
           font-weight: 800;
           cursor: pointer;
         }
 
         .toggleGroup button.active {
-          border-color: #9a722e;
-          background: #9a722e;
+          border-color: #b9862e;
+          background: #b9862e;
           color: #fff;
         }
 
         .analysisGuide {
           margin-top: 24px;
-          padding: 20px 22px;
-          border-radius: 15px;
-          background: #f5f0e7;
+          padding: 21px 22px;
+          border: 1px solid #eadcc5;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #f7eddc, #fffaf1);
           text-align: center;
         }
 
         .analysisGuide span {
           display: block;
-          color: #a17a36;
+          color: #a97924;
           font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.7px;
@@ -1081,14 +1084,14 @@ export default function Fortune2026Page() {
         .analysisGuide strong {
           display: block;
           margin-top: 7px;
-          color: #3d372f;
+          color: #17243a;
           font-size: 16px;
         }
 
         .analysisGuide p {
-          max-width: 760px;
+          max-width: 700px;
           margin: 8px auto 0;
-          color: #777066;
+          color: #756d62;
           font-size: 13px;
           line-height: 1.8;
           word-break: keep-all;
@@ -1097,15 +1100,21 @@ export default function Fortune2026Page() {
         .analyzeButton {
           display: block;
           width: 100%;
-          min-height: 58px;
+          min-height: 60px;
           margin-top: 22px;
-          border: 0;
-          border-radius: 12px;
-          background: #9a722e;
-          color: #fff;
-          font-size: 16px;
+          border: 1px solid #c99535;
+          border-radius: 14px;
+          background: linear-gradient(90deg, #c89232 0%, #e6b95a 50%, #c89232 100%);
+          color: #142137;
+          font-size: 17px;
           font-weight: 900;
           cursor: pointer;
+          box-shadow: 0 12px 28px rgba(183, 132, 39, 0.17);
+          transition: 0.2s ease;
+        }
+
+        .analyzeButton:hover:not(:disabled) {
+          transform: translateY(-1px);
         }
 
         .analyzeButton:disabled {
@@ -1119,7 +1128,7 @@ export default function Fortune2026Page() {
         }
 
         .privacyText {
-          margin: 10px 0 0;
+          margin: 11px 0 0;
           color: #938a7d;
           font-size: 11px;
           text-align: center;
@@ -1148,7 +1157,7 @@ export default function Fortune2026Page() {
 
         .resultTitle > span {
           display: block;
-          color: #a17a36;
+          color: #a97924;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 2px;
@@ -1156,58 +1165,67 @@ export default function Fortune2026Page() {
 
         .resultTitle h2 {
           margin: 8px 0 0;
-          color: #2f2a24;
+          color: #17243a;
           font-size: 28px;
         }
 
         .resultTitle p {
           margin: 10px 0 0;
-          color: #81796e;
+          color: #786f64;
           font-size: 13px;
         }
 
         .profileGrid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 12px;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .profileCard {
-          padding: 18px;
+          padding: 18px 14px;
           border: 1px solid #e0d4c1;
-          border-radius: 14px;
-          background: #fffaf2;
+          border-radius: 15px;
+          background: #fbf6ed;
           text-align: center;
         }
 
         .profileCard span {
           display: block;
-          color: #a17a36;
+          color: #a97924;
           font-size: 9px;
           font-weight: 900;
-          letter-spacing: 1.4px;
+          letter-spacing: 1.3px;
         }
 
         .profileCard strong {
           display: block;
           margin-top: 7px;
-          color: #302b24;
-          font-size: 21px;
+          color: #17243a;
+          font-size: 19px;
         }
 
         .profileCard p {
           margin: 5px 0 0;
-          color: #81796e;
+          color: #7b7368;
           font-size: 11px;
         }
 
+        .resultBody {
+          overflow: hidden;
+          border: 1px solid #dfd4c2;
+          border-radius: 18px;
+          background: #fffdfa;
+          box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
+        }
+
         .noticeBox {
-          margin-top: 26px;
+          margin-top: 22px;
           padding: 18px;
+          border: 1px solid #eadcc5;
           border-radius: 14px;
-          background: #f5f0e7;
-          color: #777066;
+          background: #f7f2e9;
+          color: #756d62;
           font-size: 12px;
           line-height: 1.8;
           text-align: center;
@@ -1218,10 +1236,10 @@ export default function Fortune2026Page() {
           width: 100%;
           min-height: 54px;
           margin-top: 18px;
-          border: 1px solid #cdbd9e;
-          border-radius: 11px;
-          background: #fffaf0;
-          color: #765b29;
+          border: 1px solid #d3bd94;
+          border-radius: 12px;
+          background: #fffaf1;
+          color: #805d21;
           font-size: 14px;
           font-weight: 900;
           cursor: pointer;
@@ -1247,22 +1265,29 @@ export default function Fortune2026Page() {
 
         @media (max-width: 680px) {
           .fortune2026Page {
-            width: min(100% - 28px, 980px);
-            padding: 42px 0 70px;
+            width: min(100% - 24px, 980px);
+            padding: 30px 0 58px;
+          }
+
+          .fortune2026Hero {
+            margin-bottom: 22px;
           }
 
           .fortune2026Hero h1 {
-            font-size: 34px;
+            font-size: 30px;
           }
 
           .fortune2026Hero p {
             font-size: 14px;
-            line-height: 1.8;
           }
 
           .fortune2026Form {
-            padding: 18px;
-            border-radius: 17px;
+            padding: 20px 18px;
+            border-radius: 20px;
+          }
+
+          .formTitle h2 {
+            font-size: 18px;
           }
 
           .formGrid {
@@ -1273,61 +1298,47 @@ export default function Fortune2026Page() {
             grid-column: auto;
           }
 
-          .birthPicker {
-            padding: 12px 9px;
-          }
-
-          .birthPickerHeader {
-            grid-template-columns: 34px 1fr 34px;
-            gap: 6px;
-          }
-
-          .birthPickerHeader > button {
-            width: 34px;
-            height: 38px;
-          }
-
-          .birthPickerSelects {
-            gap: 6px;
-          }
-
-          .profileGrid {
-            grid-template-columns: 1fr 1fr;
+          .analysisGuide {
+            padding: 18px 15px;
           }
 
           .resultTitle h2 {
             font-size: 23px;
           }
-        }
 
-        @media (max-width: 420px) {
           .profileGrid {
-            grid-template-columns: 1fr;
+            gap: 9px;
+          }
+
+          .profileCard {
+            padding: 15px 10px;
           }
         }
       `}</style>
 
       <style jsx global>{`
+        body {
+          background:
+            radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
+            linear-gradient(180deg, #f7f2e8 0%, #fbf8f1 58%, #f5efe4 100%);
+        }
+
         .premiumFortune2026Result {
           display: grid;
           gap: 22px;
+          padding: 0;
         }
 
         .fortune2026IntroCard {
           padding: 24px 26px;
-          border: 1px solid #e3d8c5;
-          border-radius: 16px;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(183, 143, 72, 0.09),
-              rgba(255, 253, 249, 0.8)
-            );
+          border-bottom: 1px solid #e4d8c6;
+          background: linear-gradient(135deg, #f5ead7, #fffaf1);
         }
 
         .fortune2026IntroMark {
+          display: block;
           margin-bottom: 10px;
-          color: #9a722e;
+          color: #a97924;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 1.8px;
@@ -1335,50 +1346,41 @@ export default function Fortune2026Page() {
 
         .fortune2026SectionGrid {
           display: grid;
-          gap: 24px;
+          gap: 20px;
+          padding: 0 22px 22px;
         }
 
         .fortune2026AnalysisCard {
           overflow: hidden;
-          border: 1px solid #d8c8ab;
-          border-radius: 18px;
-          background: #fffdf9;
-          box-shadow: 0 12px 30px rgba(79, 61, 31, 0.08);
+          border: 1px solid #dfd4c2;
+          border-radius: 16px;
+          background: #fffdfa;
         }
 
         .fortune2026AnalysisHeader {
           display: flex;
           align-items: center;
-          gap: 18px;
-          padding: 22px 24px 19px;
-          border-bottom: 1px solid #dcc9a9;
-          background:
-            linear-gradient(
-              135deg,
-              #f2e6cf 0%,
-              #fffaf2 100%
-            );
+          gap: 17px;
+          padding: 20px 22px 18px;
+          border-bottom: 1px solid #dec99f;
+          background: linear-gradient(135deg, #f1e4ca 0%, #fffaf2 100%);
         }
 
         .fortune2026SectionNumber,
         .fortune2026SummaryMark {
           display: flex;
-          width: 54px;
-          height: 54px;
-          flex: 0 0 54px;
+          width: 50px;
+          height: 50px;
+          flex: 0 0 50px;
           align-items: center;
           justify-content: center;
-          border: 1px solid #9a722e;
+          border: 1px solid #b9862e;
           border-radius: 50%;
-          background: #9a722e;
+          background: #b9862e;
           color: #fff;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 900;
           box-shadow: 0 5px 14px rgba(154, 114, 46, 0.18);
-        }
-
-        .fortune2026SummaryMark {
-          font-size: 20px;
         }
 
         .fortune2026SectionTitleWrap {
@@ -1389,40 +1391,43 @@ export default function Fortune2026Page() {
         .fortune2026SectionLabel {
           display: block;
           margin-bottom: 5px;
-          color: #a17a36;
+          color: #a97924;
           font-size: 10px;
           font-weight: 900;
-          letter-spacing: 1.7px;
+          letter-spacing: 1.6px;
         }
 
         .fortune2026SectionTitleWrap h3 {
           margin: 0;
-          color: #302b24;
-          font-size: 20px;
+          color: #17243a;
+          font-size: 19px;
           line-height: 1.45;
         }
 
         .fortune2026AnalysisContent {
-          padding: 22px 26px 25px;
-          background: #fffdf9;
+          padding: 21px 24px 24px;
         }
 
         .fortune2026Paragraph {
           margin: 0 0 13px;
-          color: #625b50;
+          color: #5f5a52;
           font-size: 15px;
           line-height: 1.95;
           word-break: keep-all;
         }
 
+        .fortune2026Paragraph:last-child {
+          margin-bottom: 0;
+        }
+
         .fortune2026HeadingSmall {
           margin: 20px 0 10px;
-          color: #6f5527;
+          color: #76541c;
           font-size: 16px;
           line-height: 1.6;
         }
 
-        .fortune2026List {
+        .fortune2026ResultList {
           display: grid;
           gap: 9px;
           margin: 15px 0 4px;
@@ -1430,9 +1435,10 @@ export default function Fortune2026Page() {
           list-style: none;
         }
 
-        .fortune2026List li {
+        .fortune2026ResultList li {
           position: relative;
-          padding: 13px 15px 13px 38px;
+          margin: 0;
+          padding: 13px 15px 13px 36px;
           border-radius: 11px;
           background: #f7f2e9;
           color: #5d564c;
@@ -1440,27 +1446,14 @@ export default function Fortune2026Page() {
           line-height: 1.75;
         }
 
-        .fortune2026List li::before {
-          content: "◆";
+        .fortune2026ResultList li::before {
+          content: "•";
           position: absolute;
-          top: 13px;
-          left: 15px;
-          color: #a77d36;
-          font-size: 9px;
-        }
-
-        .fortune2026AnalysisCard:last-child {
-          border: 2px solid #c5a66d;
-        }
-
-        .fortune2026AnalysisCard:last-child
-          .fortune2026AnalysisHeader {
-          background:
-            linear-gradient(
-              135deg,
-              #ead7ae,
-              #fff8e8
-            );
+          top: 10px;
+          left: 16px;
+          color: #b9862e;
+          font-size: 20px;
+          font-weight: 900;
         }
 
         @media (max-width: 680px) {
@@ -1468,26 +1461,30 @@ export default function Fortune2026Page() {
             gap: 16px;
           }
 
-          .fortune2026SectionGrid {
-            gap: 18px;
+          .fortune2026IntroCard {
+            padding: 19px 17px;
           }
 
-          .fortune2026AnalysisCard {
-            border-radius: 15px;
+          .fortune2026SectionGrid {
+            gap: 15px;
+            padding: 0 14px 16px;
           }
 
           .fortune2026AnalysisHeader {
-            align-items: flex-start;
             gap: 12px;
-            padding: 18px 16px 16px;
+            padding: 17px 15px;
           }
 
           .fortune2026SectionNumber,
           .fortune2026SummaryMark {
-            width: 44px;
-            height: 44px;
-            flex-basis: 44px;
-            font-size: 14px;
+            width: 43px;
+            height: 43px;
+            flex-basis: 43px;
+            font-size: 13px;
+          }
+
+          .fortune2026SectionTitleWrap h3 {
+            font-size: 17px;
           }
 
           .fortune2026AnalysisContent {
@@ -1496,12 +1493,7 @@ export default function Fortune2026Page() {
 
           .fortune2026Paragraph {
             font-size: 14px;
-            line-height: 1.9;
-            word-break: normal;
-          }
-
-          .fortune2026SectionTitleWrap h3 {
-            font-size: 18px;
+            line-height: 1.85;
           }
         }
       `}</style>
