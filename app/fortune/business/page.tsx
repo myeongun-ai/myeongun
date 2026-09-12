@@ -737,7 +737,12 @@ export default function BusinessFortunePage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={
+              loading ||
+              !form.name.trim() ||
+              !form.birth ||
+              !form.time
+            }
               className="analyzeButton"
             >
               {loading
