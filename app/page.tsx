@@ -619,7 +619,7 @@ export default function Home() {
               <Link
                 key={card.title}
                 href={card.href}
-                className="homeServiceCard"
+                className={`homeServiceCard ${card.title === "AI 상담" ? "homeServiceAiCard" : ""}`}
               >
                 <div className="homeServiceImageWrap">
                   <img
@@ -1168,6 +1168,9 @@ export default function Home() {
           text-decoration: none;
           box-shadow: 0 13px 30px rgba(35,28,18,.075);
           transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+        .homeServiceAiCard {
+          min-width: 0;
         }
         .homeServiceCard:hover {
           transform: translateY(-5px);
@@ -2350,7 +2353,7 @@ export default function Home() {
           }
 
           /* The fifth service (AI 상담) spans the full mobile width. */
-          .homeServiceGrid > .homeServiceCard:nth-child(5) {
+          .homeServiceGrid > .homeServiceAiCard {
             grid-column: 1 / -1 !important;
             width: 100% !important;
             max-width: none !important;
@@ -2358,27 +2361,27 @@ export default function Home() {
             grid-template-columns: minmax(0, 42%) minmax(0, 58%) !important;
             align-items: stretch;
           }
-          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceImageWrap {
+          .homeServiceGrid > .homeServiceAiCard .homeServiceImageWrap {
             width: 100%;
             height: 100%;
             min-height: 154px;
             aspect-ratio: auto !important;
           }
-          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceImage {
+          .homeServiceGrid > .homeServiceAiCard .homeServiceImage {
             height: 100%;
             object-fit: cover;
           }
-          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceBody {
+          .homeServiceGrid > .homeServiceAiCard .homeServiceBody {
             min-width: 0;
             min-height: 154px;
             padding: 14px 13px;
             justify-content: center;
           }
-          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceBody p {
+          .homeServiceGrid > .homeServiceAiCard .homeServiceBody p {
             min-height: 0;
             margin-bottom: 12px;
           }
-          .homeServiceGrid > .homeServiceCard:nth-child(5) .homeServiceButton {
+          .homeServiceGrid > .homeServiceAiCard .homeServiceButton {
             width: 100%;
           }
 
