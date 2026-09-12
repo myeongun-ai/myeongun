@@ -1051,7 +1051,7 @@ export default function BusinessFortunePage() {
 
         .analyzeButton:disabled {
           opacity: 0.65;
-          cursor: wait;
+          cursor: default;
         }
 
         .privacyText {

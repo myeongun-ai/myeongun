@@ -1114,7 +1114,7 @@ export default function Fortune2026Page() {
           border: 1px solid #d8c7a7;
           background: #e8dcc6;
           color: #142137;
-          cursor: not-allowed;
+          cursor: default;
           opacity: 1;
           box-shadow: none;
           transform: none;

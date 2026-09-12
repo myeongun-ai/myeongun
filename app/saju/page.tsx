@@ -369,7 +369,6 @@ export default function SajuPage() {
       }
 
       localStorage.setItem("myeongun_saju", JSON.stringify(payload));
-      localStorage.setItem("myeongun_my_saju_registered", "1");
       localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
 
       const resultText = String(parsed?.result || "").trim();
@@ -377,14 +376,6 @@ export default function SajuPage() {
       if (!resultText) {
         throw new Error("무료 사주 결과를 불러오지 못했습니다.");
       }
-
-      localStorage.setItem(
-        "myeongun_recent_saju",
-        JSON.stringify({
-          usedAt: new Date().toISOString(),
-          name: payload.name,
-        })
-      );
 
       setFreeResult(resultText);
       setYongshin(parsed?.yongshin || null);
@@ -402,12 +393,12 @@ export default function SajuPage() {
   const fieldStyle = {
     width: "100%",
     boxSizing: "border-box",
-    minHeight: "58px",
+    minHeight: "56px",
     padding: "0 18px",
-    border: "1px solid #343847",
+    border: "1px solid #ddd2bf",
     borderRadius: "12px",
-    background: "#0d1017",
-    color: "#f4f3ee",
+    background: "#fffdfa",
+    color: "#17243a",
     fontSize: "16px",
     outline: "none",
   } as const;
@@ -415,18 +406,18 @@ export default function SajuPage() {
   const labelStyle = {
     display: "grid",
     gap: "10px",
-    color: "#f5f1e8",
+    color: "#17243a",
     fontSize: "15px",
-    fontWeight: 700,
+    fontWeight: 800,
   } as const;
 
   const smallButtonStyle = {
     minHeight: "42px",
-    border: "1px solid #414657",
+    border: "1px solid #d9c9ad",
     borderRadius: "10px",
-    background: "#171b24",
-    color: "#f5f1e8",
-    fontWeight: 700,
+    background: "#fffaf1",
+    color: "#8b651f",
+    fontWeight: 800,
     cursor: "pointer",
   } as const;
 
@@ -460,7 +451,6 @@ export default function SajuPage() {
                 display: "grid",
                 gridTemplateColumns: "1fr auto",
                 gap: "8px",
-                alignItems: "stretch",
               }}
             >
               <input
@@ -695,11 +685,11 @@ export default function SajuPage() {
       <style jsx>{`
         .sajuPage {
           min-height: 100vh;
-          padding: 48px 20px 80px;
+          padding: 58px 20px 82px;
           background:
-            radial-gradient(circle at 50% 15%, rgba(47, 55, 84, 0.28), transparent 36%),
-            linear-gradient(180deg, #0a0d14 0%, #070910 100%);
-          color: #f4f3ee;
+            radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
+            linear-gradient(180deg, #f7f2e8 0%, #fbf8f1 58%, #f5efe4 100%);
+          color: #17243a;
         }
 
         .sajuCard,
@@ -707,18 +697,14 @@ export default function SajuPage() {
           width: 100%;
           max-width: 900px;
           margin: 0 auto;
-          border: 1px solid rgba(218, 171, 84, 0.32);
-          border-radius: 30px;
-          background: linear-gradient(
-            180deg,
-            rgba(23, 27, 40, 0.96),
-            rgba(17, 21, 32, 0.98)
-          );
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+          border: 1px solid #dfd4c2;
+          border-radius: 26px;
+          background: rgba(255, 253, 249, 0.97);
+          box-shadow: 0 24px 60px rgba(31, 39, 53, 0.09);
         }
 
         .sajuCard {
-          padding: 48px 38px 36px;
+          padding: 46px 38px 34px;
         }
 
         .pageHeader {
@@ -729,51 +715,45 @@ export default function SajuPage() {
         .eyebrow,
         .resultEyebrow,
         .premiumEyebrow {
-          color: #e2ad47;
-          font-size: 13px;
-          font-weight: 700;
+          color: #a97924;
+          font-size: 12px;
+          font-weight: 800;
           letter-spacing: 3px;
         }
 
         .pageHeader h1 {
-          margin: 12px 0;
-          color: #fff;
+          margin: 12px 0 10px;
+          color: #17243a;
           font-size: 38px;
           line-height: 1.25;
-          font-weight: 800;
+          font-weight: 900;
+          letter-spacing: -0.04em;
         }
 
         .pageHeader p {
           margin: 0;
-          color: #9fa4b2;
+          color: #786f64;
           font-size: 16px;
         }
 
         .calendarButton {
           min-width: 78px;
-          min-height: 58px;
-          height: 58px;
-          box-sizing: border-box;
-          align-self: stretch;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid #343847;
+          border: 1px solid #d9c9ad;
           border-radius: 12px;
-          background: #202636;
-          color: #e8bf6c;
+          background: #f6efe2;
+          color: #8b651f;
           font-size: 14px;
-          font-weight: 800;
-          line-height: 1;
+          font-weight: 900;
           cursor: pointer;
         }
 
         .datePicker {
           margin-top: 14px;
           padding: 16px;
-          border: 1px solid #353b4d;
+          border: 1px solid #dfd4c2;
           border-radius: 16px;
-          background: #111722;
+          background: #fffaf1;
+          box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
         }
 
         .pickerTop {
@@ -793,25 +773,26 @@ export default function SajuPage() {
 
         .calendarDayName {
           padding: 8px 0;
-          color: #d8a449;
+          color: #a97924;
           font-size: 12px;
-          font-weight: 700;
+          font-weight: 800;
         }
 
         .calendarDay {
           min-height: 42px;
-          border: none;
+          border: 1px solid #eee4d4;
           border-radius: 10px;
-          background: #1b2130;
-          color: #e9e8e2;
+          background: #fff;
+          color: #243148;
           font-size: 14px;
           cursor: pointer;
         }
 
         .calendarDay.selected {
-          background: #dfab4f;
-          color: #14171d;
-          font-weight: 800;
+          border-color: #c99535;
+          background: #dcae52;
+          color: #152136;
+          font-weight: 900;
         }
 
         .pickerBottom {
@@ -825,12 +806,12 @@ export default function SajuPage() {
         .darkSelect {
           width: 100%;
           box-sizing: border-box;
-          min-height: 58px;
+          min-height: 56px;
           padding: 0 18px;
-          border: 1px solid #343847;
+          border: 1px solid #ddd2bf;
           border-radius: 12px;
-          background: #0d1017;
-          color: #f4f3ee;
+          background: #fffdfa;
+          color: #17243a;
           font-size: 16px;
           outline: none;
           cursor: pointer;
@@ -838,14 +819,14 @@ export default function SajuPage() {
 
         .timeSelect:focus,
         .darkSelect:focus {
-          border-color: #c69236;
-          box-shadow: 0 0 0 2px rgba(198, 146, 54, 0.12);
+          border-color: #b9862e;
+          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
         }
 
         .timeSelect option,
         .darkSelect option {
           background: #fff;
-          color: #1c2028;
+          color: #17243a;
         }
 
         .twoCol {
@@ -857,39 +838,34 @@ export default function SajuPage() {
 
         .errorMessage {
           margin: 18px 0 0;
-          color: #ff8f85;
+          color: #b44237;
           font-size: 13px;
           line-height: 1.7;
         }
 
         .submitButton {
           width: 100%;
-          min-height: 62px;
+          min-height: 60px;
           margin-top: 28px;
-          border: none;
+          border: 1px solid #c99535;
           border-radius: 14px;
-          background: linear-gradient(
-            90deg,
-            #dca747 0%,
-            #efbd5e 50%,
-            #dca747 100%
-          );
-          color: #17191e;
-          font-size: 18px;
+          background: linear-gradient(90deg, #d7a746 0%, #f0c66d 50%, #d7a746 100%);
+          color: #142137;
+          font-size: 17px;
           font-weight: 900;
           cursor: pointer;
-          box-shadow: 0 10px 30px rgba(220, 167, 71, 0.18);
+          box-shadow: 0 12px 28px rgba(183, 132, 39, 0.17);
         }
 
         .submitButton:disabled {
           opacity: 0.65;
-          cursor: wait;
+          cursor: default;
         }
 
         .privacyText {
-          margin: 18px 0 0;
+          margin: 17px 0 0;
           text-align: center;
-          color: #868d9d;
+          color: #8d857a;
           font-size: 12px;
           line-height: 1.7;
         }
@@ -901,36 +877,37 @@ export default function SajuPage() {
 
         .resultCard h2 {
           margin: 12px 0 20px;
-          color: #f5e7c2;
+          color: #17243a;
           font-size: 28px;
         }
 
         .resultText {
           padding: 24px;
+          border: 1px solid #e8dfd1;
           border-radius: 16px;
-          background: rgba(255,255,255,0.045);
-          color: #d4d6df;
+          background: #f8f3ea;
+          color: #4d4b47;
           font-size: 15px;
           line-height: 1.95;
         }
 
         .resultText :global(.resultHeadingLarge) {
           margin: 26px 0 12px;
-          color: #f5e7c2;
+          color: #17243a;
           font-size: 24px;
           line-height: 1.4;
         }
 
         .resultText :global(.resultHeading) {
           margin: 24px 0 10px;
-          color: #e7b85c;
+          color: #9a6d20;
           font-size: 20px;
           line-height: 1.45;
         }
 
         .resultText :global(.resultHeadingSmall) {
           margin: 20px 0 8px;
-          color: #f1d89e;
+          color: #72511a;
           font-size: 17px;
           line-height: 1.5;
         }
@@ -949,33 +926,29 @@ export default function SajuPage() {
         }
 
         .resultText :global(strong) {
-          color: #fff0c9;
-          font-weight: 800;
+          color: #17243a;
+          font-weight: 900;
         }
 
         .premiumBox {
           margin-top: 26px;
           padding: 28px;
-          border: 1px solid rgba(218,170,88,0.25);
+          border: 1px solid #dec99f;
           border-radius: 18px;
-          background: linear-gradient(
-            135deg,
-            rgba(218,170,88,0.12),
-            rgba(255,255,255,0.03)
-          );
+          background: linear-gradient(135deg, #f5ead4, #fffaf1);
           text-align: center;
         }
 
         .premiumBox h3 {
           margin: 10px 0;
-          color: #f5e7c2;
+          color: #17243a;
           font-size: 23px;
         }
 
         .premiumBox p {
           max-width: 680px;
           margin: 0 auto 20px;
-          color: #aeb1bd;
+          color: #6f685e;
           font-size: 14px;
           line-height: 1.8;
         }
@@ -987,8 +960,8 @@ export default function SajuPage() {
           min-height: 54px;
           padding: 0 28px;
           border-radius: 12px;
-          background: #dbaa58;
-          color: #111;
+          background: #b9852c;
+          color: #fff;
           text-decoration: none;
           font-size: 15px;
           font-weight: 900;
@@ -996,17 +969,21 @@ export default function SajuPage() {
 
         @media (max-width: 640px) {
           .sajuPage {
-            padding: 24px 12px 60px;
+            padding: 30px 12px 58px;
           }
 
           .sajuCard,
           .resultCard {
-            padding: 34px 18px 28px;
-            border-radius: 22px;
+            padding: 30px 18px 26px;
+            border-radius: 20px;
+          }
+
+          .pageHeader {
+            margin-bottom: 28px;
           }
 
           .pageHeader h1 {
-            font-size: 31px;
+            font-size: 30px;
           }
 
           .pageHeader p {
