@@ -1061,49 +1061,51 @@ export default function CompatibilityPage() {
 
       <style jsx>{`
         .compatPage {
-          width: min(1120px, calc(100% - 32px));
+          width: min(1120px, calc(100% - 40px));
           margin: 0 auto;
-          padding: 68px 0 90px;
-          color: #342f28;
+          padding: 58px 0 82px;
+          color: #17243a;
         }
 
         .compatHero {
           max-width: 760px;
-          margin: 0 auto 34px;
+          margin: 0 auto 30px;
           text-align: center;
         }
 
         .eyebrow {
           display: block;
           margin-bottom: 11px;
-          color: #a17a36;
-          font-size: 11px;
+          color: #a97924;
+          font-size: 12px;
           font-weight: 900;
-          letter-spacing: 2.2px;
+          letter-spacing: 2.6px;
         }
 
         .compatHero h1 {
           margin: 0;
-          color: #28241f;
-          font-size: 42px;
+          color: #17243a;
+          font-size: 38px;
           line-height: 1.25;
+          font-weight: 900;
+          letter-spacing: -0.04em;
         }
 
         .compatHero p {
           max-width: 680px;
-          margin: 17px auto 0;
-          color: #777066;
-          font-size: 15px;
-          line-height: 1.9;
+          margin: 14px auto 0;
+          color: #786f64;
+          font-size: 16px;
+          line-height: 1.8;
           word-break: keep-all;
         }
 
         .compatForm {
-          padding: 30px;
-          border: 1px solid #e2d8c8;
-          border-radius: 22px;
-          background: #fffdf9;
-          box-shadow: 0 14px 38px rgba(66, 52, 30, 0.06);
+          padding: 34px;
+          border: 1px solid #dfd4c2;
+          border-radius: 26px;
+          background: rgba(255, 253, 249, 0.97);
+          box-shadow: 0 24px 60px rgba(31, 39, 53, 0.09);
         }
 
         .personGrid {
@@ -1115,9 +1117,9 @@ export default function CompatibilityPage() {
 
         .personCard {
           padding: 26px;
-          border: 1px solid #e3d8c5;
+          border: 1px solid #e4d8c6;
           border-radius: 18px;
-          background: #fffaf2;
+          background: #fbf6ed;
         }
 
         .personCardHeader {
@@ -1126,7 +1128,7 @@ export default function CompatibilityPage() {
           gap: 15px;
           margin-bottom: 24px;
           padding-bottom: 18px;
-          border-bottom: 1px solid #e8ddcb;
+          border-bottom: 1px solid #e6dac8;
         }
 
         .personNumber {
@@ -1136,18 +1138,20 @@ export default function CompatibilityPage() {
           flex: 0 0 48px;
           align-items: center;
           justify-content: center;
+          border: 1px solid #c99535;
           border-radius: 50%;
-          background: #9a722e;
+          background: linear-gradient(135deg, #c89232, #e2b252);
           color: #fff;
           font-size: 14px;
           font-weight: 900;
           letter-spacing: 1px;
+          box-shadow: 0 7px 16px rgba(183, 132, 39, 0.18);
         }
 
         .personLabel {
           display: block;
           margin-bottom: 3px;
-          color: #a17a36;
+          color: #a97924;
           font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.5px;
@@ -1155,7 +1159,7 @@ export default function CompatibilityPage() {
 
         .personCardHeader h2 {
           margin: 0;
-          color: #302b24;
+          color: #17243a;
           font-size: 20px;
         }
 
@@ -1171,10 +1175,10 @@ export default function CompatibilityPage() {
           height: 42px;
           align-items: center;
           justify-content: center;
-          border: 1px solid #ddccb0;
+          border: 1px solid #decba9;
           border-radius: 50%;
-          background: #fff;
-          color: #9a722e;
+          background: #fffdfa;
+          color: #a87828;
           font-size: 24px;
         }
 
@@ -1195,22 +1199,22 @@ export default function CompatibilityPage() {
         .field > span {
           display: block;
           margin-bottom: 8px;
-          color: #625b50;
-          font-size: 13px;
+          color: #17243a;
+          font-size: 14px;
           font-weight: 800;
         }
 
         .field input,
         .field select {
           width: 100%;
-          min-height: 48px;
+          min-height: 54px;
           box-sizing: border-box;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
+          border: 1px solid #ddd2bf;
+          border-radius: 12px;
           outline: none;
-          background: #fff;
-          padding: 0 13px;
-          color: #39342d;
+          background: #fffdfa;
+          padding: 0 15px;
+          color: #17243a;
           font: inherit;
           font-size: 14px;
         }
@@ -1227,19 +1231,19 @@ export default function CompatibilityPage() {
         }
 
         .timeFieldRow input:disabled {
-          background: #f4efe6;
+          background: #f1ece3;
           color: #9a9286;
           cursor: not-allowed;
           opacity: 1;
         }
 
         .unknownTimeButton {
-          min-height: 48px;
+          min-height: 54px;
           box-sizing: border-box;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
-          background: #fff;
-          color: #71695e;
+          border: 1px solid #ddd2bf;
+          border-radius: 12px;
+          background: #fffdfa;
+          color: #6f685e;
           font: inherit;
           font-size: 13px;
           font-weight: 800;
@@ -1247,29 +1251,29 @@ export default function CompatibilityPage() {
         }
 
         .unknownTimeButton.active {
-          border-color: #9a722e;
-          background: #9a722e;
+          border-color: #b9862e;
+          background: #b9862e;
           color: #fff;
         }
 
         .field input:focus,
         .field select:focus {
-          border-color: #b49358;
-          box-shadow: 0 0 0 3px rgba(180, 147, 88, 0.1);
+          border-color: #b9862e;
+          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
         }
 
         .birthPickerButton {
           display: flex;
           width: 100%;
-          min-height: 48px;
+          min-height: 54px;
           box-sizing: border-box;
           align-items: center;
           justify-content: space-between;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
-          background: #fff;
-          padding: 0 13px;
-          color: #39342d;
+          border: 1px solid #ddd2bf;
+          border-radius: 12px;
+          background: #fffdfa;
+          padding: 0 15px;
+          color: #17243a;
           font: inherit;
           font-size: 14px;
           cursor: pointer;
@@ -1277,17 +1281,17 @@ export default function CompatibilityPage() {
 
         .birthPickerButton:focus {
           outline: none;
-          border-color: #b49358;
-          box-shadow: 0 0 0 3px rgba(180, 147, 88, 0.1);
+          border-color: #b9862e;
+          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
         }
 
         .birthPicker {
           margin-top: 8px;
           padding: 14px;
-          border: 1px solid #dcd2c3;
-          border-radius: 12px;
-          background: #fff;
-          box-shadow: 0 10px 25px rgba(66, 52, 30, 0.1);
+          border: 1px solid #dfd4c2;
+          border-radius: 14px;
+          background: #fffaf1;
+          box-shadow: 0 12px 28px rgba(31, 39, 53, 0.09);
         }
 
         .birthPickerHeader {
@@ -1301,10 +1305,10 @@ export default function CompatibilityPage() {
         .birthPickerHeader > button {
           width: 38px;
           height: 38px;
-          border: 1px solid #ddd2c0;
+          border: 1px solid #d9c9ad;
           border-radius: 9px;
-          background: #fffaf2;
-          color: #8b682d;
+          background: #fffaf1;
+          color: #8b651f;
           font-size: 22px;
           cursor: pointer;
         }
@@ -1318,11 +1322,11 @@ export default function CompatibilityPage() {
         .birthPickerSelects select {
           width: 100%;
           min-height: 38px;
-          border: 1px solid #ddd2c0;
+          border: 1px solid #ddd2bf;
           border-radius: 8px;
           background: #fff;
           padding: 0 8px;
-          color: #39342d;
+          color: #17243a;
           font-size: 14px;
         }
 
@@ -1365,7 +1369,7 @@ export default function CompatibilityPage() {
         }
 
         .birthPickerDays button.selected {
-          background: #9a722e;
+          background: #b9862e;
           color: #fff;
           font-weight: 900;
         }
@@ -1377,33 +1381,34 @@ export default function CompatibilityPage() {
         }
 
         .toggleGroup button {
-          min-height: 46px;
-          border: 1px solid #dcd2c3;
-          border-radius: 10px;
-          background: #fff;
-          color: #71695e;
+          min-height: 48px;
+          border: 1px solid #ddd2bf;
+          border-radius: 11px;
+          background: #fffdfa;
+          color: #6f685e;
           font-size: 14px;
           font-weight: 800;
           cursor: pointer;
         }
 
         .toggleGroup button.active {
-          border-color: #9a722e;
-          background: #9a722e;
+          border-color: #b9862e;
+          background: #b9862e;
           color: #fff;
         }
 
         .analysisGuide {
           margin-top: 24px;
-          padding: 20px 22px;
-          border-radius: 15px;
-          background: #f5f0e7;
+          padding: 21px 22px;
+          border: 1px solid #eadcc5;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #f7eddc, #fffaf1);
           text-align: center;
         }
 
         .analysisGuide span {
           display: block;
-          color: #a17a36;
+          color: #a97924;
           font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.7px;
@@ -1412,14 +1417,14 @@ export default function CompatibilityPage() {
         .analysisGuide strong {
           display: block;
           margin-top: 7px;
-          color: #3d372f;
+          color: #17243a;
           font-size: 16px;
         }
 
         .analysisGuide p {
           max-width: 760px;
           margin: 8px auto 0;
-          color: #777066;
+          color: #756d62;
           font-size: 13px;
           line-height: 1.8;
           word-break: keep-all;
@@ -1428,21 +1433,21 @@ export default function CompatibilityPage() {
         .analyzeButton {
           display: block;
           width: 100%;
-          min-height: 58px;
+          min-height: 60px;
           margin-top: 22px;
-          border: 0;
-          border-radius: 12px;
-          background: #9a722e;
-          color: #fff;
-          font-size: 16px;
+          border: 1px solid #c99535;
+          border-radius: 14px;
+          background: linear-gradient(90deg, #c89232 0%, #e6b95a 50%, #c89232 100%);
+          color: #142137;
+          font-size: 17px;
           font-weight: 900;
           cursor: pointer;
+          box-shadow: 0 12px 28px rgba(183, 132, 39, 0.17);
           transition: 0.2s ease;
         }
 
         .analyzeButton:hover:not(:disabled) {
           transform: translateY(-1px);
-          background: #876324;
         }
 
         .analyzeButton:disabled {
@@ -1456,7 +1461,7 @@ export default function CompatibilityPage() {
         }
 
         .privacyText {
-          margin: 10px 0 0;
+          margin: 11px 0 0;
           color: #938a7d;
           font-size: 11px;
           text-align: center;
@@ -1485,7 +1490,7 @@ export default function CompatibilityPage() {
 
         .resultTitle > span {
           display: block;
-          color: #a17a36;
+          color: #a97924;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 2px;
@@ -1493,13 +1498,13 @@ export default function CompatibilityPage() {
 
         .resultTitle h2 {
           margin: 8px 0 0;
-          color: #2f2a24;
+          color: #17243a;
           font-size: 28px;
         }
 
         .resultTitle p {
           margin: 10px 0 0;
-          color: #81796e;
+          color: #786f64;
           font-size: 13px;
         }
 
@@ -1515,11 +1520,11 @@ export default function CompatibilityPage() {
           padding: 22px;
           border: 1px solid #e0d4c1;
           border-radius: 16px;
-          background: #fffaf2;
+          background: #fbf6ed;
         }
 
         .summaryCard > span {
-          color: #a17a36;
+          color: #a97924;
           font-size: 9px;
           font-weight: 900;
           letter-spacing: 1.5px;
@@ -1528,7 +1533,7 @@ export default function CompatibilityPage() {
         .summaryCard > strong {
           display: block;
           margin-top: 6px;
-          color: #302b24;
+          color: #17243a;
           font-size: 20px;
         }
 
@@ -1541,7 +1546,7 @@ export default function CompatibilityPage() {
           justify-content: space-between;
           gap: 14px;
           padding: 9px 0;
-          border-top: 1px solid #ebe2d5;
+          border-top: 1px solid #e8dece;
         }
 
         .summaryCard dt {
@@ -1558,17 +1563,18 @@ export default function CompatibilityPage() {
         }
 
         .summaryHeart {
-          color: #b38a46;
-          font-size: 26px;
+          color: #b9862e;
+          font-size: 28px;
           text-align: center;
         }
 
         .noticeBox {
           margin-top: 26px;
           padding: 18px;
+          border: 1px solid #eadcc5;
           border-radius: 14px;
-          background: #f5f0e7;
-          color: #777066;
+          background: #f7f2e9;
+          color: #756d62;
           font-size: 12px;
           line-height: 1.8;
           text-align: center;
@@ -1579,10 +1585,10 @@ export default function CompatibilityPage() {
           width: 100%;
           min-height: 54px;
           margin-top: 18px;
-          border: 1px solid #cdbd9e;
-          border-radius: 11px;
-          background: #fffaf0;
-          color: #765b29;
+          border: 1px solid #d3bd94;
+          border-radius: 12px;
+          background: #fffaf1;
+          color: #805d21;
           font-size: 14px;
           font-weight: 900;
           cursor: pointer;
@@ -1623,16 +1629,16 @@ export default function CompatibilityPage() {
 
         @media (max-width: 680px) {
           .compatPage {
-            width: min(100% - 28px, 1120px);
-            padding: 42px 0 70px;
+            width: min(100% - 24px, 1120px);
+            padding: 30px 0 58px;
           }
 
           .compatHero {
-            margin-bottom: 24px;
+            margin-bottom: 22px;
           }
 
           .compatHero h1 {
-            font-size: 34px;
+            font-size: 30px;
           }
 
           .compatHero p {
@@ -1642,7 +1648,7 @@ export default function CompatibilityPage() {
 
           .compatForm {
             padding: 18px;
-            border-radius: 17px;
+            border-radius: 20px;
           }
 
           .personCard {
@@ -1687,6 +1693,12 @@ export default function CompatibilityPage() {
       `}</style>
 
       <style jsx global>{`
+        body {
+          background:
+            radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
+            linear-gradient(180deg, #f7f2e8 0%, #fbf8f1 58%, #f5efe4 100%);
+        }
+
         .premiumCompatibilityResult {
           display: grid;
           gap: 22px;
@@ -1694,20 +1706,15 @@ export default function CompatibilityPage() {
 
         .compatIntroCard {
           padding: 24px 26px;
-          border: 1px solid #e3d8c5;
+          border: 1px solid #e4d8c6;
           border-radius: 16px;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(183, 143, 72, 0.09),
-              rgba(255, 253, 249, 0.8)
-            );
+          background: linear-gradient(135deg, #f5ead7, #fffaf1);
         }
 
         .compatIntroMark {
           display: block;
           margin-bottom: 10px;
-          color: #9a722e;
+          color: #a97924;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 1.8px;
@@ -1720,10 +1727,10 @@ export default function CompatibilityPage() {
 
         .compatAnalysisCard {
           overflow: hidden;
-          border: 1px solid #d8c8ab;
+          border: 1px solid #dfd4c2;
           border-radius: 18px;
-          background: #fffdf9;
-          box-shadow: 0 12px 30px rgba(79, 61, 31, 0.08);
+          background: #fffdfa;
+          box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
         }
 
         .compatAnalysisHeader {
@@ -1731,13 +1738,8 @@ export default function CompatibilityPage() {
           align-items: center;
           gap: 18px;
           padding: 22px 24px 19px;
-          border-bottom: 1px solid #dcc9a9;
-          background:
-            linear-gradient(
-              135deg,
-              #f2e6cf 0%,
-              #fffaf2 100%
-            );
+          border-bottom: 1px solid #dec99f;
+          background: linear-gradient(135deg, #f1e4ca 0%, #fffaf2 100%);
         }
 
         .compatSectionNumber,
@@ -1748,9 +1750,9 @@ export default function CompatibilityPage() {
           flex: 0 0 54px;
           align-items: center;
           justify-content: center;
-          border: 1px solid #9a722e;
+          border: 1px solid #b9862e;
           border-radius: 50%;
-          background: #9a722e;
+          background: #b9862e;
           color: #fff;
           font-size: 16px;
           font-weight: 900;
@@ -1770,7 +1772,7 @@ export default function CompatibilityPage() {
         .compatSectionLabel {
           display: block;
           margin-bottom: 5px;
-          color: #a17a36;
+          color: #a97924;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: 1.7px;
@@ -1778,19 +1780,19 @@ export default function CompatibilityPage() {
 
         .compatSectionTitleWrap h3 {
           margin: 0;
-          color: #302b24;
+          color: #17243a;
           font-size: 20px;
           line-height: 1.45;
         }
 
         .compatAnalysisContent {
           padding: 22px 26px 25px;
-          background: #fffdf9;
+          background: #fffdfa;
         }
 
         .compatParagraph {
           margin: 0 0 13px;
-          color: #625b50;
+          color: #5f5a52;
           font-size: 15px;
           line-height: 1.95;
           word-break: keep-all;
@@ -1802,7 +1804,7 @@ export default function CompatibilityPage() {
 
         .compatHeadingSmall {
           margin: 20px 0 10px;
-          color: #6f5527;
+          color: #76541c;
           font-size: 16px;
           line-height: 1.6;
         }
@@ -1831,7 +1833,7 @@ export default function CompatibilityPage() {
           position: absolute;
           top: 13px;
           left: 15px;
-          color: #a77d36;
+          color: #b9862e;
           font-size: 11px;
           font-weight: 900;
         }
@@ -1841,12 +1843,7 @@ export default function CompatibilityPage() {
         }
 
         .compatAnalysisCard:last-child .compatAnalysisHeader {
-          background:
-            linear-gradient(
-              135deg,
-              #ead7ae,
-              #fff8e8
-            );
+          background: linear-gradient(135deg, #ead7ae, #fff8e8);
         }
 
         @media (max-width: 680px) {
@@ -1855,22 +1852,12 @@ export default function CompatibilityPage() {
           }
 
           .compatIntroCard {
-            padding: 20px 18px;
-            border-radius: 14px;
-          }
-
-          .compatSectionGrid {
-            gap: 18px;
-          }
-
-          .compatAnalysisCard {
-            border-radius: 15px;
+            padding: 18px;
           }
 
           .compatAnalysisHeader {
-            align-items: flex-start;
-            gap: 12px;
-            padding: 18px 16px 16px;
+            gap: 13px;
+            padding: 18px 16px;
           }
 
           .compatSectionNumber,
@@ -1881,32 +1868,17 @@ export default function CompatibilityPage() {
             font-size: 14px;
           }
 
-          .compatSummaryMark {
+          .compatSectionTitleWrap h3 {
             font-size: 17px;
           }
 
-          .compatSectionTitleWrap h3 {
-            font-size: 18px;
-          }
-
           .compatAnalysisContent {
-            padding: 18px 16px 20px;
+            padding: 18px 17px 20px;
           }
 
           .compatParagraph {
             font-size: 14px;
-            line-height: 1.9;
-            word-break: normal;
-          }
-
-          .compatResultList li {
-            padding: 12px 13px 12px 35px;
-            font-size: 13px;
-          }
-
-          .compatResultList li::before {
-            top: 12px;
-            left: 13px;
+            line-height: 1.85;
           }
         }
       `}</style>
