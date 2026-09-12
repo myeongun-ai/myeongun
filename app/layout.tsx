@@ -142,7 +142,7 @@ export default function RootLayout({
 
           .mgHeaderInner {
             width: min(1440px, calc(100% - 48px));
-            min-height: 78px;
+            min-height: 86px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: auto 1fr auto;
@@ -160,8 +160,8 @@ export default function RootLayout({
           }
 
           .mgBrandMark {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border: 1.5px solid #dbaa58;
             border-radius: 50%;
             display: grid;
@@ -180,7 +180,7 @@ export default function RootLayout({
 
           .mgBrandText strong {
             color: #f8f4ea;
-            font-size: 22px;
+            font-size: 24px;
             letter-spacing: 0.08em;
           }
 
@@ -557,6 +557,61 @@ export default function RootLayout({
               padding-top: 0;
             }
           }
+
+          @media (max-width: 820px) {
+            .mgFooterInner {
+              padding-top: 30px !important;
+              padding-bottom: 20px !important;
+              gap: 20px 16px !important;
+            }
+
+            .mgFooterLogo {
+              margin-bottom: 10px !important;
+            }
+
+            .mgFooterBrand p {
+              margin-bottom: 9px !important;
+              line-height: 1.65 !important;
+            }
+
+            .mgFooterColumn,
+            .mgFooterCompany {
+              gap: 4px !important;
+            }
+
+            .mgFooterColumn h3,
+            .mgFooterCompany h3 {
+              margin-bottom: 6px !important;
+            }
+
+            .mgFooterColumn a,
+            .mgFooterColumn span,
+            .mgFooterCompany p {
+              line-height: 1.5 !important;
+            }
+
+            .mgFooterBottom {
+              padding-top: 12px !important;
+              padding-bottom: 14px !important;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .mgFooterInner {
+              gap: 16px !important;
+            }
+
+            .mgFooterLogo > span {
+              width: 42px !important;
+              height: 42px !important;
+              font-size: 22px !important;
+            }
+
+            .mgFooterLogo strong {
+              font-size: 18px !important;
+            }
+          }
+
         `}</style>
       </body>
     </html>

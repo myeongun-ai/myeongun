@@ -2563,6 +2563,33 @@ export default function Home() {
           }
         }
 
+
+        @media (max-width: 640px) {
+          .homeServiceMobileAiWide {
+            grid-template-columns: minmax(0, 46%) minmax(0, 54%) !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceImageWrap,
+          .homeServiceMobileAiWide:last-child .homeServiceImageWrap {
+            min-height: 138px !important;
+            max-height: 150px !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceBody,
+          .homeServiceMobileAiWide:last-child .homeServiceBody {
+            min-height: 138px !important;
+            padding: 12px !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceBody h3 {
+            margin-bottom: 5px !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceBody p {
+            margin-bottom: 9px !important;
+          }
+        }
+
       `}</style>
 
     </main>
