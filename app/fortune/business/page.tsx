@@ -1053,7 +1053,11 @@ export default function BusinessFortunePage() {
           opacity: 1;
           cursor: default;
         
-          color: #142137;}
+          color: #142137;
+          border: 1px solid #d8c7a7;
+          background: #e8dcc6;
+          box-shadow: none;
+          transform: none;}
 
         .privacyText {
           margin: 17px 0 0;
