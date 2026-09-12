@@ -2590,6 +2590,60 @@ export default function Home() {
           }
         }
 
+
+        @media (max-width: 640px) {
+          /* 2차 모바일 마감: 히어로의 불필요한 세로 여백을 줄입니다. */
+          .homeHero {
+            min-height: auto !important;
+            padding-bottom: 18px !important;
+          }
+
+          .homeHeroInner {
+            padding-top: 22px !important;
+            padding-bottom: 0 !important;
+            row-gap: 8px !important;
+          }
+
+          .homeHeroCopy {
+            margin-bottom: 0 !important;
+          }
+
+          .homeHeroCharacterWrap {
+            margin-top: -8px !important;
+            margin-bottom: -10px !important;
+          }
+
+          /* 무료 사주 입력폼의 모바일 간격을 조금 더 조밀하게 */
+          .homeQuickForm {
+            margin-top: 0 !important;
+          }
+
+          .homeQuickFormBody {
+            gap: 8px !important;
+          }
+
+          /* AI 상담 전체폭은 유지하되 시각적 높이는 한 단계 더 줄임 */
+          .homeServiceMobileAiWide {
+            grid-template-columns: minmax(0, 44%) minmax(0, 56%) !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceImageWrap,
+          .homeServiceMobileAiWide:last-child .homeServiceImageWrap {
+            min-height: 126px !important;
+            max-height: 136px !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceBody,
+          .homeServiceMobileAiWide:last-child .homeServiceBody {
+            min-height: 126px !important;
+            padding: 10px 11px !important;
+          }
+
+          .homeServiceMobileAiWide .homeServiceButton {
+            min-height: 34px !important;
+          }
+        }
+
       `}</style>
 
     </main>

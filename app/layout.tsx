@@ -612,6 +612,45 @@ export default function RootLayout({
             }
           }
 
+
+          @media (max-width: 480px) {
+            /* 모바일 푸터 2차 압축 */
+            .mgFooterInner {
+              padding-top: 25px !important;
+              padding-bottom: 16px !important;
+              gap: 13px !important;
+            }
+
+            .mgFooterBrand p {
+              font-size: 12px !important;
+              line-height: 1.55 !important;
+            }
+
+            .mgFooterDisclaimer {
+              font-size: 10px !important;
+            }
+
+            .mgFooterColumn h3,
+            .mgFooterCompany h3 {
+              margin-top: 0 !important;
+              margin-bottom: 4px !important;
+            }
+
+            .mgFooterColumn a,
+            .mgFooterColumn span,
+            .mgFooterCompany p {
+              font-size: 11px !important;
+              line-height: 1.42 !important;
+            }
+
+            .mgFooterBottom {
+              padding-top: 10px !important;
+              padding-bottom: 10px !important;
+              gap: 4px !important;
+              font-size: 9px !important;
+            }
+          }
+
         `}</style>
       </body>
     </html>
