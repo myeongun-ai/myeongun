@@ -858,9 +858,10 @@ export default function SajuPage() {
         }
 
         .submitButton:disabled {
-          opacity: 0.65;
+          opacity: 1;
           cursor: default;
-        }
+        
+          color: #142137;}
 
         .privacyText {
           margin: 17px 0 0;
