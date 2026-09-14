@@ -228,6 +228,7 @@ export default function SajuPage() {
   const [error, setError] = useState("");
   const [freeResult, setFreeResult] = useState("");
   const [yongshin, setYongshin] = useState<{ yongshin: string; heesin: string; reason: string } | null>(null);
+  const [showInputForm, setShowInputForm] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(currentYear);
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
@@ -260,6 +261,7 @@ export default function SajuPage() {
       const resultText = String(savedResult?.result || "").trim();
       if (resultText) {
         setFreeResult(resultText);
+        setShowInputForm(false);
       }
 
       setYongshin(savedResult?.yongshin || null);
@@ -418,6 +420,7 @@ export default function SajuPage() {
 
       setFreeResult(resultText);
       setYongshin(parsed?.yongshin || null);
+      setShowInputForm(false);
     } catch (err) {
       setError(
         err instanceof Error
@@ -427,6 +430,14 @@ export default function SajuPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleRetry() {
+    setFreeResult("");
+    setYongshin(null);
+    setError("");
+    setShowInputForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   const fieldStyle = {
@@ -462,7 +473,7 @@ export default function SajuPage() {
 
   return (
     <main className="sajuPage">
-      <section className="sajuCard">
+      <section className="sajuCard" style={{ display: showInputForm ? "block" : "none" }}>
         <header className="pageHeader">
           <div className="eyebrow">FREE SAJU</div>
           <h1>무료 사주 분석</h1>
@@ -718,6 +729,10 @@ export default function SajuPage() {
               상세 사주 분석 보기 · 9,900원
             </Link>
           </div>
+
+          <button type="button" className="retryButton" onClick={handleRetry}>
+            다른 사주 다시 보기
+          </button>
         </section>
       )}
 
@@ -1011,6 +1026,27 @@ export default function SajuPage() {
           font-weight: 900;
         }
 
+        .retryButton {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 50px;
+          margin: 18px auto 0;
+          padding: 0 24px;
+          border: 1px solid #d8c7a7;
+          border-radius: 12px;
+          background: #fffdfa;
+          color: #7f5b1f;
+          font-size: 14px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .retryButton:hover {
+          border-color: #b9852c;
+          background: #fff8ec;
+        }
+
         @media (max-width: 640px) {
           .sajuPage {
             padding: 30px 12px 58px;
@@ -1059,7 +1095,8 @@ export default function SajuPage() {
             font-size: 18px;
           }
 
-          .premiumButton {
+          .premiumButton,
+          .retryButton {
             width: 100%;
             box-sizing: border-box;
           }
