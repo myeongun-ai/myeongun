@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -234,6 +234,45 @@ export default function SajuPage() {
 
   useEffect(() => {
     sessionStorage.removeItem("myeongun_session_active");
+
+    const fromHome = sessionStorage.getItem("myeongun_free_saju_from_home");
+    if (fromHome !== "1") return;
+
+    sessionStorage.removeItem("myeongun_free_saju_from_home");
+
+    try {
+      const savedFormText = localStorage.getItem("myeongun_saju");
+      const savedResultText = localStorage.getItem("myeongun_saju_result");
+
+      if (!savedFormText || !savedResultText) return;
+
+      const savedForm = JSON.parse(savedFormText) as SajuForm;
+      const savedResult = JSON.parse(savedResultText);
+
+      setForm(savedForm);
+
+      const savedBirth = parseBirth(savedForm.birth);
+      if (savedBirth) {
+        setPickerYear(savedBirth.year);
+        setPickerMonth(savedBirth.month);
+      }
+
+      const resultText = String(savedResult?.result || "").trim();
+      if (resultText) {
+        setFreeResult(resultText);
+      }
+
+      setYongshin(savedResult?.yongshin || null);
+
+      window.setTimeout(() => {
+        document.getElementById("free-saju-result")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    } catch {
+      // ??λ맂 臾대즺 ?ъ＜ ?곗씠?곌? ?щ컮瑜댁? ?딆쑝硫?湲곗〈 ?낅젰 ?붾㈃??洹몃?濡??ъ슜?⑸땲??
+    }
   }, []);
 
   function update<K extends keyof SajuForm>(key: K, value: SajuForm[K]) {
@@ -647,7 +686,7 @@ export default function SajuPage() {
       </section>
 
       {freeResult && (
-        <section className="resultCard">
+        <section className="resultCard" id="free-saju-result">
           <div className="resultEyebrow">FREE SAJU RESULT</div>
           <h2>{form.name || "고객"}님의 무료 사주 분석</h2>
 

@@ -376,7 +376,8 @@ export default function Home() {
         throw new Error("무료 사주 결과를 불러오지 못했습니다.");
       }
 
-      setFreeResult(resultText);
+      sessionStorage.setItem("myeongun_free_saju_from_home", "1");
+      router.push("/saju");
       setYongshin(parsed?.yongshin || null);
     } catch (err) {
       setError(
