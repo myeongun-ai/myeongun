@@ -776,7 +776,9 @@ export default function Home() {
         </div>
       </section>
 
-      <UsageBenefits />
+      <section className="homeBenefitsArea">
+        <UsageBenefits />
+      </section>
 
       {/* RESULT */}
       {freeResult && (
@@ -1545,6 +1547,19 @@ export default function Home() {
           font-weight: 700;
         }
 
+        .homeBenefitsArea {
+          padding: 22px 24px 24px;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255,255,255,.82), transparent 38%),
+            linear-gradient(180deg, #faf7f0 0%, #f3ede3 100%);
+          border-top: 1px solid rgba(139,106,54,.12);
+          border-bottom: 1px solid rgba(139,106,54,.16);
+        }
+
+        .homeBenefitsArea .usageBenefits {
+          margin-top: 0;
+          margin-bottom: 0;
+        }
         .homeSupportSection {
           position: relative;
           padding: 54px 24px 60px;
@@ -1785,6 +1800,9 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
+          .homeBenefitsArea {
+            padding: 18px 8px 20px;
+          }
           .homeHero {
             min-height: auto;
           }
