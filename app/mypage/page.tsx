@@ -142,16 +142,9 @@ export default function MyPage() {
 
          setHasPaidSaju(Boolean(paidSaju));
          setHasPaidSession(paidSession);
-
-         const registered =
-            sessionStorage.getItem("myeongun_my_saju_registered") === "1";
-
-         if   (!registered) {
-             setSaju(null);
-             return;
-         }
-
          const saved =
+            sessionStorage.getItem("myeongun_paid_saju") ||
+            sessionStorage.getItem("myeongun_active_saju") ||
             sessionStorage.getItem("myeongun_saju");
 
          if    (!saved) {

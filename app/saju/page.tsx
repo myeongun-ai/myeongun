@@ -234,22 +234,21 @@ export default function SajuPage() {
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
 
   useEffect(() => {
-    sessionStorage.removeItem("myeongun_session_active");
-
     const fromHome = sessionStorage.getItem("myeongun_free_saju_from_home");
-    if (fromHome !== "1") return;
 
-    sessionStorage.removeItem("myeongun_free_saju_from_home");
+    if (fromHome === "1") {
+      sessionStorage.removeItem("myeongun_free_saju_from_home");
+    }
 
     try {
-      const savedFormText = sessionStorage.getItem("myeongun_saju");
-      const savedResultText = sessionStorage.getItem("myeongun_saju_result");
+      const savedFormText =
+        sessionStorage.getItem("myeongun_paid_saju") ||
+        sessionStorage.getItem("myeongun_active_saju") ||
+        sessionStorage.getItem("myeongun_saju");
 
-      if (!savedFormText || !savedResultText) return;
+      if (!savedFormText) return;
 
       const savedForm = JSON.parse(savedFormText) as SajuForm;
-      const savedResult = JSON.parse(savedResultText);
-
       setForm(savedForm);
 
       const savedBirth = parseBirth(savedForm.birth);
@@ -258,7 +257,14 @@ export default function SajuPage() {
         setPickerMonth(savedBirth.month);
       }
 
+      if (fromHome !== "1") return;
+
+      const savedResultText = sessionStorage.getItem("myeongun_saju_result");
+      if (!savedResultText) return;
+
+      const savedResult = JSON.parse(savedResultText);
       const resultText = String(savedResult?.result || "").trim();
+
       if (resultText) {
         setFreeResult(resultText);
         setShowInputForm(false);
@@ -273,7 +279,7 @@ export default function SajuPage() {
         });
       }, 100);
     } catch {
-      // ??λ맂 臾대즺 ?ъ＜ ?곗씠?곌? ?щ컮瑜댁? ?딆쑝硫?湲곗〈 ?낅젰 ?붾㈃??洹몃?濡??ъ슜?⑸땲??
+      // 저장된 세션 정보가 손상된 경우 기본 입력 화면을 유지합니다.
     }
   }, []);
 

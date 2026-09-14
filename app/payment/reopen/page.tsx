@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 function pad2(value: number) {
@@ -38,6 +38,42 @@ export default function ReopenPaymentPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(currentYear);
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
+  useEffect(() => {
+    try {
+      const savedText =
+        sessionStorage.getItem("myeongun_paid_saju") ||
+        sessionStorage.getItem("myeongun_active_saju") ||
+        sessionStorage.getItem("myeongun_saju");
+
+      if (!savedText) return;
+
+      const saved = JSON.parse(savedText) as {
+        name?: string;
+        birth?: string;
+        calendar?: string;
+      };
+
+      if (saved.name) {
+        setName(saved.name);
+      }
+
+      if (saved.birth) {
+        setBirth(saved.birth);
+
+        const parsed = parseBirth(saved.birth);
+        if (parsed) {
+          setPickerYear(parsed.year);
+          setPickerMonth(parsed.month);
+        }
+      }
+
+      if (saved.calendar === "양력" || saved.calendar === "음력") {
+        setCalendar(saved.calendar);
+      }
+    } catch {
+      // 저장된 세션 정보가 손상된 경우 재열람 입력 화면을 그대로 유지합니다.
+    }
+  }, []);
 
   const years = useMemo(
     () =>
@@ -138,6 +174,7 @@ export default function ReopenPaymentPage() {
 
       sessionStorage.setItem("myeongun_saju", JSON.stringify(result.saju));
       sessionStorage.setItem("myeongun_paid_saju", JSON.stringify(result.saju));
+      sessionStorage.setItem("myeongun_active_saju", JSON.stringify(result.saju));
       sessionStorage.setItem("myeongun_session_active", "1");
 
       router.replace("/fortune/detail");
