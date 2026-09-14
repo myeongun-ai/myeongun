@@ -26,9 +26,9 @@ type AIUsage = {
 function readReusableSaju(): SajuForm | null {
   try {
     const candidates = [
-      localStorage.getItem("myeongun_paid_saju"),
-      localStorage.getItem("myeongun_active_saju"),
-      localStorage.getItem("myeongun_saju"),
+      sessionStorage.getItem("myeongun_paid_saju"),
+      sessionStorage.getItem("myeongun_active_saju"),
+      sessionStorage.getItem("myeongun_saju"),
     ];
 
     for (const saved of candidates) {
@@ -61,7 +61,7 @@ function readReusableSaju(): SajuForm | null {
 
 function saveActiveSaju(saju: SajuForm) {
   try {
-    localStorage.setItem(
+    sessionStorage.setItem(
       "myeongun_active_saju",
       JSON.stringify({
         name: saju.name.trim(),
@@ -453,7 +453,7 @@ export default function AIPage() {
         throw new Error("AI 상담 답변이 비어 있습니다.");
       }
 
-      localStorage.setItem(
+      sessionStorage.setItem(
          "myeongun_recent_ai",
          JSON.stringify({
            usedAt: new Date().toISOString(),

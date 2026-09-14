@@ -293,8 +293,8 @@ export default function Home() {
   async function tryReopenExistingPaidSaju(payload: SajuForm) {
     try {
       const savedText =
-        localStorage.getItem("myeongun_paid_saju") ||
-        localStorage.getItem("myeongun_saju");
+        sessionStorage.getItem("myeongun_paid_saju") ||
+        sessionStorage.getItem("myeongun_saju");
 
       if (!savedText) return false;
 
@@ -319,7 +319,7 @@ export default function Home() {
       const result = await response.json();
       if (!result?.ok) return false;
 
-      localStorage.setItem("myeongun_saju", savedText);
+      sessionStorage.setItem("myeongun_saju", savedText);
       sessionStorage.setItem("myeongun_session_active", "1");
       router.push("/fortune/detail");
       return true;
@@ -354,7 +354,7 @@ export default function Home() {
 
       // 무료 사주를 새로 분석해도 기존 7일 결제 이용권은 삭제하지 않습니다.
       // 새 결제가 정상 승인되면 서버가 새 이용권으로 교체합니다.
-      localStorage.removeItem("myeongun_premium_result");
+      sessionStorage.removeItem("myeongun_premium_result");
 
       const response = await fetch("/api/fortune", {
         method: "POST",
@@ -368,8 +368,8 @@ export default function Home() {
         throw new Error(parsed?.error || "사주 분석에 실패했습니다.");
       }
 
-      localStorage.setItem("myeongun_saju", JSON.stringify(payload));
-      localStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
+      sessionStorage.setItem("myeongun_saju", JSON.stringify(payload));
+      sessionStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
 
       const resultText = String(parsed?.result || "").trim();
       if (!resultText) {

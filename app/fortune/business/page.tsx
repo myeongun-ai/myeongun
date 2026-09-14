@@ -19,9 +19,9 @@ type YongshinInfo = {
 function readReusableSaju(): SajuForm | null {
   try {
     const candidates = [
-      localStorage.getItem("myeongun_paid_saju"),
-      localStorage.getItem("myeongun_active_saju"),
-      localStorage.getItem("myeongun_saju"),
+      sessionStorage.getItem("myeongun_paid_saju"),
+      sessionStorage.getItem("myeongun_active_saju"),
+      sessionStorage.getItem("myeongun_saju"),
     ];
 
     for (const saved of candidates) {
@@ -54,7 +54,7 @@ function readReusableSaju(): SajuForm | null {
 
 function saveActiveSaju(saju: SajuForm) {
   try {
-    localStorage.setItem(
+    sessionStorage.setItem(
       "myeongun_active_saju",
       JSON.stringify({
         name: saju.name.trim(),
@@ -432,7 +432,7 @@ export default function BusinessFortunePage() {
         throw new Error("재물·사업운 분석 결과가 비어 있습니다.");
       }
 
-      localStorage.setItem(
+      sessionStorage.setItem(
          "myeongun_recent_business",
          JSON.stringify({
             usedAt: new Date().toISOString(),

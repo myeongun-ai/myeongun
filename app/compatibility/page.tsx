@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
@@ -450,7 +450,7 @@ export default function CompatibilityPage() {
       }
 
       try {
-        localStorage.setItem(
+        sessionStorage.setItem(
           "myeongun_recent_compatibility",
           JSON.stringify({
             date: new Date().toISOString(),

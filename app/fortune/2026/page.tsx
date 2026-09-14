@@ -37,9 +37,9 @@ type ProfileInfo = {
 function readReusableSaju(): SajuForm | null {
   try {
     const candidates = [
-      localStorage.getItem("myeongun_paid_saju"),
-      localStorage.getItem("myeongun_active_saju"),
-      localStorage.getItem("myeongun_saju"),
+      sessionStorage.getItem("myeongun_paid_saju"),
+      sessionStorage.getItem("myeongun_active_saju"),
+      sessionStorage.getItem("myeongun_saju"),
     ];
 
     for (const saved of candidates) {
@@ -72,7 +72,7 @@ function readReusableSaju(): SajuForm | null {
 
 function saveActiveSaju(saju: SajuForm) {
   try {
-    localStorage.setItem(
+    sessionStorage.setItem(
       "myeongun_active_saju",
       JSON.stringify({
         name: saju.name.trim(),
@@ -460,7 +460,7 @@ export default function Fortune2026Page() {
       }
 
       try {
-        localStorage.setItem(
+        sessionStorage.setItem(
           "myeongun_recent_2026",
           JSON.stringify({
             usedAt: new Date().toISOString(),

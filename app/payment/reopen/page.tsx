@@ -136,8 +136,8 @@ export default function ReopenPaymentPage() {
         throw new Error("재열람할 사주 정보를 불러오지 못했습니다.");
       }
 
-      localStorage.setItem("myeongun_saju", JSON.stringify(result.saju));
-      localStorage.setItem("myeongun_paid_saju", JSON.stringify(result.saju));
+      sessionStorage.setItem("myeongun_saju", JSON.stringify(result.saju));
+      sessionStorage.setItem("myeongun_paid_saju", JSON.stringify(result.saju));
       sessionStorage.setItem("myeongun_session_active", "1");
 
       router.replace("/fortune/detail");

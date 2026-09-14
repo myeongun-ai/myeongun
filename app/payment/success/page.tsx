@@ -47,7 +47,7 @@ function PaymentSuccessContent() {
             amount,
             saju: (() => {
               try {
-                const saved = localStorage.getItem("myeongun_saju");
+                const saved = sessionStorage.getItem("myeongun_saju");
                 return saved ? JSON.parse(saved) : null;
               } catch {
                 return null;
@@ -65,15 +65,15 @@ function PaymentSuccessContent() {
         }
 
         if (!cancelled) {
-          const paidSaju = localStorage.getItem("myeongun_saju");
+          const paidSaju = sessionStorage.getItem("myeongun_saju");
 
           if (paidSaju) {
-            localStorage.setItem("myeongun_paid_saju", paidSaju);
+            sessionStorage.setItem("myeongun_paid_saju", paidSaju);
           }
 
           if (result?.reopenCode) {
             setReopenCode(String(result.reopenCode));
-            localStorage.setItem(
+            sessionStorage.setItem(
               "myeongun_reopen_code",
               String(result.reopenCode)
             );

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -55,7 +55,7 @@ export default function MyPage() {
     useEffect(() => {
        try {         
          const savedRecentSaju =
-            localStorage.getItem("myeongun_recent_saju");
+            sessionStorage.getItem("myeongun_recent_saju");
 
          if (savedRecentSaju) {
            try {
@@ -71,7 +71,7 @@ export default function MyPage() {
          }
 
          const savedRecentAI =
-            localStorage.getItem("myeongun_recent_ai");
+            sessionStorage.getItem("myeongun_recent_ai");
 
          if (savedRecentAI) {
            try {
@@ -87,7 +87,7 @@ export default function MyPage() {
          }
 
          const savedRecentBusiness =
-            localStorage.getItem("myeongun_recent_business");
+            sessionStorage.getItem("myeongun_recent_business");
 
          if (savedRecentBusiness) {
            try {
@@ -103,7 +103,7 @@ export default function MyPage() {
          }
 
          const savedRecentCompatibility =
-            localStorage.getItem("myeongun_recent_compatibility");
+            sessionStorage.getItem("myeongun_recent_compatibility");
 
          if (savedRecentCompatibility) {
            try {
@@ -119,7 +119,7 @@ export default function MyPage() {
          }
 
          const savedRecent2026 =
-            localStorage.getItem("myeongun_recent_2026");
+            sessionStorage.getItem("myeongun_recent_2026");
 
          if (savedRecent2026) {
            try {
@@ -135,7 +135,7 @@ export default function MyPage() {
          }
 
          const paidSaju =
-            localStorage.getItem("myeongun_paid_saju");
+            sessionStorage.getItem("myeongun_paid_saju");
 
          const paidSession =
             sessionStorage.getItem("myeongun_session_active") === "1";
@@ -144,7 +144,7 @@ export default function MyPage() {
          setHasPaidSession(paidSession);
 
          const registered =
-            localStorage.getItem("myeongun_my_saju_registered") === "1";
+            sessionStorage.getItem("myeongun_my_saju_registered") === "1";
 
          if   (!registered) {
              setSaju(null);
@@ -152,7 +152,7 @@ export default function MyPage() {
          }
 
          const saved =
-            localStorage.getItem("myeongun_saju");
+            sessionStorage.getItem("myeongun_saju");
 
          if    (!saved) {
              setSaju(null);
@@ -176,7 +176,7 @@ export default function MyPage() {
 
   useEffect(() => {
     const paidSaju =
-      localStorage.getItem("myeongun_paid_saju");
+      sessionStorage.getItem("myeongun_paid_saju");
 
     if (!paidSaju) {
       setHasPaidSession(false);
@@ -230,9 +230,9 @@ export default function MyPage() {
     saju?.name?.trim() || "명운 이용자";
 
 function removeMySaju() {
-  localStorage.removeItem("myeongun_my_saju_registered");
-  localStorage.removeItem("myeongun_saju");
-  localStorage.removeItem("myeongun_saju_result");
+  sessionStorage.removeItem("myeongun_my_saju_registered");
+  sessionStorage.removeItem("myeongun_saju");
+  sessionStorage.removeItem("myeongun_saju_result");
 
   setSaju(null);
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Script from "next/script";
 import { useState } from "react";
@@ -15,7 +15,7 @@ export default function PaymentPage() {
   const handlePayment = async () => {
     try {
       const savedSaju =
-        localStorage.getItem("myeongun_saju");
+        sessionStorage.getItem("myeongun_saju");
 
       if (!savedSaju) {
         alert("먼저 사주 정보를 입력해주세요.");

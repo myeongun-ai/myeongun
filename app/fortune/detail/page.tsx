@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -85,8 +85,8 @@ export default function FortuneDetailPage() {
         }
 
         const saved =
-          localStorage.getItem("myeongun_paid_saju") ||
-          localStorage.getItem("myeongun_saju");
+          sessionStorage.getItem("myeongun_paid_saju") ||
+          sessionStorage.getItem("myeongun_saju");
 
         if (!saved) {
           router.replace("/payment/reopen");
@@ -95,7 +95,7 @@ export default function FortuneDetailPage() {
 
         const parsedSaju = JSON.parse(saved) as SajuForm;
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "myeongun_saju",
           JSON.stringify(parsedSaju)
         );
@@ -128,7 +128,7 @@ export default function FortuneDetailPage() {
         setSaju(parsedSaju);
 
         try {
-          const cachedText = localStorage.getItem("myeongun_premium_result");
+          const cachedText = sessionStorage.getItem("myeongun_premium_result");
 
           if (cachedText) {
             const cached = JSON.parse(cachedText) as CachedPremium;
@@ -148,7 +148,7 @@ export default function FortuneDetailPage() {
             }
           }
         } catch {
-          localStorage.removeItem("myeongun_premium_result");
+          sessionStorage.removeItem("myeongun_premium_result");
         }
 
         const detailResponse = await fetch("/api/fortune/detail", {
@@ -176,7 +176,7 @@ export default function FortuneDetailPage() {
         setStrength(detailData.strength || null);
         setYongshin(detailData.yongshin || null);
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "myeongun_premium_result",
           JSON.stringify({
             saju: parsedSaju,
