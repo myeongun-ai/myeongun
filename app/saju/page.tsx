@@ -1101,7 +1101,144 @@ export default function SajuPage() {
             box-sizing: border-box;
           }
         }
-      `}</style>
+      
+        /* MYEONGUN_RESULT_DESIGN_V3 */
+        .resultCard {
+          padding: 44px;
+        }
+
+        .resultCard h2 {
+          margin: 12px 0 22px;
+          font-size: 30px;
+          line-height: 1.35;
+          letter-spacing: -0.035em;
+        }
+
+        .resultText {
+          padding: 30px;
+          border-color: #e6dccb;
+          border-radius: 18px;
+          background: #fffdf9;
+          color: #45433f;
+          font-size: 15.5px;
+          line-height: 1.92;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .resultText :global(.resultHeadingLarge) {
+          margin: 34px 0 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #e2d6c2;
+          font-size: 25px;
+          letter-spacing: -0.025em;
+        }
+
+        .resultText :global(.resultHeading) {
+          margin: 30px 0 14px;
+          padding: 11px 14px;
+          border-left: 4px solid #c89535;
+          border-radius: 0 10px 10px 0;
+          background: linear-gradient(
+            90deg,
+            #f6ead4 0%,
+            rgba(246, 234, 212, 0.28) 72%,
+            transparent 100%
+          );
+          color: #805719;
+          font-size: 20px;
+          letter-spacing: -0.02em;
+        }
+
+        .resultText :global(.resultHeadingSmall) {
+          margin: 22px 0 10px;
+          font-weight: 900;
+        }
+
+        .resultText :global(.resultParagraph) {
+          margin-bottom: 15px;
+          word-break: keep-all;
+        }
+
+        .resultText :global(.resultList) {
+          margin: 10px 0 20px;
+          padding: 15px 18px 15px 38px;
+          border: 1px solid #eee3d2;
+          border-radius: 12px;
+          background: #fbf7ef;
+        }
+
+        .resultText :global(.resultList li) {
+          margin-bottom: 8px;
+        }
+
+        .resultText :global(.resultList li:last-child) {
+          margin-bottom: 0;
+        }
+
+        .premiumBox {
+          margin-top: 30px;
+          padding: 34px 30px;
+          border-color: #d7bd8c;
+          border-radius: 20px;
+          background:
+            radial-gradient(
+              circle at 50% 0%,
+              rgba(222, 174, 82, 0.16),
+              transparent 48%
+            ),
+            linear-gradient(135deg, #f6ead3 0%, #fffaf1 100%);
+          box-shadow: 0 14px 34px rgba(122, 84, 25, 0.08);
+        }
+
+        .premiumButton {
+          min-height: 56px;
+          padding: 0 30px;
+          background: linear-gradient(
+            90deg,
+            #a97622 0%,
+            #c99535 50%,
+            #a97622 100%
+          );
+          box-shadow: 0 10px 22px rgba(169, 118, 34, 0.18);
+          transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .premiumButton:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 13px 26px rgba(169, 118, 34, 0.23);
+        }
+
+        @media (max-width: 640px) {
+          .resultCard {
+            padding: 30px 18px 26px;
+          }
+
+          .resultText {
+            padding: 20px 16px;
+            font-size: 14.5px;
+            line-height: 1.85;
+          }
+
+          .resultText :global(.resultHeadingLarge) {
+            margin-top: 28px;
+            font-size: 21px;
+          }
+
+          .resultText :global(.resultHeading) {
+            margin-top: 25px;
+            padding: 10px 11px;
+            font-size: 18px;
+          }
+
+          .resultText :global(.resultList) {
+            padding: 13px 12px 13px 31px;
+          }
+
+          .premiumBox {
+            padding: 26px 18px;
+          }
+        }
+`}</style>
     </main>
   );
 }
