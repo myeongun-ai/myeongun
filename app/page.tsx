@@ -607,8 +607,6 @@ export default function Home() {
         </div>
       </section>
 
-      <UsageBenefits />
-
       {/* SERVICE CARDS */}
       <section className="homeServiceArea">
         <div className="homeServiceSection">
@@ -777,6 +775,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <UsageBenefits />
 
       {/* RESULT */}
       {freeResult && (
