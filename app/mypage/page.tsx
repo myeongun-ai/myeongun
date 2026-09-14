@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import UsageBenefits from "../UsageBenefits";
 import { useEffect, useState } from "react";
 
 type SavedSaju = {
@@ -391,6 +392,8 @@ text:
             </div>
           )}
         </section>
+
+        {ready && saju && <UsageBenefits compact />}
 
         <section className="sectionBlock">
           <div className="sectionHeading">

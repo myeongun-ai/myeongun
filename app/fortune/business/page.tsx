@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import UsageBenefits from "../../UsageBenefits";
 
 type SajuForm = {
   name: string;
@@ -887,6 +888,8 @@ export default function BusinessFortunePage() {
               {renderBusinessResult(result)}
             </div>
 
+            <UsageBenefits compact />
+
             <div className="noticeBox">
               본 분석은 전통 명리 관점을 참고한 AI 분석입니다.
               실제 투자·대출·사업 결정은 시장 상황과 재무 상태,
@@ -1188,6 +1191,15 @@ export default function BusinessFortunePage() {
           margin-bottom: 7px;
         }
 
+        .reportCard .noticeBox {
+          text-align: center;
+        }
+
+        .reportCard .resetButton {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
         .actionRow {
           display: flex;
           justify-content: center;

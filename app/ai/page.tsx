@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import UsageBenefits from "../UsageBenefits";
 
 type SajuForm = {
   name: string;
@@ -783,6 +784,8 @@ export default function AIPage() {
           </p>
         </div>
       </section>
+
+      {canChat && <UsageBenefits compact />}
 
       <section className="chatCard">
         <div className="chatHeader">

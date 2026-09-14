@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import UsageBenefits from "../../UsageBenefits";
 
 type SajuForm = {
   name: string;
@@ -846,6 +847,8 @@ export default function Fortune2026Page() {
           <div className="resultBody">
             {renderFortune2026Result(result)}
           </div>
+
+          <UsageBenefits compact />
 
           <div className="noticeBox">
             본 분석은 전통 명리 관점을 참고한 AI 운세

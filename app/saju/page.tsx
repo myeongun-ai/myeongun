@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import UsageBenefits from "../UsageBenefits";
 
 type SajuForm = {
   name: string;
@@ -722,6 +723,8 @@ export default function SajuPage() {
           <div className="resultText">
             {renderFreeResult(freeResult)}
           </div>
+
+          <UsageBenefits compact />
 
           <div className="premiumBox">
             <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>

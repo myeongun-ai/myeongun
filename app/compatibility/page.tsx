@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
+import UsageBenefits from "../UsageBenefits";
 
 type PersonForm = {
   name: string;
@@ -1036,6 +1037,8 @@ export default function CompatibilityPage() {
           <div className="resultBody">
             {renderCompatibilityResult(result)}
           </div>
+
+          <UsageBenefits compact />
 
           <div className="noticeBox">
             본 궁합 분석은 전통 명리 관점을 참고한 AI 분석입니다.

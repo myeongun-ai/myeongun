@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import UsageBenefits from "./UsageBenefits";
 
 type SajuForm = {
   name: string;
@@ -605,6 +606,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <UsageBenefits />
 
       {/* SERVICE CARDS */}
       <section className="homeServiceArea">
