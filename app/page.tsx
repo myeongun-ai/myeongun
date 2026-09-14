@@ -700,7 +700,7 @@ export default function Home() {
             </div>
             <div className="homeUtilityItem">
               <b>04</b>
-              <div><strong>고객센터</strong><span>평일 09:00 - 18:00</span></div>
+              <div><strong>고객센터</strong><span>평일 10:00 - 16:00</span></div>
             </div>
           </div>
 

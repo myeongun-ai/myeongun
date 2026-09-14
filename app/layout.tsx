@@ -103,9 +103,10 @@ export default function RootLayout({
               <h3>고객지원</h3>
               <Link href="/mypage">나의 명운</Link>
               <Link href="/payment/reopen">결제 사주 재열람</Link>
-              <span>고객센터 평일 09:00 - 18:00</span>
+              <Link href="/refund">환불정책</Link>
+              <span>고객센터 평일 10:00 - 16:00</span>
               <span>대표전화 02-6085-5868</span>
-              <span>이메일 eunseok4948@naver.com</span>
+              <span>이메일 ordi79134@daum.net</span>
             </section>
 
             <section className="mgFooterCompany">
