@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type SajuForm = {
   name: string;
@@ -34,6 +34,56 @@ type ProfileInfo = {
   } | null;
 };
 
+function readReusableSaju(): SajuForm | null {
+  try {
+    const candidates = [
+      localStorage.getItem("myeongun_paid_saju"),
+      localStorage.getItem("myeongun_active_saju"),
+      localStorage.getItem("myeongun_saju"),
+    ];
+
+    for (const saved of candidates) {
+      if (!saved) continue;
+
+      try {
+        const parsed = JSON.parse(saved) as Partial<SajuForm>;
+
+        if (
+          parsed?.name &&
+          parsed?.birth &&
+          parsed?.time &&
+          parsed?.gender &&
+          parsed?.calendar
+        ) {
+          return {
+            name: String(parsed.name).trim(),
+            birth: String(parsed.birth),
+            time: String(parsed.time),
+            gender: String(parsed.gender),
+            calendar: String(parsed.calendar),
+          };
+        }
+      } catch {}
+    }
+  } catch {}
+
+  return null;
+}
+
+function saveActiveSaju(saju: SajuForm) {
+  try {
+    localStorage.setItem(
+      "myeongun_active_saju",
+      JSON.stringify({
+        name: saju.name.trim(),
+        birth: saju.birth,
+        time: saju.time,
+        gender: saju.gender,
+        calendar: saju.calendar,
+      })
+    );
+  } catch {}
+}
 const TIME_OPTIONS = [
   { value: "모름", label: "모름" },
   { value: "子(자) 23:30 ~ 01:29", label: "子(자)  23:30 ~ 01:29" },
@@ -269,6 +319,13 @@ export default function Fortune2026Page() {
     gender: "남성",
     calendar: "양력",
   });
+  useEffect(() => {
+    const saved = readReusableSaju();
+
+    if (saved) {
+      setForm(saved);
+    }
+  }, []);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(currentYear);
@@ -412,7 +469,23 @@ export default function Fortune2026Page() {
         );
       } catch {}
 
+      saveActiveSaju({
+
+        name: form.name.trim(),
+
+        birth: form.birth,
+
+        time: form.time,
+
+        gender: form.gender,
+
+        calendar: form.calendar,
+
+      });
+
+
       setResult(resultText);
+
       setProfile(data?.profile || null);
 
       window.setTimeout(() => {
