@@ -113,7 +113,9 @@ export default function RefundPolicyPage() {
             <br />
             고객센터: 02-6085-5868
             <br />
-            이메일: eunseok4948@naver.com
+            운영시간: 평일 10:00~16:00
+            <br />
+            이메일: ordi79134@daum.net
           </p>
         </section>
 
