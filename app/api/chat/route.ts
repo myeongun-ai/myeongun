@@ -1,6 +1,12 @@
 import OpenAI from "openai";
-import { NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
+import { NextRequest, NextResponse } from "next/server";
 import { calculateMyeongunManseryeok } from "../../../lib/manseryeok";
+import {
+  entitlementCookie,
+  hashSaju,
+  verifyEntitlement,
+} from "../../../lib/paymentAccess";
 
 type Saju = {
   name?: string;
@@ -10,22 +16,169 @@ type Saju = {
   calendar?: string;
 };
 
-export async function POST(req: Request) {
+type AIUsagePayload = {
+  v: 1;
+  scope: "free" | "paid";
+  key: string;
+  used: number;
+  exp: number;
+};
+
+type AIUsageState = {
+  paid: boolean;
+  limit: number;
+  used: number;
+  remaining: number;
+  expiresAt: number;
+};
+
+const FREE_AI_LIMIT = 3;
+const PAID_AI_LIMIT = 20;
+const FREE_AI_COOKIE = "myeongun_ai_free_usage";
+const PAID_AI_COOKIE = "myeongun_ai_paid_usage";
+const FREE_AI_SECONDS = 60 * 60 * 24 * 365;
+
+function getAIUsageSigningKey() {
+  const tossSecret = process.env.TOSS_SECRET_KEY;
+
+  if (!tossSecret) {
+    throw new Error("TOSS_SECRET_KEY가 설정되지 않았습니다.");
+  }
+
+  return createHmac("sha256", tossSecret)
+    .update("myeongun-ai-usage-v1")
+    .digest();
+}
+
+function signAIUsage(encoded: string) {
+  return createHmac("sha256", getAIUsageSigningKey())
+    .update(encoded)
+    .digest("base64url");
+}
+
+function createAIUsageToken(payload: AIUsagePayload) {
+  const encoded = Buffer.from(JSON.stringify(payload), "utf8").toString(
+    "base64url"
+  );
+
+  return `${encoded}.${signAIUsage(encoded)}`;
+}
+
+function verifyAIUsageToken(
+  token: string | undefined,
+  scope: AIUsagePayload["scope"],
+  key: string
+) {
+  if (!token) return null;
+
+  const [encoded, signature] = token.split(".");
+  if (!encoded || !signature) return null;
+
+  const expected = signAIUsage(encoded);
+  const a = Buffer.from(signature);
+  const b = Buffer.from(expected);
+
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(encoded, "base64url").toString("utf8")
+    ) as AIUsagePayload;
+
+    if (payload.v !== 1) return null;
+    if (payload.scope !== scope) return null;
+    if (payload.key !== key) return null;
+    if (!Number.isFinite(payload.used) || payload.used < 0) return null;
+    if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function getAIUsage(req: NextRequest, saju: Saju) {
+  const now = Math.floor(Date.now() / 1000);
+  const entitlementToken = req.cookies.get(entitlementCookie.name)?.value;
+  const entitlement = verifyEntitlement(entitlementToken);
+
+  const isPaid =
+    Boolean(entitlement) &&
+    entitlement?.sajuHash === hashSaju(saju);
+
+  const scope: AIUsagePayload["scope"] = isPaid ? "paid" : "free";
+  const limit = isPaid ? PAID_AI_LIMIT : FREE_AI_LIMIT;
+  const key = isPaid
+    ? `${entitlement?.orderId || ""}:${entitlement?.sajuHash || ""}`
+    : "free-browser-v1";
+  const expiresAt = isPaid
+    ? Number(entitlement?.exp || now)
+    : now + FREE_AI_SECONDS;
+  const cookieName = isPaid ? PAID_AI_COOKIE : FREE_AI_COOKIE;
+
+  const saved = verifyAIUsageToken(
+    req.cookies.get(cookieName)?.value,
+    scope,
+    key
+  );
+
+  const used = Math.min(saved?.used || 0, limit);
+
+  const usage: AIUsageState = {
+    paid: isPaid,
+    limit,
+    used,
+    remaining: Math.max(0, limit - used),
+    expiresAt: saved?.exp || expiresAt,
+  };
+
+  return {
+    usage,
+    scope,
+    key,
+    cookieName,
+    expiresAt: saved?.exp || expiresAt,
+  };
+}
+
+function setAIUsageCookie(
+  response: NextResponse,
+  info: ReturnType<typeof getAIUsage>,
+  used: number
+) {
+  const now = Math.floor(Date.now() / 1000);
+  const payload: AIUsagePayload = {
+    v: 1,
+    scope: info.scope,
+    key: info.key,
+    used,
+    exp: info.expiresAt,
+  };
+
+  response.cookies.set(info.cookieName, createAIUsageToken(payload), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: Math.max(1, info.expiresAt - now),
+  });
+}
+
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    const action = String(body?.action || "chat").trim();
     const question = String(body?.question || "").trim();
     const saju = (body?.saju || null) as Saju | null;
     const targetYear = Number(body?.targetYear || 2026);
 
-    if (!question) {
-      return NextResponse.json(
-        { error: "질문을 입력해주세요." },
-        { status: 400 }
-      );
-    }
-
     if (
+      !saju?.name ||
       !saju?.birth ||
       !saju?.time ||
       !saju?.gender ||
@@ -37,6 +190,34 @@ export async function POST(req: Request) {
             "AI 상담을 이용하려면 생년월일, 출생시간, 성별, 달력 기준을 모두 입력해주세요.",
         },
         { status: 403 }
+      );
+    }
+
+    const usageInfo = getAIUsage(req, saju);
+
+    if (action === "status") {
+      return NextResponse.json(
+        { ok: true, usage: usageInfo.usage },
+        { status: 200, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
+    if (!question) {
+      return NextResponse.json(
+        { error: "질문을 입력해주세요.", usage: usageInfo.usage },
+        { status: 400, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
+    if (usageInfo.usage.remaining <= 0) {
+      return NextResponse.json(
+        {
+          error: usageInfo.usage.paid
+            ? "상세 사주 이용 혜택으로 제공되는 AI 상담 20회를 모두 사용했습니다."
+            : "무료 AI 상담 3회를 모두 사용했습니다.",
+          usage: usageInfo.usage,
+        },
+        { status: 429, headers: { "Cache-Control": "no-store" } }
       );
     }
 
@@ -180,20 +361,39 @@ ${targetYear}년의 흐름을 사용자의 질문 주제와 연결해 설명하�
       );
     }
 
-    return NextResponse.json({
-      answer,
-      profile: {
-        name: saju.name || "",
-        birth: saju.birth,
-        time: saju.time,
-        gender: saju.gender,
-        calendar: saju.calendar,
-        dayMaster: manseryeok.dayMaster,
-        fiveElements: manseryeok.fiveElements,
-        strength: manseryeok.strength,
-        yongshin: manseryeok.yongshin,
+    const nextUsed = Math.min(
+      usageInfo.usage.used + 1,
+      usageInfo.usage.limit
+    );
+
+    const nextUsage: AIUsageState = {
+      ...usageInfo.usage,
+      used: nextUsed,
+      remaining: Math.max(0, usageInfo.usage.limit - nextUsed),
+    };
+
+    const jsonResponse = NextResponse.json(
+      {
+        answer,
+        usage: nextUsage,
+        profile: {
+          name: saju.name || "",
+          birth: saju.birth,
+          time: saju.time,
+          gender: saju.gender,
+          calendar: saju.calendar,
+          dayMaster: manseryeok.dayMaster,
+          fiveElements: manseryeok.fiveElements,
+          strength: manseryeok.strength,
+          yongshin: manseryeok.yongshin,
+        },
       },
-    });
+      { headers: { "Cache-Control": "no-store" } }
+    );
+
+    setAIUsageCookie(jsonResponse, usageInfo, nextUsed);
+
+    return jsonResponse;
   } catch (error) {
     console.error("AI 상담 오류:", error);
 

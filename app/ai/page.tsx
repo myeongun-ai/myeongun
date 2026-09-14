@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type SajuForm = {
   name: string;
@@ -13,6 +13,14 @@ type SajuForm = {
 type Message = {
   who: "ai" | "user";
   text: string;
+};
+
+type AIUsage = {
+  paid: boolean;
+  limit: number;
+  used: number;
+  remaining: number;
+  expiresAt: number;
 };
 
 const TIME_OPTIONS = [
@@ -163,6 +171,8 @@ export default function AIPage() {
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [usage, setUsage] = useState<AIUsage | null>(null);
+  const [usageLoading, setUsageLoading] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -196,6 +206,68 @@ export default function AIPage() {
       form.gender &&
       form.calendar
   );
+
+  useEffect(() => {
+    if (!canChat) {
+      setUsage(null);
+      setUsageLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      setUsageLoading(true);
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            action: "status",
+            saju: {
+              name: form.name.trim(),
+              birth: form.birth,
+              time: form.time,
+              gender: form.gender,
+              calendar: form.calendar,
+            },
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data?.usage) {
+          setUsage(data.usage as AIUsage);
+        }
+      } catch (err) {
+        if (
+          !(err instanceof DOMException && err.name === "AbortError")
+        ) {
+          console.error("AI usage status error:", err);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setUsageLoading(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [
+    canChat,
+    form.name,
+    form.birth,
+    form.time,
+    form.gender,
+    form.calendar,
+  ]);
 
   const quickQuestions = [
     "2026년 사업운이 궁금해요",
@@ -262,7 +334,14 @@ export default function AIPage() {
   }
 
   async function send(preset?: string) {
-    if (!canChat || loading) return;
+    if (
+      !canChat ||
+      loading ||
+      usageLoading ||
+      usage?.remaining === 0
+    ) {
+      return;
+    }
 
     const q = String(preset ?? question).trim();
 
@@ -300,6 +379,10 @@ export default function AIPage() {
       });
 
       const data = await response.json();
+
+      if (data?.usage) {
+        setUsage(data.usage as AIUsage);
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -366,6 +449,8 @@ export default function AIPage() {
 
     setQuestion("");
     setError("");
+    setUsage(null);
+    setUsageLoading(false);
     setPickerOpen(false);
 
     setMessages([
@@ -630,7 +715,13 @@ export default function AIPage() {
 
           {canChat && (
             <div className="connectedBadge">
-              상담 준비 완료
+              {usageLoading
+                ? "이용 상태 확인 중"
+                : usage
+                  ? usage.paid
+                    ? `상세 사주 혜택 · ${usage.remaining}회 남음`
+                    : `무료 상담 · ${usage.remaining}회 남음`
+                  : "상담 준비 완료"}
             </div>
           )}
         </div>
@@ -639,6 +730,14 @@ export default function AIPage() {
           <div className="lockedNotice">
             이름, 생년월일, 출생시간, 성별, 달력 기준을
             입력하면 상담이 활성화됩니다.
+          </div>
+        )}
+
+        {canChat && usage?.remaining === 0 && (
+          <div className="lockedNotice">
+            {usage.paid
+              ? "상세 사주 이용 혜택으로 제공되는 AI 상담 20회를 모두 사용했습니다."
+              : "무료 AI 상담 3회를 모두 사용했습니다. 상세 사주 이용권이 유효한 사주는 결제 후 7일 동안 최대 20회 AI 상담을 이용할 수 있습니다."}
           </div>
         )}
 
@@ -679,7 +778,12 @@ export default function AIPage() {
             <button
               key={text}
               type="button"
-              disabled={!canChat || loading}
+              disabled={
+                !canChat ||
+                loading ||
+                usageLoading ||
+                usage?.remaining === 0
+              }
               onClick={() => send(text)}
             >
               {text}
@@ -699,11 +803,18 @@ export default function AIPage() {
               setQuestion(event.target.value)
             }
             placeholder={
-              canChat
-                ? "예: 올해 사업 확장 시 주의할 점이 궁금해요"
-                : "사주 정보를 먼저 입력해 주세요"
+              !canChat
+                ? "사주 정보를 먼저 입력해 주세요"
+                : usage?.remaining === 0
+                  ? "AI 상담 이용 횟수를 모두 사용했습니다"
+                  : "예: 올해 사업 확장 시 주의할 점이 궁금해요"
             }
-            disabled={!canChat || loading}
+            disabled={
+              !canChat ||
+              loading ||
+              usageLoading ||
+              usage?.remaining === 0
+            }
           />
 
           <button
@@ -711,6 +822,8 @@ export default function AIPage() {
             disabled={
               !canChat ||
               loading ||
+              usageLoading ||
+              usage?.remaining === 0 ||
               !question.trim()
             }
           >
