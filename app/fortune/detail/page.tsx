@@ -549,7 +549,10 @@ export default function FortuneDetailPage() {
                   <h2>{section.title}</h2>
                 </div>
 
-                <p className="analysisSummary">{section.summary}</p>
+                <div className="sectionQuickView">
+                  <span>한눈에 보는 핵심</span>
+                  <p>{section.summary}</p>
+                </div>
 
                 <div className="keyPointTitle">
                   <span>KEY POINTS</span>
@@ -579,11 +582,13 @@ export default function FortuneDetailPage() {
 
         <section className="actionSection">
           <div className="actionHead">
-            <span>MYEONGUN ACTION PLAN</span>
-            <h2>{name}님을 위한 실천 방향</h2>
+            <span>MYEONGUN PRIORITY ACTION PLAN</span>
+            <h2>{name}님이 지금 가장 먼저 할 일</h2>
             <p>
               좋은 흐름은 기다리는 것보다 준비하고 활용할 때 더 의미가
               있습니다.
+              <br />
+              아래 01번부터 우선순위대로 하나씩 적용해 보세요.
             </p>
           </div>
 
@@ -1060,6 +1065,31 @@ export default function FortuneDetailPage() {
           word-break: keep-all;
         }
 
+        .sectionQuickView {
+          margin-top: 22px;
+          padding: 20px 22px;
+          border-left: 3px solid #b38a42;
+          border-radius: 0 13px 13px 0;
+          background: #f7f1e5;
+        }
+
+        .sectionQuickView > span {
+          display: block;
+          margin-bottom: 8px;
+          color: #987134;
+          font-size: 9px;
+          letter-spacing: 1.2px;
+          font-weight: 800;
+        }
+
+        .sectionQuickView p {
+          margin: 0;
+          color: #52534d;
+          font-size: 14px;
+          line-height: 2.05;
+          white-space: pre-line;
+          word-break: keep-all;
+        }
         .keyPointTitle {
           display: flex;
           align-items: center;
@@ -1432,6 +1462,13 @@ export default function FortuneDetailPage() {
             font-size: 13px;
           }
 
+          .sectionQuickView {
+            padding: 17px 18px;
+          }
+
+          .sectionQuickView p {
+            font-size: 13px;
+          }
           .actionSection {
             padding: 38px 21px;
             border-radius: 21px;
