@@ -265,6 +265,9 @@ export default function ReopenPaymentPage() {
           결제 후 7일 동안 PC와 휴대폰 등 다른 기기에서도 다시 열 수 있습니다.
           <br />
           결제 완료 화면에서 발급된 8자리 재열람 코드를 입력해주세요.
+          <br />
+          재열람 코드를 잊어버리거나 분실하면 다시 확인할 수 없으므로,
+          반드시 메모하거나 캡처하여 보관해 주세요.
         </p>
 
         <form onSubmit={submit}>
