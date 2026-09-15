@@ -69,6 +69,23 @@ export default function PaymentPage() {
         "-" +
         Math.random().toString(36).substring(2, 8);
 
+      const prepareResponse = await fetch("/api/payment/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          saju: JSON.parse(savedSaju),
+        }),
+      });
+
+      const prepareResult = await prepareResponse.json();
+
+      if (!prepareResponse.ok) {
+        throw new Error(
+          prepareResult?.message || "결제 준비 정보를 저장하지 못했습니다."
+        );
+      }
+
       await payment.requestPayment({
         method: "CARD",
         amount: {

@@ -65,10 +65,14 @@ function PaymentSuccessContent() {
         }
 
         if (!cancelled) {
-          const paidSaju = sessionStorage.getItem("myeongun_saju");
+          const recoveredSaju = result?.saju
+            ? JSON.stringify(result.saju)
+            : sessionStorage.getItem("myeongun_saju");
 
-          if (paidSaju) {
-            sessionStorage.setItem("myeongun_paid_saju", paidSaju);
+          if (recoveredSaju) {
+            sessionStorage.setItem("myeongun_saju", recoveredSaju);
+            sessionStorage.setItem("myeongun_paid_saju", recoveredSaju);
+            sessionStorage.setItem("myeongun_active_saju", recoveredSaju);
           }
 
           if (result?.reopenCode) {

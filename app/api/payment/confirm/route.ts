@@ -5,6 +5,7 @@ import {
   SajuAccessInput,
 } from "../../../../lib/paymentAccess";
 import { saveCrossDeviceReopen } from "../../../../lib/reopenStore";
+import { consumePendingPayment, deletePendingPayment } from "../../../../lib/paymentPending";
 
 const PREMIUM_PRICE = 9900;
 
@@ -15,18 +16,11 @@ export async function POST(request: Request) {
     const paymentKey = String(body?.paymentKey || "").trim();
     const orderId = String(body?.orderId || "").trim();
     const amount = Number(body?.amount);
-    const saju = (body?.saju || null) as SajuAccessInput | null;
+    const clientSaju = (body?.saju || null) as SajuAccessInput | null;
 
     if (!paymentKey || !orderId || !Number.isFinite(amount)) {
       return NextResponse.json(
         { message: "결제 승인 정보가 부족합니다." },
-        { status: 400 }
-      );
-    }
-
-    if (!saju?.name || !saju?.birth || !saju?.time) {
-      return NextResponse.json(
-        { message: "결제에 연결할 사주 정보가 없습니다." },
         { status: 400 }
       );
     }
@@ -41,6 +35,20 @@ export async function POST(request: Request) {
     if (!orderId.startsWith("MYEONGUN-")) {
       return NextResponse.json(
         { message: "유효하지 않은 주문번호입니다." },
+        { status: 400 }
+      );
+    }
+
+    const pendingSaju = await consumePendingPayment(orderId);
+    const saju =
+      pendingSaju ||
+      (clientSaju?.name && clientSaju?.birth && clientSaju?.time
+        ? clientSaju
+        : null);
+
+    if (!saju?.name || !saju?.birth || !saju?.time) {
+      return NextResponse.json(
+        { message: "결제에 연결할 사주 정보를 찾지 못했습니다. 고객센터로 문의해 주세요." },
         { status: 400 }
       );
     }
@@ -114,10 +122,11 @@ export async function POST(request: Request) {
         amount: PREMIUM_PRICE,
         status: result?.status || "DONE",
         reopenDays: reopen.reopenDays,
+        saju,
         reopenCode: reopen.code,
         reopenExpiresAt: reopen.expiresAt,
       },
-      { status: 200 }
+      { status: 200, headers: { "Cache-Control": "no-store" } }
     );
 
     nextResponse.cookies.set(entitlementCookie.name, entitlement, {
@@ -136,6 +145,8 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: 0,
     });
+
+    await deletePendingPayment(orderId);
 
     return nextResponse;
   } catch (error) {
