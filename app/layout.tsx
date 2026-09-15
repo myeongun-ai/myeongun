@@ -6,6 +6,11 @@ export const metadata = {
   title: "명운 | 사주 · 재물사업 · 궁합 · 2026 운세 · AI 상담",
   description:
     "전통 명리학을 바탕으로 사주, 재물·사업운, 궁합, 2026 운세와 AI 상담을 제공하는 명운입니다.",
+  verification: {
+    other: {
+      "naver-site-verification": "a3faca2733939637d3a64efc254a838ad812b58b",
+    },
+  },
 };
 
 export default function RootLayout({
