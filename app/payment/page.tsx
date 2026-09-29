@@ -224,16 +224,6 @@ export default function PaymentPage() {
           >
             {loading ? "결제창 준비 중..." : "9,900원 결제하기"}
           </button>
-
-          <p
-            style={{
-              marginTop: "18px",
-              fontSize: "12px",
-              color: "#999",
-            }}
-          >
-            현재 테스트 결제입니다.
-          </p>
         </section>
       </main>
     </>
