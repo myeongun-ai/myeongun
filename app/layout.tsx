@@ -1,6 +1,7 @@
-import "./globals.css";
+﻿import "./globals.css";
 import Link from "next/link";
 import SessionPrivacyCleanup from "./SessionPrivacyCleanup";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "명운 | 사주 · 재물사업 · 궁합 · 2026 운세 · AI 상담",
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <SessionPrivacyCleanup />
+        <Analytics />
         <header className="mgSiteHeader">
           <div className="mgHeaderInner">
             <Link className="mgBrand" href="/" aria-label="명운 홈">
@@ -673,3 +675,4 @@ export default function RootLayout({
     </html>
   );
 }
+
