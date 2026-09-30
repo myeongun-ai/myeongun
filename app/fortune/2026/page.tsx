@@ -74,7 +74,7 @@ function readReusableSaju(): SajuForm | null {
 function saveActiveSaju(saju: SajuForm) {
   try {
     sessionStorage.setItem(
-      "myeongun_active_saju",
+      "myeongun_saju",
       JSON.stringify({
         name: saju.name.trim(),
         birth: saju.birth,
@@ -534,8 +534,8 @@ export default function Fortune2026Page() {
         <span className="eyebrow">2026 YEAR FORTUNE</span>
         <h1>2026년 운세</h1>
         <p>
-          실제 만세력 계산을 바탕으로 2026년의 전체 흐름부터
-          재물·사업·직업·인간관계·생활 관리와 월별 흐름까지
+          실제 만세력 계산을 바탕으로 2026년의 전체 방향과
+          재물·일, 인간관계·생활에서 기억할 핵심을
           살펴봅니다.
         </p>
       </section>
@@ -849,6 +849,35 @@ export default function Fortune2026Page() {
           </div>
 
           <UsageBenefits compact />
+
+          <div className="premiumBox">
+            <div className="premiumEyebrow">
+              PREMIUM SAJU REPORT
+            </div>
+
+            <h3>
+              2026년의 흐름을 더 깊이 알고 싶으신가요?
+            </h3>
+
+            <p>
+              재물·직업·관계와 앞으로의 흐름을
+              상세 사주에서 더 깊게 확인할 수 있습니다.
+            </p>
+
+            <Link href="/payment" className="premiumButton">
+              <span className="premiumButtonTitle">
+                상세 사주 전체보기
+              </span>
+              <strong className="premiumButtonPrice">
+                9,900원 결제하기 →
+              </strong>
+            </Link>
+
+            <div className="premiumPaymentGuide">
+              결제 후 상세 사주 전체 내용과 AI 상담을
+              7일간 최대 20회 이용할 수 있습니다.
+            </div>
+          </div>
 
           <div className="noticeBox">
             본 분석은 전통 명리 관점을 참고한 AI 운세
@@ -1288,6 +1317,47 @@ export default function Fortune2026Page() {
           box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
         }
 
+        .premiumBox {
+          margin-top: 22px;
+          padding: 28px 24px;
+          border: 1px solid #dec99f;
+          border-radius: 18px;
+          background: linear-gradient(135deg, #f5ead7 0%, #fffaf1 100%);
+          text-align: center;
+          box-shadow: 0 12px 30px rgba(154, 114, 46, 0.1);
+        }
+
+        .premiumEyebrow {
+          color: #a97924;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.8px;
+        }
+
+        .premiumBox h3 {
+          margin: 9px 0 0;
+          color: #17243a;
+          font-size: 20px;
+          line-height: 1.5;
+        }
+
+        .premiumBox > p {
+          max-width: 650px;
+          margin: 9px auto 0;
+          color: #756d62;
+          font-size: 14px;
+          line-height: 1.75;
+          word-break: keep-all;
+        }
+
+        .premiumPaymentGuide {
+          margin-top: 11px;
+          color: #857a69;
+          font-size: 12px;
+          line-height: 1.6;
+          word-break: keep-all;
+        }
+
         .noticeBox {
           margin-top: 22px;
           padding: 18px;
@@ -1377,6 +1447,42 @@ export default function Fortune2026Page() {
           background:
             radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
             linear-gradient(180deg, #f7f2e8 0%, #fbf8f1 58%, #f5efe4 100%);
+        }
+
+        .premiumButton {
+          display: flex;
+          width: min(100%, 520px);
+          min-height: 72px;
+          margin: 18px auto 0;
+          box-sizing: border-box;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 3px;
+          padding: 14px 20px;
+          text-align: center;
+          border: 1px solid #a97924;
+          border-radius: 14px;
+          background: linear-gradient(90deg, #9f7327 0%, #c9963c 50%, #9f7327 100%);
+          color: #fff;
+          text-decoration: none;
+          box-shadow: 0 12px 26px rgba(154, 114, 46, 0.2);
+          transition: 0.2s ease;
+        }
+
+        .premiumButton:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 15px 30px rgba(154, 114, 46, 0.25);
+        }
+
+        .premiumButtonTitle {
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .premiumButtonPrice {
+          font-size: 16px;
+          font-weight: 900;
         }
 
         .premiumFortune2026Result {
@@ -1513,6 +1619,22 @@ export default function Fortune2026Page() {
         }
 
         @media (max-width: 680px) {
+          .premiumButton {
+            min-height: 70px;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+            padding: 12px 16px;
+          }
+
+          .premiumButtonTitle {
+            font-size: 13px;
+          }
+
+          .premiumButtonPrice {
+            font-size: 16px;
+          }
+
           .premiumFortune2026Result {
             gap: 16px;
           }
