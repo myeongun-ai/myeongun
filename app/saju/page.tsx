@@ -712,8 +712,8 @@ export default function SajuPage() {
             <div style={{ marginTop: "20px", padding: "20px", borderRadius: "14px", border: "1px solid #d8d0c3", background: "#f8f5ee" }}>
               <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", color: "#777" }}>참고용 오행 분석</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
-                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>용신</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.yongshin}</strong></div>
-                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>희신</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.heesin}</strong></div>
+                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>나에게 가장 도움이 되는 기운 (용신)</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.yongshin}</strong></div>
+                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>함께 도움이 되는 기운 (희신)</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.heesin}</strong></div>
               </div>
               <p style={{ margin: "12px 0 0", fontSize: "12px", lineHeight: 1.6, color: "#777" }}>{yongshin.reason}</p>
               <p style={{ margin: "8px 0 0", fontSize: "11px", lineHeight: 1.5, color: "#999" }}>※ 전통 명리의 확정 판정이 아닌 명운의 참고용 분석입니다.</p>
@@ -734,9 +734,39 @@ export default function SajuPage() {
               장기 흐름까지 개인별 프리미엄 분석을 확인할 수 있습니다.
             </p>
 
-            <Link href="/payment" className="premiumButton">
-              상세 사주 분석 보기 · 9,900원
+            <Link
+              href="/payment"
+              className="premiumButton"
+              style={{
+                display: "flex",
+                width: "min(100%, 430px)",
+                minHeight: "82px",
+                boxSizing: "border-box",
+                margin: "0 auto",
+                padding: "13px 28px",
+                border: "2px solid #8f6018",
+                borderRadius: "16px",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                gap: "4px",
+                background: "linear-gradient(135deg, #9f6d1e 0%, #c99434 48%, #a36f1e 100%)",
+                color: "#ffffff",
+                textDecoration: "none",
+                boxShadow: "0 12px 26px rgba(133, 88, 18, 0.28)",
+              }}
+            >
+              <span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 800, lineHeight: 1.35 }}>
+                상세 사주 전체보기
+              </span>
+              <strong style={{ color: "#ffffff", fontSize: "20px", fontWeight: 900, lineHeight: 1.35 }}>
+                9,900원 결제하기 →
+              </strong>
             </Link>
+
+            <div className="premiumPaymentGuide">
+              결제 후 상세 사주 전체 내용과 AI 상담을 7일간 최대 20회 이용할 수 있습니다.
+            </div>
           </div>
 
           <button type="button" className="retryButton" onClick={handleRetry}>
@@ -1023,16 +1053,45 @@ export default function SajuPage() {
 
         .premiumButton {
           display: inline-flex;
+          width: min(100%, 430px);
+          min-height: 82px;
+          box-sizing: border-box;
+          padding: 13px 28px;
+          border: 2px solid #9d6c1d;
+          border-radius: 16px;
           align-items: center;
           justify-content: center;
-          min-height: 54px;
-          padding: 0 28px;
-          border-radius: 12px;
-          background: #b9852c;
+          flex-direction: column;
+          gap: 4px;
+          background: linear-gradient(135deg, #9f6d1e 0%, #c99434 48%, #a36f1e 100%);
           color: #fff;
           text-decoration: none;
-          font-size: 15px;
+          box-shadow: 0 12px 26px rgba(133, 88, 18, 0.25);
+        }
+
+        .premiumButtonTitle {
+          display: block;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .premiumButtonPrice {
+          display: block;
+          font-size: 20px;
           font-weight: 900;
+          line-height: 1.35;
+          letter-spacing: -0.02em;
+        }
+
+        .premiumPaymentGuide {
+          max-width: 600px;
+          margin: 13px auto 0;
+          color: #756b5d;
+          font-size: 12px;
+          font-weight: 600;
+          line-height: 1.65;
+          text-align: center;
         }
 
         .retryButton {
@@ -1200,21 +1259,54 @@ export default function SajuPage() {
         }
 
         .premiumButton {
-          min-height: 56px;
-          padding: 0 30px;
+          display: flex;
+          width: min(100%, 430px);
+          min-height: 82px;
+          box-sizing: border-box;
+          margin: 0 auto;
+          padding: 13px 28px;
+          border: 2px solid #8f6018;
+          border-radius: 16px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 4px;
           background: linear-gradient(
-            90deg,
-            #a97622 0%,
-            #c99535 50%,
-            #a97622 100%
+            135deg,
+            #9f6d1e 0%,
+            #c99434 48%,
+            #a36f1e 100%
           );
-          box-shadow: 0 10px 22px rgba(169, 118, 34, 0.18);
+          color: #ffffff;
+          text-decoration: none;
+          box-shadow:
+            0 12px 26px rgba(133, 88, 18, 0.28),
+            inset 0 1px 0 rgba(255, 255, 255, 0.24);
           transition: transform 0.16s ease, box-shadow 0.16s ease;
         }
 
+        .premiumButtonTitle {
+          display: block;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .premiumButtonPrice {
+          display: block;
+          color: #ffffff;
+          font-size: 20px;
+          font-weight: 900;
+          line-height: 1.35;
+          letter-spacing: -0.02em;
+        }
+
         .premiumButton:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 13px 26px rgba(169, 118, 34, 0.23);
+          transform: translateY(-2px);
+          box-shadow:
+            0 15px 30px rgba(133, 88, 18, 0.34),
+            inset 0 1px 0 rgba(255, 255, 255, 0.24);
         }
 
         @media (max-width: 640px) {
