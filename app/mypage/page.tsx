@@ -842,6 +842,7 @@ text:
         .premiumCard {
           margin-top: 48px;
           padding: 32px;
+          text-align: center;
           border: 1px solid #cdb98e;
           border-radius: 22px;
           background:
@@ -869,7 +870,7 @@ text:
 
         .premiumCard > p {
           max-width: 680px;
-          margin: 0;
+          margin: 0 auto;
           color: #d5d8d1;
           font-size: 13px;
           line-height: 1.8;
@@ -879,6 +880,7 @@ text:
         .premiumActions {
           display: flex;
           flex-wrap: wrap;
+          justify-content: center;
           gap: 10px;
           margin-top: 22px;
         }
