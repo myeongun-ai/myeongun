@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import UsageBenefits from "../../UsageBenefits";
 
@@ -890,6 +891,30 @@ export default function BusinessFortunePage() {
 
             <UsageBenefits compact />
 
+            <div className="premiumBox">
+              <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>
+
+              <h3>재물·사업운을 더 자세히 알고 싶으신가요?</h3>
+
+              <p>
+                돈의 세부 흐름, 사업·직업 방향, 앞으로의 변화와 대응 방법을
+                상세 사주에서 더 깊게 확인할 수 있습니다.
+              </p>
+
+              <Link href="/payment" className="premiumButton">
+                <span className="premiumButtonTitle">
+                  상세 사주 전체보기
+                </span>
+                <strong className="premiumButtonPrice">
+                  9,900원 결제하기 →
+                </strong>
+              </Link>
+
+              <div className="premiumPaymentGuide">
+                결제 후 상세 사주 전체 내용과 AI 상담을 7일간 최대 20회 이용할 수 있습니다.
+              </div>
+            </div>
+
             <div className="noticeBox">
               본 분석은 전통 명리 관점을 참고한 AI 분석입니다.
               실제 투자·대출·사업 결정은 시장 상황과 재무 상태,
@@ -1191,7 +1216,85 @@ export default function BusinessFortunePage() {
           margin-bottom: 7px;
         }
 
+        .premiumBox {
+          margin-top: 30px;
+          padding: 34px 30px;
+          border: 1px solid #d7bd8c;
+          border-radius: 20px;
+          background: linear-gradient(135deg, #f6ead3 0%, #fffaf1 100%);
+          text-align: center;
+          box-shadow: 0 14px 34px rgba(122, 84, 25, 0.08);
+        }
+
+        .premiumEyebrow {
+          color: #a97924;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 3px;
+        }
+
+        .premiumBox h3 {
+          margin: 10px 0;
+          color: #17243a;
+          font-size: 23px;
+          line-height: 1.4;
+        }
+
+        .premiumBox p {
+          max-width: 680px;
+          margin: 0 auto 20px;
+          color: #6f685e;
+          font-size: 14px;
+          line-height: 1.8;
+        }
+
+        .premiumButton {
+          display: flex;
+          width: min(100%, 430px);
+          min-height: 82px;
+          box-sizing: border-box;
+          margin: 0 auto;
+          padding: 13px 28px;
+          border: 2px solid #80520f;
+          border-radius: 16px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 4px;
+          background: #a66f18;
+          color: #ffffff !important;
+          text-decoration: none;
+          box-shadow: 0 12px 26px rgba(133, 88, 18, 0.3);
+        }
+
+        .premiumButtonTitle {
+          display: block;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .premiumButtonPrice {
+          display: block;
+          color: #ffffff;
+          font-size: 20px;
+          font-weight: 900;
+          line-height: 1.35;
+        }
+
+        .premiumPaymentGuide {
+          max-width: 600px;
+          margin: 13px auto 0;
+          color: #756b5d;
+          font-size: 12px;
+          font-weight: 600;
+          line-height: 1.65;
+          text-align: center;
+        }
+
         .reportCard .noticeBox {
+          margin-top: 24px;
           text-align: center;
         }
 
@@ -1274,6 +1377,40 @@ export default function BusinessFortunePage() {
       `}</style>
 
       <style jsx global>{`
+        .premiumButton {
+          display: flex !important;
+          width: min(100%, 430px) !important;
+          min-height: 82px !important;
+          box-sizing: border-box;
+          margin: 0 auto;
+          padding: 13px 28px;
+          border: 2px solid #80520f;
+          border-radius: 16px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 4px;
+          background: #a66f18 !important;
+          color: #ffffff !important;
+          text-decoration: none !important;
+          box-shadow: 0 12px 26px rgba(133, 88, 18, 0.3);
+        }
+
+        .premiumButtonTitle {
+          display: block;
+          color: #ffffff !important;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .premiumButtonPrice {
+          display: block;
+          color: #ffffff !important;
+          font-size: 20px;
+          font-weight: 900;
+          line-height: 1.35;
+        }
         .premiumBusinessResult {
           display: grid;
           gap: 22px;
