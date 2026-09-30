@@ -18,8 +18,8 @@ export default function UsageBenefits({
           결제 및 AI 상담 이용 혜택
         </h2>
         <p>
-          무료 AI 상담 3회, 상세 사주 결제 후 7일간 AI 상담 최대
-          20회를 이용할 수 있습니다.
+          무료 사주 AI 상담 3회, 상세 사주 결제 후 7일간 사주 관련 AI 상담
+          최대 20회를 이용할 수 있습니다.
         </p>
       </div>
 
@@ -27,11 +27,11 @@ export default function UsageBenefits({
         <article className="usageBenefitCard free">
           <span className="usageBenefitLabel">
             <span aria-hidden="true">✨</span>
-            무료 AI 상담
+            무료 사주 AI 상담
           </span>
           <strong>3회 무료 이용</strong>
           <p>
-            사주 정보를 입력하면 AI 상담을 무료로 3회 이용할 수
+            사주 정보를 입력하면 사주 관련 AI 상담을 무료로 3회 이용할 수
             있습니다.
           </p>
         </article>
@@ -43,7 +43,7 @@ export default function UsageBenefits({
           </span>
           <strong>7일간 · 최대 20회</strong>
           <p>
-            상세 사주 결제 후 7일간 이용권이 유지되며 AI 상담은
+            상세 사주 결제 후 7일간 이용권이 유지되며 사주 관련 AI 상담은
             최대 20회 이용할 수 있습니다.
           </p>
         </article>

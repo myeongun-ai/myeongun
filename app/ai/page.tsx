@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import UsageBenefits from "../UsageBenefits";
 
@@ -392,12 +393,7 @@ export default function AIPage() {
   }
 
   async function send(preset?: string) {
-    if (
-      !canChat ||
-      loading ||
-      usageLoading ||
-      usage?.remaining === 0
-    ) {
+    if (!canChat || loading || usageLoading) {
       return;
     }
 
@@ -800,8 +796,8 @@ export default function AIPage() {
                 ? "이용 상태 확인 중"
                 : usage
                   ? usage.paid
-                    ? `상세 사주 혜택 · ${usage.remaining}회 남음`
-                    : `무료 상담 · ${usage.remaining}회 남음`
+                    ? `상세 사주 AI 상담 · ${usage.remaining}회 남음`
+                    : `무료 사주 AI 상담 · ${usage.remaining}회 남음`
                   : "상담 준비 완료"}
             </div>
           )}
@@ -815,11 +811,32 @@ export default function AIPage() {
         )}
 
         {canChat && usage?.remaining === 0 && (
-          <div className="lockedNotice">
-            {usage.paid
-              ? "상세 사주 이용 혜택으로 제공되는 AI 상담 20회를 모두 사용했습니다."
-              : "무료 AI 상담 3회를 모두 사용했습니다. 상세 사주 이용권이 유효한 사주는 결제 후 7일 동안 최대 20회 AI 상담을 이용할 수 있습니다."}
-          </div>
+          usage.paid ? (
+            <div className="usageCompleteBox">
+              <strong>사주 관련 AI 상담 20회를 모두 이용하셨습니다.</strong>
+              <p>
+                결제·환불·재열람·이용코드·이용방법·서비스 오류 같은
+                일반 서비스 상담은 횟수 제한 없이 언제든 이용할 수 있습니다.
+              </p>
+            </div>
+          ) : (
+            <div className="freeCompleteBox">
+              <span>FREE AI CONSULTING COMPLETE</span>
+              <h3>무료 사주 관련 AI 상담 3회를 모두 이용하셨습니다.</h3>
+              <p>
+                더 깊은 사주 상담이 필요하시면 상세 사주 분석을 이용해 주세요.
+                결제 후 7일 동안 사주 관련 AI 상담을 최대 20회 이용할 수 있습니다.
+              </p>
+              <Link href="/payment" className="premiumButton">
+                <span>상세 사주 전체보기</span>
+                <strong>9,900원 결제하기 →</strong>
+              </Link>
+              <div className="serviceGuide">
+                결제·환불·재열람·이용코드·이용방법·서비스 오류 같은
+                일반 서비스 상담은 횟수 제한 없이 언제든 이용할 수 있습니다.
+              </div>
+            </div>
+          )
         )}
 
         <div className={`messages ${messages.length > 1 || loading ? "active" : "initial"}`}>
@@ -849,7 +866,7 @@ export default function AIPage() {
           {loading && (
             <div className="bubble aiBubble">
               <small>명운 AI</small>
-              <p>사주를 기준으로 답변을 작성하고 있습니다...</p>
+              <p>질문 내용을 확인하고 답변을 작성하고 있습니다...</p>
             </div>
           )}
         </div>
@@ -887,14 +904,13 @@ export default function AIPage() {
               !canChat
                 ? "사주 정보를 먼저 입력해 주세요"
                 : usage?.remaining === 0
-                  ? "AI 상담 이용 횟수를 모두 사용했습니다"
+                  ? "예: 환불, 결제, 재열람, 이용방법을 문의해 주세요"
                   : "예: 올해 사업 확장 시 주의할 점이 궁금해요"
             }
             disabled={
               !canChat ||
               loading ||
-              usageLoading ||
-              usage?.remaining === 0
+              usageLoading
             }
           />
 
@@ -904,7 +920,6 @@ export default function AIPage() {
               !canChat ||
               loading ||
               usageLoading ||
-              usage?.remaining === 0 ||
               !question.trim()
             }
           >
@@ -1250,6 +1265,53 @@ export default function AIPage() {
           text-align: center;
         }
 
+        .usageCompleteBox,
+        .freeCompleteBox {
+          margin-bottom: 18px;
+          padding: 20px;
+          border: 1px solid #dfd2bb;
+          border-radius: 15px;
+          background: #f8f3e9;
+          text-align: center;
+        }
+
+        .usageCompleteBox strong,
+        .freeCompleteBox h3 {
+          display: block;
+          margin: 0;
+          color: #142137;
+          font-size: 18px;
+          line-height: 1.5;
+        }
+
+        .freeCompleteBox > span {
+          display: block;
+          margin-bottom: 7px;
+          color: #a17a36;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.7px;
+        }
+
+        .usageCompleteBox p,
+        .freeCompleteBox p {
+          max-width: 650px;
+          margin: 9px auto 0;
+          color: #687080;
+          font-size: 13px;
+          line-height: 1.8;
+          word-break: keep-all;
+        }
+
+        .serviceGuide {
+          margin-top: 12px;
+          color: #765b29;
+          font-size: 12px;
+          font-weight: 800;
+          line-height: 1.7;
+          word-break: keep-all;
+        }
+
         .messages {
           display: grid;
           gap: 12px;
@@ -1296,6 +1358,38 @@ export default function AIPage() {
           line-height: 1.8;
           white-space: pre-wrap;
           word-break: keep-all;
+        }
+
+        .premiumButton {
+          display: flex;
+          width: min(100%, 430px);
+          min-height: 66px;
+          box-sizing: border-box;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 3px;
+          margin: 17px auto 0;
+          border: 1px solid #b88936;
+          border-radius: 12px;
+          background: #d4ad62;
+          color: #142137;
+          text-decoration: none;
+          box-shadow: 0 8px 18px rgba(154, 114, 46, 0.14);
+        }
+
+        .premiumButton span {
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .premiumButton strong {
+          font-size: 16px;
+          font-weight: 900;
+        }
+
+        .premiumButton:hover {
+          background: #c79a45;
         }
 
         .aiAnswerPlain {
