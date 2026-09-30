@@ -53,6 +53,21 @@ const emptyPartner: PersonForm = {
   calendar: "양력",
 };
 
+function saveActiveSaju(saju: PersonForm) {
+  try {
+    sessionStorage.setItem(
+      "myeongun_saju",
+      JSON.stringify({
+        name: saju.name.trim(),
+        birth: saju.birth,
+        time: saju.time,
+        gender: saju.gender,
+        calendar: saju.calendar,
+      })
+    );
+  } catch {}
+}
+
 function pad2(value: number) {
   return String(value).padStart(2, "0");
 }
@@ -460,6 +475,8 @@ export default function CompatibilityPage() {
           })
         );
       } catch {}
+
+      saveActiveSaju(me);
 
       setResult(resultText);
       setPeople(data?.people || null);
@@ -1039,6 +1056,30 @@ export default function CompatibilityPage() {
           </div>
 
           <UsageBenefits compact />
+
+          <div className="premiumBox">
+             <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>
+
+             <h3>두 사람의 관계를 더 깊이 알고 싶으신가요?</h3>
+
+             <p>
+                 결혼·장기 관계, 재물·생활 궁합과 앞으로의 관계 방향을
+                 상세 사주에서 더 깊게 확인할 수 있습니다.
+             </p>
+
+             <Link href="/payment" className="premiumButton">
+                <span className="premiumButtonTitle">
+                   상세 사주 전체보기
+                </span>
+                <strong className="premiumButtonPrice">
+                   9,900원 결제하기 →
+                </strong>
+             </Link>
+
+             <div className="premiumPaymentGuide">
+                결제 후 상세 사주 전체 내용과 AI 상담을 7일간 최대 20회 이용할 수 있습니다.
+             </div>
+          </div>
 
           <div className="noticeBox">
             본 궁합 분석은 전통 명리 관점을 참고한 AI 분석입니다.
@@ -1676,6 +1717,84 @@ export default function CompatibilityPage() {
       `}</style>
 
       <style jsx global>{`
+        .premiumBox {
+          margin-top: 28px;
+          padding: 28px 24px;
+          border: 1px solid #dcc28f;
+          border-radius: 18px;
+          background: linear-gradient(135deg, #f7eddc 0%, #fffaf1 100%);
+          text-align: center;
+          box-shadow: 0 12px 30px rgba(133, 88, 18, 0.08);
+        }
+
+        .premiumEyebrow {
+          display: block;
+          margin-bottom: 8px;
+          color: #a97924;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.8px;
+        }
+
+        .premiumBox h3 {
+          margin: 0;
+          color: #17243a;
+          font-size: 22px;
+          line-height: 1.45;
+        }
+
+        .premiumBox p {
+          max-width: 650px;
+          margin: 10px auto 20px;
+          color: #756d62;
+          font-size: 14px;
+          line-height: 1.8;
+          word-break: keep-all;
+        }
+
+        .premiumButton {
+          display: flex !important;
+          width: min(100%, 430px) !important;
+          min-height: 82px !important;
+          box-sizing: border-box;
+          margin: 0 auto;
+          padding: 13px 28px;
+          border: 2px solid #80520f;
+          border-radius: 16px;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 4px;
+          background: #a66f18 !important;
+          color: #ffffff !important;
+          text-decoration: none !important;
+          box-shadow: 0 12px 26px rgba(133, 88, 18, 0.3);
+        }
+
+        .premiumButtonTitle {
+          display: block;
+          color: #ffffff !important;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .premiumButtonPrice {
+          display: block;
+          color: #ffffff !important;
+          font-size: 20px;
+          font-weight: 900;
+          line-height: 1.35;
+        }
+
+        .premiumPaymentGuide {
+          max-width: 680px;
+          margin: 13px auto 0;
+          color: #7b6b50;
+          font-size: 12px;
+          line-height: 1.7;
+          word-break: keep-all;
+        }
         body {
           background:
             radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
