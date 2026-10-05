@@ -57,7 +57,7 @@ const sectionMeta = [
   { label: "CAREER", short: "직업" },
   { label: "RELATIONSHIP", short: "관계" },
   { label: "WELLNESS", short: "생활" },
-  { label: "2026 FLOW", short: "2026" },
+  { label: "NEW YEAR FLOW", short: "신년" },
   { label: "LONG TERM", short: "장기" },
 ];
 

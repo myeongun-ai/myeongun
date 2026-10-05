@@ -132,6 +132,20 @@ export async function POST(request: NextRequest) {
 
     const client = new OpenAI({ apiKey });
 
+    const seoulParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "numeric",
+    }).formatToParts(new Date());
+
+    const seoulYear = Number(
+      seoulParts.find((part) => part.type === "year")?.value
+    );
+    const seoulMonth = Number(
+      seoulParts.find((part) => part.type === "month")?.value
+    );
+    const targetYear = seoulMonth >= 9 ? seoulYear + 1 : seoulYear;
+
     const prompt = `
 당신은 한국어로 설명하는 프리미엄 사주 해석 AI입니다.
 아래 고객 정보를 바탕으로 9,900원 유료 상품에 적합한 깊이와 구체성을 가진 상세 분석을 작성하세요.
@@ -165,7 +179,7 @@ export async function POST(request: NextRequest) {
 6. 투자 수익, 사업 성공, 재산 증가를 보장하지 마세요.
 7. 건강은 질병 진단이 아니라 생활 습관과 자기관리 관점으로만 표현하세요.
 8. 인간관계와 애정운은 상대방의 행동이나 미래를 확정적으로 단정하지 마세요.
-9. 2026년과 장기 흐름은 "가능성", "경향", "준비할 점", "활용 방향" 중심으로 설명하세요.
+9. ${targetYear}년과 장기 흐름은 "가능성", "경향", "준비할 점", "활용 방향" 중심으로 설명하세요.
 10. 고객이 읽었을 때 각 섹션이 서로 다른 내용을 제공하도록 반복 표현을 최소화하세요.
 11. 지나치게 추상적인 문장보다 실제 생활에서 적용할 수 있는 구체적인 조언을 우선하세요.
 12. 모든 문장은 자연스럽고 신뢰감 있는 한국어 존댓말로 작성하세요.
@@ -196,7 +210,7 @@ export async function POST(request: NextRequest) {
 - 직업운은 직업명을 단순 나열하기보다 잘 맞는 역할, 업무 환경, 책임 범위, 의사결정 방식, 조직과 독립활동의 균형을 구체적으로 설명하세요.
 - 인간관계와 애정운은 관계의 시작, 신뢰 형성, 갈등 패턴, 감정 표현, 장기 관계에서의 보완점을 구분해 설명하세요.
 - 생활과 건강 관리는 질병을 예측하거나 진단하지 말고, 사주 성향과 연결되는 생활 리듬·과로·휴식·수면·운동·스트레스 관리 습관을 구체적으로 제안하세요.
-- 2026년 운세는 연간 전체 분위기, 상반기, 하반기, 재물·사업, 직업·관계의 준비 포인트가 구별되도록 작성하세요. 특정 월의 사건이나 결과를 확정적으로 예언하지 마세요.
+- ${targetYear}년 운세는 연간 전체 분위기, 상반기, 하반기, 재물·사업, 직업·관계의 준비 포인트가 구별되도록 작성하세요. 특정 월의 사건이나 결과를 확정적으로 예언하지 마세요.
 - 향후 장기 흐름은 실제 대운 계산값이 제공되지 않았으므로 대운처럼 단정하지 마세요. 1~2년, 3~5년, 5~10년은 현재 사주 구조에서 장기적으로 강화하면 좋은 방향과 역량의 관점으로 설명하세요.
 - actionPlan은 다른 섹션의 문장을 반복하지 말고, 우선순위가 느껴지는 구체적인 행동 계획으로 작성하세요.
 - 사용자가 9,900원을 지불한 가치가 느껴지도록 충분한 설명과 구체성을 제공하되, 근거 없는 과장이나 분량을 늘리기 위한 반복은 하지 마세요.
@@ -213,7 +227,7 @@ export async function POST(request: NextRequest) {
   4. 직업운
   5. 인간관계와 애정운
   6. 생활과 건강 관리
-  7. 2026년 운세
+  7. ${targetYear}년 운세
   8. 향후 장기 흐름
 - actionPlan: 지금부터 실천할 수 있는 구체적인 행동 4~5개
 - disclaimer: 참고용 AI 명리 분석이라는 안내
@@ -230,7 +244,7 @@ export async function POST(request: NextRequest) {
 - 직업운: 잘 맞을 가능성이 있는 업무 방식, 역할, 조직생활과 독립활동의 균형
 - 인간관계와 애정운: 관계 형성 방식, 갈등 시 주의점, 소통 방식
 - 생활과 건강 관리: 수면, 운동, 휴식, 스트레스 관리 등 일반적인 생활관리
-- 2026년 운세: 상반기·하반기 흐름, 재물·사업, 관계·생활 측면의 준비 포인트
+- ${targetYear}년 운세: 상반기·하반기 흐름, 재물·사업, 관계·생활 측면의 준비 포인트
 - 향후 장기 흐름: 1~2년, 3~5년, 5~10년의 방향과 장기적으로 쌓아야 할 자산·역량
 
 반드시 아래 JSON 구조 하나만 반환하세요.
@@ -280,10 +294,10 @@ export async function POST(request: NextRequest) {
       "advice": "생활관리 조언 2~4문장"
     },
     {
-      "title": "2026년 운세",
+      "title": "${targetYear}년 운세",
       "summary": "5~8문장",
       "points": ["상반기 흐름", "하반기 흐름", "재물·사업 포인트", "관계·생활 포인트"],
-      "advice": "2026년 실행 조언 2~4문장"
+      "advice": "${targetYear}년 실행 조언 2~4문장"
     },
     {
       "title": "향후 장기 흐름",
