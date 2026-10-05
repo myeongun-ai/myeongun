@@ -42,6 +42,20 @@ export async function POST(req: Request) {
       apiKey,
     });
 
+    const seoulParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "numeric",
+    }).formatToParts(new Date());
+
+    const seoulYear = Number(
+      seoulParts.find((part) => part.type === "year")?.value
+    );
+    const seoulMonth = Number(
+      seoulParts.find((part) => part.type === "month")?.value
+    );
+    const targetYear = seoulMonth >= 9 ? seoulYear + 1 : seoulYear;
+
     const prompt = `
 당신은 한국어로 쉽고 친절하게 설명하는 재물·사업운 전문 AI '명운'입니다.
 
@@ -142,7 +156,7 @@ ${manseryeok.strength.level} (${manseryeok.strength.score}점)
 - 직장과 사업 중 어느 쪽을 선택해야 하는지에 대한 최종 판단
 - 이직·독립·창업 시기
 - 장기적인 직업 방향
-- 2026년의 상세한 재물·사업 흐름
+- ${targetYear}년의 상세한 재물·사업 흐름
 - 월별 재물운
 - 월별 사업운
 - 앞으로의 연도별 변화
