@@ -117,7 +117,7 @@ function renderAIAnswer(text: string) {
   const normalized = text.replace(/\r\n/g, "\n").trim();
 
   const headingPattern =
-    /^(?:0?\d+\s*[.)-]?\s*)?(핵심 답변|사주 근거|2026년 흐름(?:과 질문 주제 연결)?|질문 주제 해석|시기별(?: 또는 상황별)? 주의점|지금부터 할 수 있는 실전 조언|실전 조언)\s*:?\s*$/;
+    /^(?:0?\d+\s*[.)-]?\s*)?(핵심 답변|사주 근거|\d{4}년 흐름(?:과 질문 주제 연결)?|질문 주제 해석|시기별(?: 또는 상황별)? 주의점|지금부터 할 수 있는 실전 조언|실전 조언)\s*:?\s*$/;
 
   const lines = normalized.split("\n");
   const sections: { title: string; content: string[] }[] = [];
@@ -207,6 +207,14 @@ function renderAIAnswer(text: string) {
 export default function AIPage() {
   const today = new Date();
   const currentYear = today.getFullYear();
+  const seoulParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(today);
+  const seoulYear = Number(seoulParts.find((part) => part.type === "year")?.value);
+  const seoulMonth = Number(seoulParts.find((part) => part.type === "month")?.value);
+  const targetYear = seoulMonth >= 9 ? seoulYear + 1 : seoulYear;
 
   const [form, setForm] = useState<SajuForm>({
     name: "",
@@ -329,8 +337,8 @@ export default function AIPage() {
   ]);
 
   const quickQuestions = [
-    "2026년 사업운이 궁금해요",
-    "2026년 재물운을 자세히 보고 싶어요",
+    `${targetYear}년 사업운이 궁금해요`,
+    `${targetYear}년 재물운을 자세히 보고 싶어요`,
     "직업을 바꾸는 것이 좋을까요?",
     "인간관계 흐름이 궁금해요",
   ];
@@ -428,7 +436,7 @@ export default function AIPage() {
             gender: form.gender,
             calendar: form.calendar,
           },
-          targetYear: 2026,
+          targetYear,
         }),
       });
 
@@ -549,7 +557,7 @@ export default function AIPage() {
         <h1>명운 AI 상담</h1>
         <p>
           사주 정보를 직접 입력하면 실제 만세력 계산을 바탕으로
-          재물·사업·직업·인간관계·2026년 흐름을 자유롭게
+          재물·사업·직업·인간관계·신년 운세 흐름을 자유롭게
           상담할 수 있습니다.
         </p>
       </section>

@@ -281,7 +281,7 @@ function removeMySaju() {
       title: "신년 운세",
       text: saju && recent2026
         ? `최근 분석 · ${new Date(recent2026.usedAt).toLocaleDateString("ko-KR")} · ${recent2026.name}`
-        : "2026년의 전체 흐름과 주요 운세를 확인합니다.",
+        : "신년의 전체 흐름과 주요 운세를 확인합니다.",
     },
     {
       href: "/ai",

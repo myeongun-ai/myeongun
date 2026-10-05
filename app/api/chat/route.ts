@@ -174,7 +174,7 @@ function isMyeongunRelatedQuestion(question: string) {
   const patterns = [
     /(사주|운세|재물운|사업운|직업운|취업운|이직운|연애운|결혼운|궁합|건강운|금전운|시험운|승진운|대운|세운|오행|십성|용신|희신|만세력)/i,
     /(재물|사업|직업|취업|이직|연애|결혼|인간관계|돈|금전|건강|시험|승진).*(운|흐름|사주|어떻게|궁금|좋|나쁘)/i,
-    /(올해|내년|2026년|2027년).*(운|사업|재물|직업|취업|이직|연애|결혼|돈|관계)/i,
+    /(올해|내년|\d{4}년).*(운|사업|재물|직업|취업|이직|연애|결혼|돈|관계)/i,
     /(환불|취소|결제|결재|결제내역|중복결제|결제오류|결제실패|영수증|승인번호|주문번호|토스)/i,
     /(이용|사용|서비스|사이트|홈페이지|명운).*(방법|어떻게|문의|안내|오류|문제|안됨|안 돼|안되|가능|기간|횟수)/i,
     /(어떻게).*(이용|사용|결제|결재|환불|취소|재열람|다시보기)/i,
@@ -191,7 +191,7 @@ function isServiceQuestion(question: string) {
 
   const sajuPatterns = [
     /(사주|운세|재물운|사업운|직업운|취업운|이직운|연애운|결혼운|궁합|건강운|금전운|시험운|승진운|대운|세운|오행|십성|용신|희신)/i,
-    /(올해|내년|2026년|2027년).*(운|사업|재물|직업|취업|이직|연애|결혼|돈|관계)/i,
+    /(올해|내년|\d{4}년).*(운|사업|재물|직업|취업|이직|연애|결혼|돈|관계)/i,
     /(운이|운은|운을|운세가|사주가|사주를).*(어떻게|어떤|좋|나쁘|궁금)/i,
   ];
 
@@ -263,7 +263,7 @@ ${question}
 - 자세한 정책 위치를 안내할 때는 개발 경로 '/refund'를 그대로 보여주지 말고 '명운 홈페이지 하단의 환불정책'이라고 표현하세요.
 
 [답변 원칙]
-- 절대로 사주, 만세력, 오행, 십성, 운세, 2026년 흐름을 근거로 서비스 문의에 답하지 마세요.
+- 절대로 사주, 만세력, 오행, 십성, 운세, 신년 운세 흐름을 근거로 서비스 문의에 답하지 마세요.
 - "사주상", "운의 흐름", "기운" 같은 표현을 사용하지 마세요.
 - 사용자의 질문에 먼저 직접 답하고, 가능한 해결 방법을 순서대로 설명하세요.
 - 위에 확인된 서비스 정보와 환불정책만 사실처럼 말하세요.
@@ -283,6 +283,19 @@ ${question}
 `;
 }
 
+function getTargetYear() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(new Date());
+
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+
+  return month >= 9 ? year + 1 : year;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -290,7 +303,7 @@ export async function POST(req: NextRequest) {
     const action = String(body?.action || "chat").trim();
     const question = String(body?.question || "").trim();
     const saju = (body?.saju || null) as Saju | null;
-    const targetYear = Number(body?.targetYear || 2026);
+    const targetYear = Number(body?.targetYear || getTargetYear());
 
     if (
       !saju?.name ||
