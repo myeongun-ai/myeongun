@@ -730,7 +730,7 @@ export default function SajuPage() {
             <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>
             <h3>더 깊은 상세 사주 분석이 필요하신가요?</h3>
             <p>
-              재물운, 사업운, 직업운, 인간관계, 2026년 운세,
+              재물운, 사업운, 직업운, 인간관계, 신년 운세,
               장기 흐름까지 개인별 프리미엄 분석을 확인할 수 있습니다.
             </p>
 

@@ -42,6 +42,20 @@ export async function POST(req: Request) {
       apiKey,
     });
 
+    const seoulParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "numeric",
+    }).formatToParts(new Date());
+
+    const seoulYear = Number(
+      seoulParts.find((part) => part.type === "year")?.value
+    );
+    const seoulMonth = Number(
+      seoulParts.find((part) => part.type === "month")?.value
+    );
+    const targetYear = seoulMonth >= 9 ? seoulYear + 1 : seoulYear;
+
     const prompt = `
 당신은 한국어로 쉽고 친절하게 설명하는 무료 사주 해석 AI '명운'입니다.
 
@@ -133,7 +147,7 @@ ${manseryeok.strength.level} (${manseryeok.strength.score}점)
 - 월별 운세
 - 장기적인 운의 변화
 - 세부적인 연도별 흐름
-- 상세한 2026년 재물·직업·관계 분석
+- 상세한 ${targetYear}년 재물·직업·관계 분석
 - 상세 사주에서 제공할 수 있는 구체적인 행동 전략
 
 무료 결과에서 위 내용을 궁금하게 만드는 것은 괜찮지만,
@@ -185,13 +199,13 @@ ${manseryeok.strength.level} (${manseryeok.strength.score}점)
 
 구체적인 직업 추천이나 관계의 세부 흐름은 공개하지 마세요.
 
-## 4. 2026년 핵심 방향
+## 4. ${targetYear}년 핵심 방향
 
-2026년의 전체적인 방향만 1~2문장으로 알려 주세요.
+${targetYear}년의 전체적인 방향만 1~2문장으로 알려 주세요.
 
 월별 운세나 재물·직업·관계별 상세 변화는 설명하지 마세요.
 
-고객이 자신의 2026년 세부 흐름이 궁금해질 수 있도록
+고객이 자신의 ${targetYear}년 세부 흐름이 궁금해질 수 있도록
 "무엇을 준비하고 무엇을 조심해야 하는지가 중요한 해"라는 관점에서 설명하세요.
 
 ## 무료 분석 한눈에 보기
