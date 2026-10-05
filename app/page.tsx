@@ -34,7 +34,7 @@ const cards = [
   },
   {
     image: "/characters/myeongun-2026.png",
-    title: "2026 운세",
+    title: "신년 운세",
     text: "다가올 기회와 한 해의 흐름을 미리 준비하다",
     href: "/fortune/2026",
   },
@@ -445,7 +445,7 @@ export default function Home() {
             <div className="homeQuickTabs">
               <a className="active" href="#free-saju">사주보기</a>
               <Link href="/compatibility">궁합보기</Link>
-              <Link href="/fortune/2026">2026 운세</Link>
+              <Link href="/fortune/2026">신년 운세</Link>
               <Link href="/ai">AI 상담</Link>
             </div>
 

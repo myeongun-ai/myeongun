@@ -1,16 +1,16 @@
-﻿import "./globals.css";
+import "./globals.css";
 import Link from "next/link";
 import SessionPrivacyCleanup from "./SessionPrivacyCleanup";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
-  title: "명운 | 사주 · 재물사업 · 궁합 · 2026 운세 · AI 상담",
+  title: "명운 | 사주 · 재물사업 · 궁합 · 신년 운세 · AI 상담",
   description:
-    "전통 명리학을 바탕으로 사주, 재물·사업운, 궁합, 2026 운세와 AI 상담을 제공하는 명운입니다.",
+    "전통 명리학을 바탕으로 사주, 재물·사업운, 궁합, 신년 운세와 AI 상담을 제공하는 명운입니다.",
   openGraph: {
-    title: "명운 | 사주 · 재물사업 · 궁합 · 2026 운세 · AI 상담",
+    title: "명운 | 사주 · 재물사업 · 궁합 · 신년 운세 · AI 상담",
     description:
-      "전통 명리학을 바탕으로 사주, 재물·사업운, 궁합, 2026 운세와 AI 상담을 제공하는 명운입니다.",
+      "전통 명리학을 바탕으로 사주, 재물·사업운, 궁합, 신년 운세와 AI 상담을 제공하는 명운입니다.",
     url: "https://myeongun.kr",
     siteName: "명운",
     locale: "ko_KR",
@@ -48,7 +48,7 @@ export default function RootLayout({
               <Link href="/saju">종합 사주</Link>
               <Link href="/fortune/business">재물·사업운</Link>
               <Link href="/compatibility">궁합</Link>
-              <Link href="/fortune/2026">2026 운세</Link>
+              <Link href="/fortune/2026">신년 운세</Link>
               <Link className="mgAiNav" href="/ai">
                 AI 상담
               </Link>
@@ -113,7 +113,7 @@ export default function RootLayout({
               <Link href="/saju">종합 사주</Link>
               <Link href="/fortune/business">재물·사업운</Link>
               <Link href="/compatibility">궁합</Link>
-              <Link href="/fortune/2026">2026 운세</Link>
+              <Link href="/fortune/2026">신년 운세</Link>
               <Link href="/ai">AI 상담</Link>
             </section>
 

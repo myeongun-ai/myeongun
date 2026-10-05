@@ -33,7 +33,7 @@ const cards = [
   },
   {
     icon: "📅",
-    title: "2026 운세",
+    title: "신년 운세",
     text: "올해의 큰 흐름과 월별 운",
     href: "/fortune/2026",
   },
@@ -441,7 +441,7 @@ export default function Home() {
               궁합
             </Link>
             <Link href="/fortune/2026" style={navStyle}>
-              2026 운세
+              신년 운세
             </Link>
           </nav>
         </div>
