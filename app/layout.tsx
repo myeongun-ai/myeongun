@@ -143,7 +143,7 @@ export default function RootLayout({
           </div>
 
           <div className="mgFooterBottom">
-            <span>© 2026 MYEONGUN · myeongun.kr</span>
+            <span>© {new Date().getFullYear()} MYEONGUN · myeongun.kr</span>
             <span>좋은 날은 언제나 옵니다.</span>
           </div>
         </footer>

@@ -322,7 +322,7 @@ function PaymentFailContent() {
           </div>
 
           <div style={{ marginTop: "8px" }}>
-            © 2026 MYEONGUN · myeongun.kr
+            © {new Date().getFullYear()} MYEONGUN · myeongun.kr
           </div>
         </footer>
       </div>
