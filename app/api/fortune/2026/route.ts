@@ -2,7 +2,22 @@ import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { calculateMyeongunManseryeok } from "../../../../lib/manseryeok";
 
+function getTargetYear() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(new Date());
+
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+
+  return month >= 9 ? year + 1 : year;
+}
+
 export async function POST(req: Request) {
+  const targetYear = getTargetYear();
+
   try {
     const body = await req.json();
 
@@ -51,7 +66,7 @@ export async function POST(req: Request) {
     const prompt = `
 당신은 한국어로 설명하는 명리 기반 AI 운세 분석 서비스 '명운'입니다.
 
-아래 실제 만세력 계산 결과를 기준으로 사용자의 2026년 운세를 쉽고 현실적인 한국어로 분석하세요.
+아래 실제 만세력 계산 결과를 기준으로 사용자의 ${targetYear}년 신년 운세를 쉽고 현실적인 한국어로 분석하세요.
 
 [입력 정보]
 이름: ${body.name}
@@ -107,7 +122,7 @@ ${manseryeok.strength.level}
 - 위 만세력 계산값은 명운 엔진에서 산출된 실제 기준값입니다.
 - 연주·월주·일주·시주, 일간, 오행, 신강·신약, 용신·희신, 십성, 지장간을 해석의 근거로 사용하세요.
 - 제공되지 않은 대운, 세운표, 신살 등을 임의로 만들어내지 마세요.
-- 2026년은 확정적인 미래 예언이 아니라 전통 명리 관점에서 볼 수 있는 가능성과 방향으로 설명하세요.
+- ${targetYear}년은 확정적인 미래 예언이 아니라 전통 명리 관점에서 볼 수 있는 가능성과 방향으로 설명하세요.
 - 재물, 투자, 사업 성공을 보장하거나 특정 결과를 단정하지 마세요.
 - 건강은 질병 진단이나 예측이 아니라 수면, 체력, 스트레스, 생활습관 관리 관점에서만 간단히 다루세요.
 - 과도하게 불안감을 주는 표현이나 사고·질병·수명에 대한 단정적인 예언은 금지합니다.
@@ -120,12 +135,12 @@ ${manseryeok.strength.level}
 - 마크다운 제목 형식을 정확히 지켜 주세요.
 
 [무료 서비스 작성 범위]
-- 이 메뉴는 무료 2026년 운세 요약 서비스입니다.
-- 무료 분석만 읽어도 사용자가 자신의 2026년 기본 방향과 주의점을 이해할 수 있어야 합니다.
+- 이 메뉴는 무료 ${targetYear}년 신년 운세 요약 서비스입니다.
+- 무료 분석만 읽어도 사용자가 자신의 ${targetYear}년 기본 방향과 주의점을 이해할 수 있어야 합니다.
 - 다만 유료 상세 사주 분석을 대신할 정도로 재물·직업·관계와 미래 흐름을 모두 자세히 풀어 쓰지 마세요.
 - 전체 분량은 약 800~1,000자를 목표로 하세요.
 - 같은 의미를 반복하거나 불필요하게 길게 설명하지 마세요.
-- 2026년의 전체적인 방향, 재물·일의 핵심 방향, 관계·생활의 핵심 방향, 지금 기억할 행동을 중심으로 설명하세요.
+- ${targetYear}년의 전체적인 방향, 재물·일의 핵심 방향, 관계·생활의 핵심 방향, 지금 기억할 행동을 중심으로 설명하세요.
 
 [무료 분석에서 자세히 다루지 않을 내용]
 다음 내용은 무료 분석에서 구체적으로 풀어 쓰지 마세요.
@@ -141,14 +156,14 @@ ${manseryeok.strength.level}
 - 개인 상황별 세부 실행 전략
 
 위 내용을 질문받은 것처럼 미리 자세히 제공하지 말고,
-무료 분석에서는 2026년의 핵심적인 방향과 주의점까지만 안내하세요.
+무료 분석에서는 ${targetYear}년의 핵심적인 방향과 주의점까지만 안내하세요.
 
 [반드시 아래 구조로 작성]
 
-# 명운의 2026년 무료 운세
+# 명운의 ${targetYear}년 무료 신년 운세
 
-## 1. 2026년 전체 방향
-2026년에 사용자가 가장 중요하게 기억해야 할 전체적인 흐름을
+## 1. ${targetYear}년 전체 방향
+${targetYear}년에 사용자가 가장 중요하게 기억해야 할 전체적인 흐름을
 쉽고 현실적인 표현으로 3~4문장 작성하세요.
 
 이어 아래 형식으로 핵심 키워드 3개를 짧게 작성하세요.
@@ -168,16 +183,16 @@ ${manseryeok.strength.level}
 건강은 생활습관 관리 수준에서만 간단히 언급하세요.
 
 ## 4. 올해 기억할 두 가지
-2026년에 실제 생활에서 기억하면 좋은 행동을 정확히 2개만 작성하세요.
+${targetYear}년에 실제 생활에서 기억하면 좋은 행동을 정확히 2개만 작성하세요.
 
 1.
 2.
 
-## 무료 2026 운세 한눈에 보기
-2026년의 가장 중요한 방향과 주의점을 2~3문장으로 간결하게 정리하세요.
+## 무료 ${targetYear} 신년 운세 한눈에 보기
+${targetYear}년의 가장 중요한 방향과 주의점을 2~3문장으로 간결하게 정리하세요.
 
 마지막에는 광고처럼 과장하거나 결제를 강요하지 말고,
-무료 운세에서는 2026년의 기본 방향과 핵심 주의점을 확인할 수 있으며,
+무료 신년 운세에서는 ${targetYear}년의 기본 방향과 핵심 주의점을 확인할 수 있으며,
 재물·직업·관계와 앞으로의 흐름을 더 깊게 보는 개인 분석은
 상세 사주 분석에서 확인할 수 있다는 취지로 자연스럽게 안내하세요.
 `;
@@ -191,13 +206,14 @@ ${manseryeok.strength.level}
 
     if (!result) {
       return NextResponse.json(
-        { error: "2026년 운세 결과를 생성하지 못했습니다." },
+        { error: `${targetYear}년 신년 운세 결과를 생성하지 못했습니다.` },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
       result,
+      targetYear,
       profile: {
         name: body.name,
         birth: body.birth,
@@ -211,12 +227,11 @@ ${manseryeok.strength.level}
       },
     });
   } catch (error) {
-    console.error("2026 fortune API error:", error);
+    console.error(`${targetYear} new year fortune API error:`, error);
 
     return NextResponse.json(
       {
-        error:
-          "2026년 운세 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+        error: `${targetYear}년 신년 운세 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.`,
       },
       { status: 500 }
     );

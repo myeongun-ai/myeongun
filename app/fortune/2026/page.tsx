@@ -123,6 +123,11 @@ function parseBirth(value: string) {
   };
 }
 
+function getTargetYear() {
+  const today = new Date();
+  return today.getMonth() >= 8 ? today.getFullYear() + 1 : today.getFullYear();
+}
+
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
 
@@ -135,7 +140,7 @@ function renderInline(text: string) {
   });
 }
 
-function renderFortune2026Result(text: string) {
+function renderFortune2026Result(text: string, targetYear: number) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
 
   type ResultSection = {
@@ -256,7 +261,7 @@ function renderFortune2026Result(text: string) {
       {intro.length > 0 && (
         <section className="fortune2026IntroCard">
           <div className="fortune2026IntroMark">
-            MYEONGUN · 2026 FORTUNE
+            MYEONGUN · {targetYear} FORTUNE
           </div>
 
           {intro.map((line, index) => (
@@ -291,7 +296,7 @@ function renderFortune2026Result(text: string) {
 
                 <div className="fortune2026SectionTitleWrap">
                   <span className="fortune2026SectionLabel">
-                    YEAR · FORTUNE · 2026
+                    YEAR · FORTUNE · {targetYear}
                   </span>
 
                   <h3>{renderInline(title)}</h3>
@@ -312,6 +317,7 @@ function renderFortune2026Result(text: string) {
 export default function Fortune2026Page() {
   const today = new Date();
   const currentYear = today.getFullYear();
+  const targetYear = getTargetYear();
 
   const [form, setForm] = useState<SajuForm>({
     name: "",
@@ -443,6 +449,7 @@ export default function Fortune2026Page() {
           time: form.time,
           gender: form.gender,
           calendar: form.calendar,
+          targetYear,
         }),
       });
 
@@ -450,14 +457,14 @@ export default function Fortune2026Page() {
 
       if (!response.ok) {
         throw new Error(
-          data?.error || "2026년 운세 분석 중 오류가 발생했습니다."
+          data?.error || `${targetYear}년 신년 운세 분석 중 오류가 발생했습니다.`
         );
       }
 
       const resultText = String(data?.result || "").trim();
 
       if (!resultText) {
-        throw new Error("2026년 운세 분석 결과가 비어 있습니다.");
+        throw new Error(`${targetYear}년 신년 운세 분석 결과가 비어 있습니다.`);
       }
 
       try {
@@ -501,7 +508,7 @@ export default function Fortune2026Page() {
       setError(
         err instanceof Error
           ? err.message
-          : "2026년 운세 분석 중 오류가 발생했습니다."
+          : `${targetYear}년 신년 운세 분석 중 오류가 발생했습니다.`
       );
     } finally {
       setLoading(false);
@@ -531,10 +538,10 @@ export default function Fortune2026Page() {
   return (
     <main className="fortune2026Page">
       <section className="fortune2026Hero">
-        <span className="eyebrow">2026 YEAR FORTUNE</span>
-        <h1>2026년 운세</h1>
+        <span className="eyebrow">{targetYear} NEW YEAR FORTUNE</span>
+        <h1>{targetYear}년 신년 운세</h1>
         <p>
-          실제 만세력 계산을 바탕으로 2026년의 전체 방향과
+          실제 만세력 계산을 바탕으로 {targetYear}년의 전체 방향과
           재물·일, 인간관계·생활에서 기억할 핵심을
           살펴봅니다.
         </p>
@@ -546,7 +553,7 @@ export default function Fortune2026Page() {
       >
         <section className="formTitle">
           <span>MYEONGUN FORTUNE</span>
-          <h2>2026년 운세를 확인할 정보를 입력하세요</h2>
+          <h2>{targetYear}년 신년 운세를 확인할 정보를 입력하세요</h2>
         </section>
 
         <div className="formGrid">
@@ -759,13 +766,13 @@ export default function Fortune2026Page() {
         </div>
 
         <section className="analysisGuide">
-          <span>2026 YEAR ANALYSIS</span>
+          <span>{targetYear} NEW YEAR ANALYSIS</span>
           <strong>
             단순한 띠 운세가 아닌 개인 만세력 기준 분석입니다.
           </strong>
           <p>
             일간과 오행, 신강·신약, 십성, 지장간과 참고용
-            용신·희신을 바탕으로 2026년의 흐름과 현실적인
+            용신·희신을 바탕으로 {targetYear}년의 흐름과 현실적인
             대응 방향을 분석합니다.
           </p>
         </section>
@@ -778,12 +785,12 @@ export default function Fortune2026Page() {
           disabled={!canAnalyze || loading}
         >
           {loading
-            ? "2026년 운세를 분석하고 있습니다..."
-            : "2026년 운세 분석 시작"}
+            ? `${targetYear}년 신년 운세를 분석하고 있습니다...`
+            : `${targetYear}년 신년 운세 분석 시작`}
         </button>
 
         <p className="privacyText">
-          입력한 정보는 2026년 운세 분석 요청에 사용됩니다.
+          입력한 정보는 {targetYear}년 신년 운세 분석 요청에 사용됩니다.
         </p>
       </form>
 
@@ -793,10 +800,10 @@ export default function Fortune2026Page() {
           id="fortune-2026-result"
         >
           <div className="resultTitle">
-            <span>2026 FORTUNE REPORT</span>
-            <h2>{form.name}님의 2026년 운세 분석</h2>
+            <span>{targetYear} NEW YEAR FORTUNE REPORT</span>
+            <h2>{form.name}님의 {targetYear}년 신년 운세 분석</h2>
             <p>
-              실제 만세력 기준으로 2026년의 주요 흐름을
+              실제 만세력 기준으로 {targetYear}년의 주요 흐름을
               정리했습니다.
             </p>
           </div>
@@ -845,7 +852,7 @@ export default function Fortune2026Page() {
           )}
 
           <div className="resultBody">
-            {renderFortune2026Result(result)}
+            {renderFortune2026Result(result, targetYear)}
           </div>
 
           <UsageBenefits compact />
@@ -856,7 +863,7 @@ export default function Fortune2026Page() {
             </div>
 
             <h3>
-              2026년의 흐름을 더 깊이 알고 싶으신가요?
+              {targetYear}년의 흐름을 더 깊이 알고 싶으신가요?
             </h3>
 
             <p>
@@ -891,7 +898,7 @@ export default function Fortune2026Page() {
             className="resetButton"
             onClick={resetAll}
           >
-            다른 정보로 2026년 운세 보기
+            다른 정보로 {targetYear}년 신년 운세 보기
           </button>
         </section>
       )}
