@@ -1,7 +1,8 @@
-
 import { NextResponse } from "next/server";
 import type { SajuAccessInput } from "../../../../lib/paymentAccess";
 import { savePendingPayment } from "../../../../lib/paymentPending";
+
+export const runtime = "nodejs";
 
 function json(
   data: Record<string, unknown>,
@@ -13,6 +14,66 @@ function json(
       "Cache-Control": "no-store",
     },
   });
+}
+
+const AI_UNAVAILABLE_MESSAGE =
+  "현재 AI 상세 사주 서비스를 일시적으로 이용할 수 없습니다. " +
+  "결제는 진행되지 않았으니 잠시 후 다시 이용해 주세요.";
+
+async function checkAiService(): Promise<boolean> {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    console.error("결제 보호: OPENAI_API_KEY가 없습니다.");
+    return false;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      10000
+    );
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/responses",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-4.1-mini",
+            input: "정상",
+            max_output_tokens: 16,
+          }),
+          signal: controller.signal,
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+
+        console.error(
+          "결제 보호: AI 상태 확인 실패",
+          response.status,
+          errorBody.slice(0, 500)
+        );
+
+        return false;
+      }
+
+      return true;
+    } finally {
+      clearTimeout(timeout);
+    }
+  } catch (error) {
+    console.error("결제 보호: AI 연결 오류", error);
+    return false;
+  }
 }
 
 export async function POST(request: Request) {
@@ -41,8 +102,7 @@ export async function POST(request: Request) {
     ) {
       return json(
         {
-          message:
-            "결제에 연결할 사주 정보가 없습니다.",
+          message: "결제에 연결할 사주 정보가 없습니다.",
         },
         400
       );
@@ -69,6 +129,16 @@ export async function POST(request: Request) {
             "이름, 생년월일, 출생시간, 성별, 양력/음력 정보를 모두 입력해주세요.",
         },
         400
+      );
+    }
+
+    // 결제 준비 정보를 저장하기 전에 AI 서비스 상태 확인
+    const aiAvailable = await checkAiService();
+
+    if (!aiAvailable) {
+      return json(
+        { message: AI_UNAVAILABLE_MESSAGE },
+        503
       );
     }
 
