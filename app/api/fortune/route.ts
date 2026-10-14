@@ -1,12 +1,188 @@
-import OpenAI from "openai";
+
 import { NextResponse } from "next/server";
-import { calculateMyeongunManseryeok } from "../../../lib/manseryeok";
+import {
+  calculateMyeongunManseryeok,
+  type FiveElement,
+  type MyeongunManseryeokResult,
+} from "../../../lib/manseryeok";
+
+export const runtime = "nodejs";
+
+type ElementDescription = {
+  character: string;
+  strength: string;
+  caution: string;
+  money: string;
+  work: string;
+  relationship: string;
+  advice: string;
+};
+
+const ELEMENTS: Record<FiveElement, ElementDescription> = {
+  목: {
+    character: "새로운 가능성을 찾고 성장하려는 성향",
+    strength: "배우고 발전하려는 자세",
+    caution: "여러 일을 한꺼번에 시작해 집중력이 분산되는 점",
+    money: "장기적인 성장과 꾸준한 준비",
+    work: "기획하고 새로운 방향을 만들어 가는 활동",
+    relationship: "상대방과 함께 발전하는 관계",
+    advice: "새로운 일을 시작할 때는 우선순위를 정해 보세요.",
+  },
+  화: {
+    character: "표현과 소통을 통해 활력을 얻는 성향",
+    strength: "적극성과 따뜻한 표현력",
+    caution: "순간적인 감정이나 성급한 결정",
+    money: "적극적인 활동과 지출의 균형",
+    work: "사람들과 소통하고 아이디어를 전달하는 활동",
+    relationship: "마음을 표현하면서 상대의 이야기도 듣는 관계",
+    advice: "중요한 결정은 잠시 시간을 두고 판단해 보세요.",
+  },
+  토: {
+    character: "안정과 신뢰를 중요하게 여기는 성향",
+    strength: "책임감과 꾸준함",
+    caution: "익숙한 방식만 고집하거나 변화를 미루는 점",
+    money: "안정적인 관리와 계획적인 생활",
+    work: "체계를 유지하고 맡은 일을 완성하는 활동",
+    relationship: "오랜 신뢰를 쌓아 가는 관계",
+    advice: "안정적인 기반을 유지하면서 작은 변화도 시도해 보세요.",
+  },
+  금: {
+    character: "원칙과 기준을 세워 판단하려는 성향",
+    strength: "분별력과 결단력",
+    caution: "자신이나 다른 사람에게 지나치게 엄격해지는 점",
+    money: "기준을 세운 관리와 신중한 판단",
+    work: "분석하고 문제를 정리하는 활동",
+    relationship: "약속과 책임을 중요하게 여기는 관계",
+    advice: "원칙을 지키되 상황에 맞는 유연함도 생각해 보세요.",
+  },
+  수: {
+    character: "상황을 살피고 깊이 생각하는 성향",
+    strength: "관찰력과 유연한 사고",
+    caution: "고민이 길어져 실행이 늦어지는 점",
+    money: "정보를 충분히 확인하고 판단하는 습관",
+    work: "정보를 모으고 흐름을 파악하는 활동",
+    relationship: "상대의 입장을 이해하려는 관계",
+    advice: "충분히 생각했다면 작은 행동부터 시작해 보세요.",
+  },
+};
+
+const ELEMENT_MEANING: Record<FiveElement, string> = {
+  목: "성장과 시작",
+  화: "표현과 활동",
+  토: "안정과 균형",
+  금: "원칙과 정리",
+  수: "지혜와 유연함",
+};
+
+function getTargetYear(): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(new Date());
+
+  const year = Number(
+    parts.find((part) => part.type === "year")?.value
+  );
+
+  const month = Number(
+    parts.find((part) => part.type === "month")?.value
+  );
+
+  return month >= 9 ? year + 1 : year;
+}
+
+function createFreeResult(
+  data: MyeongunManseryeokResult,
+  targetYear: number
+): string {
+  const element = data.dayMaster.element;
+  const description = ELEMENTS[element];
+
+  const counts = Object.entries(data.fiveElements) as [
+    FiveElement,
+    number
+  ][];
+
+  const sorted = [...counts].sort(
+    (a, b) => b[1] - a[1]
+  );
+
+  const strongest = sorted[0];
+  const weakest = sorted[sorted.length - 1];
+
+  const balanceText =
+    strongest[1] === weakest[1]
+      ? "다섯 기운의 수량이 비교적 고르게 나타납니다."
+      : `${ELEMENT_MEANING[strongest[0]]}을 뜻하는 ${strongest[0]}의 기운이 상대적으로 많이 나타납니다.`;
+
+  const strengthText =
+    data.strength.level === "신강"
+      ? "자기 주관을 활용하되 주변 의견도 살피는 태도가 도움이 될 수 있습니다."
+      : data.strength.level === "신약"
+      ? "혼자 모든 일을 감당하기보다 주변의 도움과 충분한 준비를 활용하는 태도가 도움이 될 수 있습니다."
+      : "자신의 생각과 주변 상황 사이에서 균형을 찾는 태도가 도움이 될 수 있습니다.";
+
+  const timeNotice = data.time.known
+    ? ""
+    : "출생시간을 알 수 없어 시주를 제외한 참고 분석이며, 세부 해석에는 제한이 있습니다.";
+
+  const yearAdvice =
+    data.strength.level === "신강"
+      ? "자신이 주도하는 일과 다른 사람과 협력하는 일 사이의 균형을 살펴보세요."
+      : data.strength.level === "신약"
+      ? "새로운 계획을 무리하게 늘리기보다 준비와 기반을 점검해 보세요."
+      : "지금까지 유지해 온 생활의 균형을 점검하고 필요한 변화를 준비해 보세요.";
+
+  return [
+    "## 기본 사주 구성",
+    `고객님의 일간은 ${data.dayMaster.stem}이며, 전통 명리에서는 ${element}의 성질과 연결하여 해석합니다. ${balanceText}`,
+    timeNotice,
+
+    "## 1. 나의 기본 성향",
+    `전통 명리의 ${element} 기운을 바탕으로 보면 ${description.character}을 참고할 수 있습니다. ${strengthText}`,
+    `- 강점: ${description.strength}`,
+    `- 주의할 점: ${description.caution}`,
+
+    "## 2. 재물·사업 방향",
+    `재물과 사업에서는 ${description.money}을 중요하게 생각해 볼 수 있습니다. 실제 재정 판단은 소득과 지출, 사업 환경을 함께 검토해야 합니다.`,
+    "재물과 사업의 구체적인 흐름은 전체 사주와 시기를 함께 살펴보는 것이 중요합니다.",
+
+    "## 3. 직업·인간관계 방향",
+    `직업에서는 ${description.work}과 관련된 자신의 강점을 돌아볼 수 있습니다.`,
+    `인간관계에서는 ${description.relationship}를 생각해 보세요. 다만 실제 적성과 관계는 개인의 경험과 환경에 따라 달라집니다.`,
+
+    `## 4. ${targetYear}년 핵심 방향`,
+    `${targetYear}년을 준비하면서 ${yearAdvice}`,
+    "이는 특정 연도의 운세를 확정적으로 예측한 내용이 아니라, 기본 사주 성향을 바탕으로 제안하는 생활 방향입니다.",
+
+    "## 무료 분석 한눈에 보기",
+    `- ${description.advice}`,
+    "- 중요한 선택은 사주 해석뿐 아니라 현실적인 조건과 충분한 정보를 함께 고려해 보세요.",
+
+    "무료 분석에서는 사주의 기본 성향과 핵심 방향까지 안내해 드렸습니다. 재물·사업·직업·인간관계와 앞으로의 세부 흐름을 더 깊게 보고 싶다면 상세 사주에서 확인할 수 있습니다.",
+    "",
+    "※ 이 분석은 전통 명리 해석을 활용한 참고용 콘텐츠이며, 미래의 결과를 보장하지 않습니다.",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    if (!body.birth || !body.time || !body.gender || !body.calendar) {
+    if (
+      !body ||
+      typeof body.birth !== "string" ||
+      typeof body.time !== "string" ||
+      typeof body.gender !== "string" ||
+      typeof body.calendar !== "string" ||
+      !body.birth ||
+      !body.time ||
+      !body.gender ||
+      !body.calendar
+    ) {
       return NextResponse.json(
         { error: "필수 정보를 모두 입력해 주세요." },
         { status: 400 }
@@ -19,229 +195,14 @@ export async function POST(req: Request) {
       calendar: body.calendar,
     });
 
-    const formatHiddenStems = (
-      pillar: typeof manseryeok.pillars.year
-    ) =>
-      pillar.hiddenStems
-        .map((item) => `${item.stem}(${item.tenGod})`)
-        .join(" · ");
-
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          error:
-            "OPENAI_API_KEY가 설정되지 않았습니다. Vercel 환경변수를 확인해 주세요.",
-        },
-        { status: 500 }
-      );
-    }
-
-    const client = new OpenAI({
-      apiKey,
-    });
-
-    const seoulParts = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Seoul",
-      year: "numeric",
-      month: "numeric",
-    }).formatToParts(new Date());
-
-    const seoulYear = Number(
-      seoulParts.find((part) => part.type === "year")?.value
+    const result = createFreeResult(
+      manseryeok,
+      getTargetYear()
     );
-    const seoulMonth = Number(
-      seoulParts.find((part) => part.type === "month")?.value
-    );
-    const targetYear = seoulMonth >= 9 ? seoulYear + 1 : seoulYear;
-
-    const prompt = `
-당신은 한국어로 쉽고 친절하게 설명하는 무료 사주 해석 AI '명운'입니다.
-
-아래 출생정보와 실제 만세력 계산값을 바탕으로,
-처음 이용하는 고객이 자신의 사주가 어떤 특징을 가지고 있는지 신뢰할 수 있을 정도의 핵심 내용만 보여 주세요.
-
-이 서비스는 무료 분석입니다.
-무료 결과만으로 재물, 사업, 직업, 인간관계, 연도별 흐름에 대한 모든 궁금증이 해결되지 않도록 하세요.
-
-무료에서는 "나는 기본적으로 어떤 사람인가"와 "어떤 방향을 주의해서 살아가면 좋은가"를 이해할 수 있는 정도까지만 설명합니다.
-
-세부적인 재물 흐름, 사업 방향, 직업 적성, 인간관계의 깊은 분석, 시기별 변화와 앞으로의 구체적인 흐름은 상세 사주에서 확인할 수 있도록 남겨 두세요.
-
-[입력 정보]
-이름: ${body.name || "고객"}
-생년월일: ${body.birth}
-출생시간: ${body.time}
-성별: ${body.gender}
-달력 기준: ${body.calendar}
-
-[실제 만세력 계산 결과]
-연주: ${manseryeok.pillars.year.pillar}
-월주: ${manseryeok.pillars.month.pillar}
-일주: ${manseryeok.pillars.day.pillar}
-시주: ${manseryeok.pillars.hour?.pillar || "출생시간 미상"}
-
-일간: ${manseryeok.dayMaster.stem} (${manseryeok.dayMaster.element}, ${manseryeok.dayMaster.yinYang})
-
-오행:
-목 ${manseryeok.fiveElements.목},
-화 ${manseryeok.fiveElements.화},
-토 ${manseryeok.fiveElements.토},
-금 ${manseryeok.fiveElements.금},
-수 ${manseryeok.fiveElements.수}
-
-신강·신약:
-${manseryeok.strength.level} (${manseryeok.strength.score}점)
-- ${manseryeok.strength.reason}
-
-참고용 용신·희신:
-용신 ${manseryeok.yongshin?.yongshin || "미산출"},
-희신 ${manseryeok.yongshin?.heesin || "미산출"}
-- ${manseryeok.yongshin?.reason || "용신·희신 참고값 미산출"}
-
-지지 십성:
-연지 ${manseryeok.pillars.year.tenGodBranch},
-월지 ${manseryeok.pillars.month.tenGodBranch},
-일지 ${manseryeok.pillars.day.tenGodBranch},
-시지 ${manseryeok.pillars.hour?.tenGodBranch || "출생시간 미상"}
-
-지장간:
-연지 ${formatHiddenStems(manseryeok.pillars.year)},
-월지 ${formatHiddenStems(manseryeok.pillars.month)},
-일지 ${formatHiddenStems(manseryeok.pillars.day)},
-시지 ${
-      manseryeok.pillars.hour
-        ? formatHiddenStems(manseryeok.pillars.hour)
-        : "출생시간 미상"
-    }
-
-[가장 중요한 작성 원칙]
-
-- 고객은 사주 전문지식이 전혀 없다고 생각하세요.
-- 초등학생부터 어르신까지 이해할 수 있는 쉬운 한국어를 사용하세요.
-- 한자와 어려운 명리 전문용어를 가능한 한 사용하지 마세요.
-- 전문용어를 나열해서 분석이 어려워 보이게 만들지 마세요.
-- 계산값은 내부 분석 근거로 사용하고 고객에게는 생활 언어로 설명하세요.
-- 문장은 짧고 명확하게 작성하세요.
-- 같은 내용을 반복하지 마세요.
-- 막연한 설명보다 실제 성격이나 생활에서 나타날 수 있는 모습을 알려 주세요.
-- 불안감을 주거나 운명을 단정하는 표현을 사용하지 마세요.
-- 확정적인 미래 예언을 하지 마세요.
-- 투자 수익이나 사업 성공을 보장하지 마세요.
-- 건강은 질병 진단이 아니라 생활습관과 자기관리 관점에서만 다루세요.
-- 모든 문장은 자연스러운 한국어 존댓말로 작성하세요.
-- 마크다운 제목과 목록을 사용해 휴대폰에서도 읽기 쉽게 작성하세요.
-
-[무료 분석에서 공개하지 않을 내용]
-
-아래 내용은 무료 결과에서 자세히 설명하지 마세요.
-
-- 장기적인 재물 흐름
-- 돈이 들어오거나 나가는 구체적인 시기
-- 구체적인 사업 방향과 사업 의사결정
-- 직업 적성의 심층 분석
-- 이직·독립·창업 등의 구체적인 판단
-- 인간관계와 연애·배우자 관계의 심층 분석
-- 시기별 관계 변화
-- 월별 운세
-- 장기적인 운의 변화
-- 세부적인 연도별 흐름
-- 상세한 ${targetYear}년 재물·직업·관계 분석
-- 상세 사주에서 제공할 수 있는 구체적인 행동 전략
-
-무료 결과에서 위 내용을 궁금하게 만드는 것은 괜찮지만,
-답을 자세하게 미리 제공하지 마세요.
-
-[무료 결과 분량]
-
-전체 결과는 마크다운 제목을 포함하여 약 700~1,000자 정도로 작성하세요.
-
-각 항목을 길게 설명하지 마세요.
-무료 서비스라는 점을 고려해 핵심만 보여 주세요.
-
-[반드시 포함할 내용]
-
-## 기본 사주 구성
-
-입력정보와 전체적인 사주 균형을 2문장 이내로 설명하세요.
-
-오행의 특징은 쉽게 설명하되 전문적인 계산 내용을 모두 공개하지 마세요.
-
-출생시간이 "모름"이면
-시간 정보가 없어 일부 세부 해석에는 제한이 있다는 내용을 한 문장으로 알려 주세요.
-
-## 1. 나의 기본 성향
-
-이 사람이 평소 어떤 방식으로 생각하고 판단하는지 2~3문장으로 설명하세요.
-
-강점 한 가지와 조심할 점 한 가지가 자연스럽게 드러나도록 작성하세요.
-
-이어 아래 형식으로 핵심만 정리하세요.
-
-- 강점:
-- 주의할 점:
-
-## 2. 재물·사업 방향
-
-재물과 사업에 관한 기본 성향만 1~2문장으로 설명하세요.
-
-구체적인 돈의 흐름, 사업 시기, 투자 방향, 장기 전략까지 설명하지 마세요.
-
-마지막에
-"재물과 사업의 구체적인 흐름은 전체 사주와 시기를 함께 살펴보는 것이 중요합니다."
-라는 취지의 문장을 자연스럽게 넣으세요.
-
-## 3. 직업·인간관계 방향
-
-직업에서 강점을 발휘하는 기본적인 방식과
-사람을 대할 때의 특징을 각각 아주 짧게 설명하세요.
-
-구체적인 직업 추천이나 관계의 세부 흐름은 공개하지 마세요.
-
-## 4. ${targetYear}년 핵심 방향
-
-${targetYear}년의 전체적인 방향만 1~2문장으로 알려 주세요.
-
-월별 운세나 재물·직업·관계별 상세 변화는 설명하지 마세요.
-
-고객이 자신의 ${targetYear}년 세부 흐름이 궁금해질 수 있도록
-"무엇을 준비하고 무엇을 조심해야 하는지가 중요한 해"라는 관점에서 설명하세요.
-
-## 무료 분석 한눈에 보기
-
-이 사람에게 가장 중요한 생활 조언을 딱 2개만 목록으로 작성하세요.
-
-- 첫 번째 조언
-- 두 번째 조언
-
-마지막에는 별도의 짧은 문단으로 아래 취지를 자연스럽게 안내하세요.
-
-"무료 분석에서는 사주의 기본 성향과 핵심 방향까지 안내해 드렸습니다.
-재물·사업·직업·인간관계와 앞으로의 세부 흐름을 더 깊게 보고 싶다면 상세 사주에서 확인할 수 있습니다."
-
-광고처럼 과장하지 마세요.
-결제를 강요하는 표현도 사용하지 마세요.
-무료 결과에서 설명하지 않은 내용을 상세 사주에서 더 깊게 볼 수 있다는 차이만 분명하게 전달하세요.
-`;
-
-    const response = await client.responses.create({
-      model: "gpt-5.6",
-      input: prompt,
-    });
-
-    const result = String(response.output_text || "").trim();
-
-    if (!result) {
-      return NextResponse.json(
-        { error: "무료 사주 결과를 생성하지 못했습니다." },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json({
       result,
-      yongshin: manseryeok.yongshin,
+      yongshin: manseryeok.yongshin ?? null,
     });
   } catch (error) {
     console.error("fortune API error:", error);
@@ -249,7 +210,7 @@ ${targetYear}년의 전체적인 방향만 1~2문장으로 알려 주세요.
     return NextResponse.json(
       {
         error:
-          "사주 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+          "사주 정보를 분석하지 못했습니다. 입력 내용을 확인한 후 다시 시도해 주세요.",
       },
       { status: 500 }
     );
