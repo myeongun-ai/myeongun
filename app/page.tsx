@@ -424,7 +424,7 @@ export default function Home() {
             </h1>
 
             <p className="homeHeroLead">
-              명운은 당신의 오늘과 내일을 함께 합니다.
+              생년월일과 출생시간을 입력하고, 나의 성향과 운세 흐름을 무료로 확인해 보세요.
             </p>
 
             <div className="homeHeroBenefits">
@@ -443,7 +443,7 @@ export default function Home() {
         <div className="homeQuickPanelWrap" id="free-saju">
           <div className="homeQuickPanel">
             <div className="homeQuickTabs">
-              <a className="active" href="#free-saju">사주보기</a>
+              <a className="active" href="#free-saju">무료 사주 보기</a>
               <Link href="/compatibility">궁합보기</Link>
               <Link href="/fortune/2026">신년 운세</Link>
               <Link href="/ai">AI 상담</Link>
@@ -519,7 +519,7 @@ export default function Home() {
                 className="homeQuickSubmit"
                 disabled={loading}
               >
-                {loading ? "분석 중..." : "내 사주 무료로 보기"}
+                {loading ? "무료 사주 분석 중..." : "무료로 내 사주 분석하기"}
                 {!loading && <span>→</span>}
               </button>
 
@@ -601,7 +601,7 @@ export default function Home() {
 
             <div className="homeQuickBottom">
               <span>🔒 입력하신 정보는 사주 분석을 위한 용도로 사용됩니다.</span>
-              <span>무료 분석 · 상세 분석 · 결제 사주 재열람 지원</span>
+              <span>① 정보 입력 → ② 무료 분석 결과 확인 → ③ 상세 사주 선택(유료)</span>
             </div>
           </div>
         </div>
