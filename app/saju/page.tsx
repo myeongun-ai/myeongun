@@ -13,20 +13,45 @@ type SajuForm = {
   calendar: string;
 };
 
+type Yongshin = {
+  yongshin: string;
+  heesin: string;
+  reason: string;
+};
+
 const TIME_OPTIONS = [
   { value: "모름", label: "모름" },
-  { value: "子(자) 23:30 ~ 01:29", label: "子(자)  23:30 ~ 01:29" },
-  { value: "丑(축) 01:30 ~ 03:29", label: "丑(축)  01:30 ~ 03:29" },
-  { value: "寅(인) 03:30 ~ 05:29", label: "寅(인)  03:30 ~ 05:29" },
-  { value: "卯(묘) 05:30 ~ 07:29", label: "卯(묘)  05:30 ~ 07:29" },
-  { value: "辰(진) 07:30 ~ 09:29", label: "辰(진)  07:30 ~ 09:29" },
-  { value: "巳(사) 09:30 ~ 11:29", label: "巳(사)  09:30 ~ 11:29" },
-  { value: "午(오) 11:30 ~ 13:29", label: "午(오)  11:30 ~ 13:29" },
-  { value: "未(미) 13:30 ~ 15:29", label: "未(미)  13:30 ~ 15:29" },
-  { value: "申(신) 15:30 ~ 17:29", label: "申(신)  15:30 ~ 17:29" },
-  { value: "酉(유) 17:30 ~ 19:29", label: "酉(유)  17:30 ~ 19:29" },
-  { value: "戌(술) 19:30 ~ 21:29", label: "戌(술)  19:30 ~ 21:29" },
-  { value: "亥(해) 21:30 ~ 23:29", label: "亥(해)  21:30 ~ 23:29" },
+  { value: "子(자) 23:30 ~ 01:29", label: "子(자) 23:30 ~ 01:29" },
+  { value: "丑(축) 01:30 ~ 03:29", label: "丑(축) 01:30 ~ 03:29" },
+  { value: "寅(인) 03:30 ~ 05:29", label: "寅(인) 03:30 ~ 05:29" },
+  { value: "卯(묘) 05:30 ~ 07:29", label: "卯(묘) 05:30 ~ 07:29" },
+  { value: "辰(진) 07:30 ~ 09:29", label: "辰(진) 07:30 ~ 09:29" },
+  { value: "巳(사) 09:30 ~ 11:29", label: "巳(사) 09:30 ~ 11:29" },
+  { value: "午(오) 11:30 ~ 13:29", label: "午(오) 11:30 ~ 13:29" },
+  { value: "未(미) 13:30 ~ 15:29", label: "未(미) 13:30 ~ 15:29" },
+  { value: "申(신) 15:30 ~ 17:29", label: "申(신) 15:30 ~ 17:29" },
+  { value: "酉(유) 17:30 ~ 19:29", label: "酉(유) 17:30 ~ 19:29" },
+  { value: "戌(술) 19:30 ~ 21:29", label: "戌(술) 19:30 ~ 21:29" },
+  { value: "亥(해) 21:30 ~ 23:29", label: "亥(해) 21:30 ~ 23:29" },
+];
+
+const PREMIUM_FEATURES = [
+  {
+    title: "재물·사업·직업운",
+    text: "돈과 일에 관한 흐름을 더 자세히 살펴보세요.",
+  },
+  {
+    title: "인연·인간관계",
+    text: "나의 관계 성향과 인연의 흐름을 확인하세요.",
+  },
+  {
+    title: "앞으로의 운세 흐름",
+    text: "신년 운세와 장기 흐름을 함께 살펴보세요.",
+  },
+  {
+    title: "AI 상담 포함",
+    text: "결제 후 7일간 최대 20회 질문할 수 있습니다.",
+  },
 ];
 
 function pad2(value: number) {
@@ -38,9 +63,9 @@ function daysInMonth(year: number, month: number) {
 }
 
 function parseBirth(value: string) {
-  const [y, m, d] = value.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  return { year: y, month: m, day: d };
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return { year, month, day };
 }
 
 function toMinutes(value: string) {
@@ -76,22 +101,20 @@ function parseRange(value: string) {
 
 function timeMatches(savedTime: string, enteredTime: string) {
   if (savedTime === enteredTime) return true;
-
-  if (savedTime === "모름" || enteredTime === "모름") {
-    return false;
-  }
+  if (savedTime === "모름" || enteredTime === "모름") return false;
 
   const savedMinutes = toMinutes(savedTime);
   const enteredMinutes = toMinutes(enteredTime);
   const savedRange = parseRange(savedTime);
   const enteredRange = parseRange(enteredTime);
 
-  function isInside(minutes: number, range: { start: number; end: number }) {
-    if (range.start <= range.end) {
-      return minutes >= range.start && minutes <= range.end;
-    }
-
-    return minutes >= range.start || minutes <= range.end;
+  function isInside(
+    minutes: number,
+    range: { start: number; end: number }
+  ) {
+    return range.start <= range.end
+      ? minutes >= range.start && minutes <= range.end
+      : minutes >= range.start || minutes <= range.end;
   }
 
   if (savedMinutes !== null && enteredRange) {
@@ -116,46 +139,33 @@ function sameSajuForReopen(a: SajuForm, b: SajuForm) {
 }
 
 function renderInline(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-
-  return parts.map((part, index) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <strong key={index}>
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-
-    return part;
-  });
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={index}>{part.slice(2, -2)}</strong>
+    ) : (
+      part
+    )
+  );
 }
 
 function renderFreeResult(text: string) {
-  const lines = text
-    .replace(/\r\n/g, "\n")
-    .split("\n");
-
   const nodes: React.ReactNode[] = [];
-  let bulletBuffer: string[] = [];
+  let bullets: string[] = [];
 
   function flushBullets() {
-    if (!bulletBuffer.length) return;
+    if (!bullets.length) return;
 
     nodes.push(
       <ul className="resultList" key={`list-${nodes.length}`}>
-        {bulletBuffer.map((item, index) => (
-          <li key={`${item}-${index}`}>
-            {renderInline(item)}
-          </li>
+        {bullets.map((item, index) => (
+          <li key={index}>{renderInline(item)}</li>
         ))}
       </ul>
     );
-
-    bulletBuffer = [];
+    bullets = [];
   }
 
-  lines.forEach((rawLine, index) => {
+  text.replace(/\r\n/g, "\n").split("\n").forEach((rawLine, index) => {
     const line = rawLine.trim();
 
     if (!line) {
@@ -163,52 +173,41 @@ function renderFreeResult(text: string) {
       return;
     }
 
-    if (line.startsWith("### ")) {
-      flushBullets();
-      nodes.push(
-        <h4 className="resultHeadingSmall" key={`h4-${index}`}>
-          {renderInline(line.slice(4))}
-        </h4>
-      );
-      return;
-    }
-
-    if (line.startsWith("## ")) {
-      flushBullets();
-      nodes.push(
-        <h3 className="resultHeading" key={`h3-${index}`}>
-          {renderInline(line.slice(3))}
-        </h3>
-      );
-      return;
-    }
-
-    if (line.startsWith("# ")) {
-      flushBullets();
-      nodes.push(
-        <h2 className="resultHeadingLarge" key={`h2-${index}`}>
-          {renderInline(line.slice(2))}
-        </h2>
-      );
-      return;
-    }
-
     if (/^[-*]\s+/.test(line)) {
-      bulletBuffer.push(line.replace(/^[-*]\s+/, ""));
+      bullets.push(line.replace(/^[-*]\s+/, ""));
       return;
     }
 
     flushBullets();
 
-    nodes.push(
-      <p className="resultParagraph" key={`p-${index}`}>
-        {renderInline(line)}
-      </p>
-    );
+    if (line.startsWith("### ")) {
+      nodes.push(
+        <h4 className="resultHeadingSmall" key={`h4-${index}`}>
+          {renderInline(line.slice(4))}
+        </h4>
+      );
+    } else if (line.startsWith("## ")) {
+      nodes.push(
+        <h3 className="resultHeading" key={`h3-${index}`}>
+          {renderInline(line.slice(3))}
+        </h3>
+      );
+    } else if (line.startsWith("# ")) {
+      nodes.push(
+        <h2 className="resultHeadingLarge" key={`h2-${index}`}>
+          {renderInline(line.slice(2))}
+        </h2>
+      );
+    } else {
+      nodes.push(
+        <p className="resultParagraph" key={`p-${index}`}>
+          {renderInline(line)}
+        </p>
+      );
+    }
   });
 
   flushBullets();
-
   return nodes;
 }
 
@@ -228,24 +227,25 @@ export default function SajuPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [freeResult, setFreeResult] = useState("");
-  const [yongshin, setYongshin] = useState<{ yongshin: string; heesin: string; reason: string } | null>(null);
+  const [yongshin, setYongshin] = useState<Yongshin | null>(null);
   const [showInputForm, setShowInputForm] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(currentYear);
   const [pickerMonth, setPickerMonth] = useState(today.getMonth() + 1);
 
   useEffect(() => {
-    const fromHome = sessionStorage.getItem("myeongun_free_saju_from_home");
-
-    if (fromHome === "1") {
-      sessionStorage.removeItem("myeongun_free_saju_from_home");
-    }
+    let scrollTimer: number | undefined;
 
     try {
-      const savedFormText =
-        sessionStorage.getItem("myeongun_paid_saju") ||
-        sessionStorage.getItem("myeongun_active_saju") ||
-        sessionStorage.getItem("myeongun_saju");
+      const fromHome =
+        sessionStorage.getItem("myeongun_free_saju_from_home") === "1";
+
+      // 홈의 무료 결과에는 홈에서 방금 입력한 정보를 사용합니다.
+      const savedFormText = fromHome
+        ? sessionStorage.getItem("myeongun_saju")
+        : sessionStorage.getItem("myeongun_paid_saju") ||
+          sessionStorage.getItem("myeongun_active_saju") ||
+          sessionStorage.getItem("myeongun_saju");
 
       if (!savedFormText) return;
 
@@ -258,43 +258,51 @@ export default function SajuPage() {
         setPickerMonth(savedBirth.month);
       }
 
-      if (fromHome !== "1") return;
+      if (!fromHome) return;
 
-      const savedResultText = sessionStorage.getItem("myeongun_saju_result");
+      const savedResultText =
+        sessionStorage.getItem("myeongun_saju_result");
       if (!savedResultText) return;
 
       const savedResult = JSON.parse(savedResultText);
       const resultText = String(savedResult?.result || "").trim();
+      if (!resultText) return;
 
-      if (resultText) {
-        setFreeResult(resultText);
-        setShowInputForm(false);
-      }
-
+      setFreeResult(resultText);
       setYongshin(savedResult?.yongshin || null);
+      setShowInputForm(false);
 
-      window.setTimeout(() => {
+      scrollTimer = window.setTimeout(() => {
+        sessionStorage.removeItem("myeongun_free_saju_from_home");
         document.getElementById("free-saju-result")?.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
       }, 100);
     } catch {
-      // 저장된 세션 정보가 손상된 경우 기본 입력 화면을 유지합니다.
+      // 저장 정보가 손상된 경우 입력 화면을 유지합니다.
     }
+
+    return () => {
+      if (scrollTimer !== undefined) window.clearTimeout(scrollTimer);
+    };
   }, []);
 
-  function update<K extends keyof SajuForm>(key: K, value: SajuForm[K]) {
+  function update<K extends keyof SajuForm>(
+    key: K,
+    value: SajuForm[K]
+  ) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setFreeResult("");
+    setYongshin(null);
+    setError("");
   }
 
   const years = useMemo(
-    () =>
-      Array.from(
-        { length: currentYear - 1930 + 1 },
-        (_, i) => currentYear - i
-      ),
+    () => Array.from(
+      { length: currentYear - 1930 + 1 },
+      (_, index) => currentYear - index
+    ),
     [currentYear]
   );
 
@@ -312,23 +320,12 @@ export default function SajuPage() {
   }
 
   function moveMonth(delta: number) {
-    let year = pickerYear;
-    let month = pickerMonth + delta;
-
-    if (month < 1) {
-      month = 12;
-      year -= 1;
-    }
-
-    if (month > 12) {
-      month = 1;
-      year += 1;
-    }
-
+    const next = new Date(pickerYear, pickerMonth - 1 + delta, 1);
+    const year = next.getFullYear();
     if (year < 1930 || year > currentYear) return;
 
     setPickerYear(year);
-    setPickerMonth(month);
+    setPickerMonth(next.getMonth() + 1);
   }
 
   function selectDay(day: number) {
@@ -345,10 +342,7 @@ export default function SajuPage() {
       if (!savedText) return false;
 
       const saved = JSON.parse(savedText) as SajuForm;
-
-      if (!sameSajuForReopen(saved, payload)) {
-        return false;
-      }
+      if (!sameSajuForReopen(saved, payload)) return false;
 
       const response = await fetch("/api/payment/reopen", {
         method: "POST",
@@ -376,11 +370,13 @@ export default function SajuPage() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
+
     setError("");
     setFreeResult("");
+    setYongshin(null);
 
     const data = new FormData(e.currentTarget);
-
     const payload: SajuForm = {
       name: String(data.get("name") || "").trim(),
       birth: String(data.get("birth") || ""),
@@ -400,8 +396,7 @@ export default function SajuPage() {
       const reopened = await tryReopenExistingPaidSaju(payload);
       if (reopened) return;
 
-      // 무료 사주를 새로 분석해도 기존 7일 결제 이용권은 삭제하지 않습니다.
-      // 새 결제가 정상 승인되면 서버가 새 이용권으로 교체합니다.
+      // 기존 7일 결제 이용권은 유지합니다.
       sessionStorage.removeItem("myeongun_premium_result");
 
       const response = await fetch("/api/fortune", {
@@ -416,18 +411,20 @@ export default function SajuPage() {
         throw new Error(parsed?.error || "사주 분석에 실패했습니다.");
       }
 
-      sessionStorage.setItem("myeongun_saju", JSON.stringify(payload));
-      sessionStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
-
       const resultText = String(parsed?.result || "").trim();
-
       if (!resultText) {
         throw new Error("무료 사주 결과를 불러오지 못했습니다.");
       }
 
+      sessionStorage.setItem("myeongun_saju", JSON.stringify(payload));
+      sessionStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
+
+      setForm(payload);
       setFreeResult(resultText);
       setYongshin(parsed?.yongshin || null);
+      setPickerOpen(false);
       setShowInputForm(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setError(
         err instanceof Error
@@ -443,6 +440,7 @@ export default function SajuPage() {
     setFreeResult("");
     setYongshin(null);
     setError("");
+    setPickerOpen(false);
     setShowInputForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -457,7 +455,6 @@ export default function SajuPage() {
     background: "#fffdfa",
     color: "#17243a",
     fontSize: "16px",
-    outline: "none",
   } as const;
 
   const labelStyle = {
@@ -480,11 +477,17 @@ export default function SajuPage() {
 
   return (
     <main className="sajuPage">
-      <section className="sajuCard" style={{ display: showInputForm ? "block" : "none" }}>
+      <section
+        className="sajuCard"
+        style={{ display: showInputForm ? "block" : "none" }}
+      >
         <header className="pageHeader">
           <div className="eyebrow">FREE SAJU</div>
           <h1>무료 사주 분석</h1>
-          <p>생년월일과 출생시간을 입력해 주세요.</p>
+          <p>나의 성향과 운세의 기본 흐름을 먼저 확인해 보세요.</p>
+          <div className="inputGuide">
+            무료 결과 확인 후 상세 분석을 선택할 수 있습니다.
+          </div>
         </header>
 
         <form onSubmit={handleSubmit}>
@@ -497,30 +500,23 @@ export default function SajuPage() {
               onChange={(e) => update("name", e.target.value)}
               placeholder="이름을 입력하세요"
               autoComplete="name"
+              required
               style={fieldStyle}
             />
           </label>
 
           <label style={{ ...labelStyle, marginTop: "22px" }}>
             생년월일
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr auto",
-                gap: "8px",
-              }}
-            >
+            <div className="birthRow">
               <input
                 name="birth"
                 type="text"
                 readOnly
-                required
                 value={form.birth}
                 placeholder="년-월-일"
                 onClick={openPicker}
                 style={{ ...fieldStyle, cursor: "pointer" }}
               />
-
               <button
                 type="button"
                 onClick={openPicker}
@@ -532,7 +528,7 @@ export default function SajuPage() {
           </label>
 
           {pickerOpen && (
-            <section className="datePicker">
+            <section className="datePicker" aria-label="생년월일 선택">
               <div className="pickerTop">
                 <button
                   type="button"
@@ -542,7 +538,6 @@ export default function SajuPage() {
                 >
                   ‹
                 </button>
-
                 <select
                   aria-label="연도 선택"
                   value={pickerYear}
@@ -550,12 +545,9 @@ export default function SajuPage() {
                   style={{ ...fieldStyle, minHeight: "44px", padding: "0 10px" }}
                 >
                   {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}년
-                    </option>
+                    <option key={year} value={year}>{year}년</option>
                   ))}
                 </select>
-
                 <select
                   aria-label="월 선택"
                   value={pickerMonth}
@@ -563,12 +555,9 @@ export default function SajuPage() {
                   style={{ ...fieldStyle, minHeight: "44px", padding: "0 10px" }}
                 >
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                    <option key={month} value={month}>
-                      {month}월
-                    </option>
+                    <option key={month} value={month}>{month}월</option>
                   ))}
                 </select>
-
                 <button
                   type="button"
                   onClick={() => moveMonth(1)}
@@ -585,11 +574,9 @@ export default function SajuPage() {
                     {dayName}
                   </div>
                 ))}
-
                 {Array.from({ length: firstDay }).map((_, index) => (
                   <div key={`blank-${index}`} />
                 ))}
-
                 {Array.from({ length: monthDays }, (_, i) => i + 1).map((day) => {
                   const selected =
                     parsedBirth?.year === pickerYear &&
@@ -601,6 +588,7 @@ export default function SajuPage() {
                       key={day}
                       type="button"
                       onClick={() => selectDay(day)}
+                      aria-pressed={selected}
                       className={selected ? "calendarDay selected" : "calendarDay"}
                     >
                       {day}
@@ -620,7 +608,6 @@ export default function SajuPage() {
                 >
                   삭제
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setPickerOpen(false)}
@@ -641,10 +628,7 @@ export default function SajuPage() {
               required
               className="timeSelect"
             >
-              <option value="" disabled>
-                시간을 선택하세요
-              </option>
-
+              <option value="" disabled>시간을 선택하세요</option>
               {TIME_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -652,6 +636,9 @@ export default function SajuPage() {
               ))}
             </select>
           </label>
+          <p className="fieldHint">
+            출생시간을 모르시면 ‘모름’을 선택해 주세요.
+          </p>
 
           <div className="twoCol">
             <label style={labelStyle}>
@@ -666,9 +653,8 @@ export default function SajuPage() {
                 <option value="여성">여성</option>
               </select>
             </label>
-
             <label style={labelStyle}>
-              달력
+              달력 기준
               <select
                 name="calendar"
                 value={form.calendar}
@@ -682,19 +668,14 @@ export default function SajuPage() {
             </label>
           </div>
 
-          {error && <p className="errorMessage">{error}</p>}
+          {error && <p className="errorMessage" role="alert">{error}</p>}
 
           <button
             type="submit"
-            disabled={
-              loading ||
-              !form.name.trim() ||
-              !form.birth ||
-              !form.time
-            }
+            disabled={loading || !form.name.trim() || !form.birth || !form.time}
             className="submitButton"
           >
-            {loading ? "무료 사주 분석 중..." : "무료 사주 분석 시작"}
+            {loading ? "무료 사주 분석 중..." : "무료로 내 사주 분석하기"}
           </button>
         </form>
 
@@ -707,32 +688,75 @@ export default function SajuPage() {
         <section className="resultCard" id="free-saju-result">
           <div className="resultEyebrow">FREE SAJU RESULT</div>
           <h2>{form.name || "고객"}님의 무료 사주 분석</h2>
+          <p className="resultIntro">
+            나의 기본 성향과 운세 흐름을 확인해 보세요.
+            더 자세한 분석은 아래에서 선택할 수 있습니다.
+          </p>
+
+          <div className="resultSteps" aria-label="사주 이용 순서">
+            <span className="completed">① 정보 입력</span>
+            <span className="current" aria-current="step">② 무료 결과 확인</span>
+            <span>③ 상세 분석 선택</span>
+          </div>
 
           {yongshin && (
-            <div style={{ marginTop: "20px", padding: "20px", borderRadius: "14px", border: "1px solid #d8d0c3", background: "#f8f5ee" }}>
-              <div style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", color: "#777" }}>참고용 오행 분석</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
-                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>나에게 가장 도움이 되는 기운 (용신)</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.yongshin}</strong></div>
-                <div style={{ padding: "14px", borderRadius: "10px", background: "#fff" }}><div style={{ fontSize: "12px", color: "#777" }}>함께 도움이 되는 기운 (희신)</div><strong style={{ display: "block", marginTop: "5px", fontSize: "20px" }}>{yongshin.heesin}</strong></div>
+            <div className="elementBox">
+              <div className="elementLabel">참고용 오행 분석</div>
+              <div className="elementGrid">
+                <div>
+                  <span>나에게 가장 도움이 되는 기운 (용신)</span>
+                  <strong>{yongshin.yongshin}</strong>
+                </div>
+                <div>
+                  <span>함께 도움이 되는 기운 (희신)</span>
+                  <strong>{yongshin.heesin}</strong>
+                </div>
               </div>
-              <p style={{ margin: "12px 0 0", fontSize: "12px", lineHeight: 1.6, color: "#777" }}>{yongshin.reason}</p>
-              <p style={{ margin: "8px 0 0", fontSize: "11px", lineHeight: 1.5, color: "#999" }}>※ 전통 명리의 확정 판정이 아닌 명운의 참고용 분석입니다.</p>
+              <p>{yongshin.reason}</p>
+              <small>
+                ※ 전통 명리의 확정 판정이 아닌 명운의 참고용 분석입니다.
+              </small>
             </div>
           )}
 
-          <div className="resultText">
-            {renderFreeResult(freeResult)}
-          </div>
+          <div className="resultText">{renderFreeResult(freeResult)}</div>
 
           <UsageBenefits compact />
 
           <div className="premiumBox">
-            <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>
-            <h3>더 깊은 상세 사주 분석이 필요하신가요?</h3>
-            <p>
-              재물운, 사업운, 직업운, 인간관계, 신년 운세,
-              장기 흐름까지 개인별 프리미엄 분석을 확인할 수 있습니다.
+            <div className="premiumEyebrow">MYEONGUN PREMIUM</div>
+            <h3>내 재물운과 앞으로의 흐름이 더 궁금하신가요?</h3>
+            <p className="premiumIntro">
+              무료 분석에서 확인한 나의 성향을 바탕으로,
+              일과 돈, 인연과 앞으로의 흐름을 더 자세히 살펴보세요.
             </p>
+
+            <div className="comparison">
+              <div className="compareCard">
+                <span>지금 확인한 내용</span>
+                <strong>무료 사주</strong>
+                <p>기본 성향과 운세 방향</p>
+                <b>0원</b>
+              </div>
+              <div className="compareCard premiumCompare">
+                <span>더 자세히 알고 싶다면</span>
+                <strong>상세 사주</strong>
+                <p>개인별 상세 분석 + AI 상담</p>
+                <b>9,900원 <small>1회 결제</small></b>
+              </div>
+            </div>
+
+            <div className="premiumFeatures">
+              {PREMIUM_FEATURES.map((feature) => (
+                <div className="premiumFeature" key={feature.title}>
+                  <span className="featureCheck" aria-hidden="true">✓</span>
+                  <div>
+                    <strong>{feature.title}</strong>
+                    <p>{feature.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             <Link
               href="/payment"
@@ -743,29 +767,37 @@ export default function SajuPage() {
                 minHeight: "82px",
                 boxSizing: "border-box",
                 margin: "0 auto",
-                padding: "13px 28px",
+                padding: "13px 22px",
                 border: "2px solid #8f6018",
                 borderRadius: "16px",
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "column",
-                gap: "4px",
+                gap: "5px",
                 background: "linear-gradient(135deg, #9f6d1e 0%, #c99434 48%, #a36f1e 100%)",
                 color: "#ffffff",
                 textDecoration: "none",
                 boxShadow: "0 12px 26px rgba(133, 88, 18, 0.28)",
               }}
             >
-              <span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 800, lineHeight: 1.35 }}>
-                상세 사주 전체보기
-              </span>
-              <strong style={{ color: "#ffffff", fontSize: "20px", fontWeight: 900, lineHeight: 1.35 }}>
-                9,900원 결제하기 →
+              <strong style={{ color: "#fff", fontSize: "19px", lineHeight: 1.4 }}>
+                상세 사주 안내 보기 →
               </strong>
+              <span style={{ color: "#fff", fontSize: "13px", fontWeight: 700 }}>
+                9,900원 · AI 상담 7일간 최대 20회 포함
+              </span>
             </Link>
 
-            <div className="premiumPaymentGuide">
-              결제 후 상세 사주 전체 내용과 AI 상담을 7일간 최대 20회 이용할 수 있습니다.
+            <p className="premiumPaymentGuide">
+              다음 화면에서 제공 내용과 이용 조건을 확인한 후
+              결제를 진행합니다.
+            </p>
+            <div className="premiumNotices">
+              <p>결제 후 발급되는 이용코드는 재열람을 위해 별도로 보관해 주세요.</p>
+              <p>
+                사주 분석은 참고용 콘텐츠이며 미래의 결과를 보장하지 않습니다.
+              </p>
+              <Link href="/refund">환불정책 확인</Link>
             </div>
           </div>
 
@@ -780,55 +812,52 @@ export default function SajuPage() {
           min-height: 100vh;
           padding: 58px 20px 82px;
           background:
-            radial-gradient(circle at 50% 0%, rgba(225, 185, 105, 0.13), transparent 30%),
-            linear-gradient(180deg, #f7f2e8 0%, #fbf8f1 58%, #f5efe4 100%);
+            radial-gradient(circle at 50% 0%, rgba(225,185,105,.13), transparent 30%),
+            linear-gradient(180deg, #f7f2e8, #fbf8f1 58%, #f5efe4);
           color: #17243a;
         }
-
-        .sajuCard,
-        .resultCard {
+        .sajuCard, .resultCard {
+          box-sizing: border-box;
           width: 100%;
           max-width: 900px;
           margin: 0 auto;
           border: 1px solid #dfd4c2;
           border-radius: 26px;
-          background: rgba(255, 253, 249, 0.97);
-          box-shadow: 0 24px 60px rgba(31, 39, 53, 0.09);
+          background: rgba(255,253,249,.97);
+          box-shadow: 0 24px 60px rgba(31,39,53,.09);
         }
-
-        .sajuCard {
-          padding: 46px 38px 34px;
-        }
-
-        .pageHeader {
-          margin-bottom: 34px;
-          text-align: center;
-        }
-
-        .eyebrow,
-        .resultEyebrow,
-        .premiumEyebrow {
+        .sajuCard { padding: 46px 38px 34px; }
+        .pageHeader { margin-bottom: 34px; text-align: center; }
+        .eyebrow, .resultEyebrow, .premiumEyebrow {
           color: #a97924;
           font-size: 12px;
           font-weight: 800;
           letter-spacing: 3px;
         }
-
         .pageHeader h1 {
           margin: 12px 0 10px;
-          color: #17243a;
           font-size: 38px;
           line-height: 1.25;
           font-weight: 900;
-          letter-spacing: -0.04em;
+          letter-spacing: -.04em;
         }
-
         .pageHeader p {
           margin: 0;
           color: #786f64;
           font-size: 16px;
+          line-height: 1.7;
         }
-
+        .inputGuide {
+          margin-top: 13px;
+          color: #8b651f;
+          font-size: 13px;
+          line-height: 1.7;
+        }
+        .birthRow {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 8px;
+        }
         .calendarButton {
           min-width: 78px;
           border: 1px solid #d9c9ad;
@@ -839,38 +868,33 @@ export default function SajuPage() {
           font-weight: 900;
           cursor: pointer;
         }
-
         .datePicker {
           margin-top: 14px;
           padding: 16px;
           border: 1px solid #dfd4c2;
           border-radius: 16px;
           background: #fffaf1;
-          box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
+          box-shadow: 0 14px 34px rgba(31,39,53,.08);
         }
-
         .pickerTop {
           display: grid;
-          grid-template-columns: 44px 1fr 1fr 44px;
+          grid-template-columns: 44px minmax(0,1fr) minmax(0,1fr) 44px;
           gap: 8px;
           align-items: center;
         }
-
         .calendarGrid {
           display: grid;
-          grid-template-columns: repeat(7, minmax(0, 1fr));
+          grid-template-columns: repeat(7,minmax(0,1fr));
           gap: 7px;
           margin-top: 14px;
           text-align: center;
         }
-
         .calendarDayName {
           padding: 8px 0;
           color: #a97924;
           font-size: 12px;
           font-weight: 800;
         }
-
         .calendarDay {
           min-height: 42px;
           border: 1px solid #eee4d4;
@@ -880,23 +904,19 @@ export default function SajuPage() {
           font-size: 14px;
           cursor: pointer;
         }
-
         .calendarDay.selected {
           border-color: #c99535;
           background: #dcae52;
           color: #152136;
           font-weight: 900;
         }
-
         .pickerBottom {
           display: flex;
           justify-content: space-between;
           gap: 10px;
           margin-top: 14px;
         }
-
-        .timeSelect,
-        .darkSelect {
+        .timeSelect, .darkSelect {
           width: 100%;
           box-sizing: border-box;
           min-height: 56px;
@@ -906,60 +926,53 @@ export default function SajuPage() {
           background: #fffdfa;
           color: #17243a;
           font-size: 16px;
-          outline: none;
           cursor: pointer;
         }
-
-        .timeSelect:focus,
-        .darkSelect:focus {
+        .timeSelect:focus, .darkSelect:focus {
           border-color: #b9862e;
-          box-shadow: 0 0 0 3px rgba(185, 134, 46, 0.11);
+          box-shadow: 0 0 0 3px rgba(185,134,46,.11);
         }
-
-        .timeSelect option,
-        .darkSelect option {
+        .timeSelect option, .darkSelect option {
           background: #fff;
           color: #17243a;
         }
-
+        .fieldHint {
+          margin: 9px 0 0;
+          color: #786f64;
+          font-size: 12px;
+          line-height: 1.6;
+        }
         .twoCol {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(2,minmax(0,1fr));
           gap: 16px;
           margin-top: 22px;
         }
-
         .errorMessage {
           margin: 18px 0 0;
           color: #b44237;
           font-size: 13px;
           line-height: 1.7;
         }
-
         .submitButton {
           width: 100%;
           min-height: 60px;
           margin-top: 28px;
           border: 1px solid #c99535;
           border-radius: 14px;
-          background: linear-gradient(90deg, #d7a746 0%, #f0c66d 50%, #d7a746 100%);
+          background: linear-gradient(90deg,#d7a746,#f0c66d 50%,#d7a746);
           color: #142137;
           font-size: 17px;
           font-weight: 900;
           cursor: pointer;
-          box-shadow: 0 12px 28px rgba(183, 132, 39, 0.17);
+          box-shadow: 0 12px 28px rgba(183,132,39,.17);
         }
-
         .submitButton:disabled {
-          opacity: 1;
-          cursor: default;
-        
-          color: #142137;
-          border: 1px solid #d8c7a7;
+          border-color: #d8c7a7;
           background: #e8dcc6;
           box-shadow: none;
-          transform: none;}
-
+          cursor: default;
+        }
         .privacyText {
           margin: 17px 0 0;
           text-align: center;
@@ -967,133 +980,259 @@ export default function SajuPage() {
           font-size: 12px;
           line-height: 1.7;
         }
-
         .resultCard {
           margin-top: 26px;
-          padding: 38px;
+          padding: 44px;
+          scroll-margin-top: 24px;
         }
-
         .resultCard h2 {
-          margin: 12px 0 20px;
-          color: #17243a;
-          font-size: 28px;
+          margin: 12px 0 14px;
+          font-size: 30px;
+          line-height: 1.35;
+          letter-spacing: -.035em;
         }
-
-        .resultText {
-          padding: 24px;
-          border: 1px solid #e8dfd1;
-          border-radius: 16px;
-          background: #f8f3ea;
-          color: #4d4b47;
-          font-size: 15px;
-          line-height: 1.95;
+        .resultIntro {
+          margin: 0;
+          color: #786f64;
+          font-size: 14px;
+          line-height: 1.8;
+          word-break: keep-all;
         }
-
-        .resultText :global(.resultHeadingLarge) {
-          margin: 26px 0 12px;
-          color: #17243a;
-          font-size: 24px;
-          line-height: 1.4;
+        .resultSteps {
+          display: grid;
+          grid-template-columns: repeat(3,minmax(0,1fr));
+          gap: 8px;
+          margin: 22px 0;
         }
-
-        .resultText :global(.resultHeading) {
-          margin: 24px 0 10px;
-          color: #9a6d20;
-          font-size: 20px;
-          line-height: 1.45;
-        }
-
-        .resultText :global(.resultHeadingSmall) {
-          margin: 20px 0 8px;
-          color: #72511a;
-          font-size: 17px;
+        .resultSteps span {
+          padding: 12px 8px;
+          border: 1px solid #e6dccb;
+          border-radius: 10px;
+          background: #f8f5ef;
+          color: #82796c;
+          text-align: center;
+          font-size: 12px;
+          font-weight: 700;
           line-height: 1.5;
         }
-
-        .resultText :global(.resultParagraph) {
-          margin: 0 0 12px;
+        .resultSteps .completed { color: #726343; }
+        .resultSteps .current {
+          border-color: #c99535;
+          background: #f6ead4;
+          color: #805719;
         }
-
-        .resultText :global(.resultList) {
-          margin: 8px 0 18px;
-          padding-left: 22px;
+        .elementBox {
+          margin: 20px 0;
+          padding: 20px;
+          border: 1px solid #d8d0c3;
+          border-radius: 14px;
+          background: #f8f5ee;
         }
-
-        .resultText :global(.resultList li) {
-          margin-bottom: 7px;
+        .elementLabel {
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: .08em;
+          color: #777;
         }
-
-        .resultText :global(strong) {
-          color: #17243a;
-          font-weight: 900;
+        .elementGrid {
+          display: grid;
+          grid-template-columns: repeat(2,minmax(0,1fr));
+          gap: 12px;
+          margin-top: 12px;
         }
-
-        .premiumBox {
-          margin-top: 26px;
-          padding: 28px;
-          border: 1px solid #dec99f;
+        .elementGrid > div {
+          padding: 14px;
+          border-radius: 10px;
+          background: #fff;
+        }
+        .elementGrid span {
+          font-size: 12px;
+          line-height: 1.6;
+          color: #777;
+        }
+        .elementGrid strong {
+          display: block;
+          margin-top: 5px;
+          font-size: 20px;
+        }
+        .elementBox p {
+          margin: 12px 0 0;
+          color: #777;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+        .elementBox small {
+          display: block;
+          margin-top: 8px;
+          color: #888;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+        .resultText {
+          padding: 30px;
+          border: 1px solid #e6dccb;
           border-radius: 18px;
-          background: linear-gradient(135deg, #f5ead4, #fffaf1);
+          background: #fffdf9;
+          color: #45433f;
+          font-size: 15.5px;
+          line-height: 1.92;
+          overflow-wrap: anywhere;
+        }
+        .resultText :global(.resultHeadingLarge) {
+          margin: 34px 0 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #e2d6c2;
+          color: #17243a;
+          font-size: 25px;
+          line-height: 1.4;
+          letter-spacing: -.025em;
+        }
+        .resultText :global(.resultHeading) {
+          margin: 30px 0 14px;
+          padding: 11px 14px;
+          border-left: 4px solid #c89535;
+          border-radius: 0 10px 10px 0;
+          background: linear-gradient(90deg,#f6ead4,rgba(246,234,212,.28) 72%,transparent);
+          color: #805719;
+          font-size: 20px;
+          line-height: 1.45;
+          letter-spacing: -.02em;
+        }
+        .resultText :global(.resultHeadingSmall) {
+          margin: 22px 0 10px;
+          color: #72511a;
+          font-size: 17px;
+          font-weight: 900;
+          line-height: 1.5;
+        }
+        .resultText :global(.resultParagraph) {
+          margin: 0 0 15px;
+          word-break: keep-all;
+        }
+        .resultText :global(.resultList) {
+          margin: 10px 0 20px;
+          padding: 15px 18px 15px 38px;
+          border: 1px solid #eee3d2;
+          border-radius: 12px;
+          background: #fbf7ef;
+        }
+        .resultText :global(.resultList li) { margin-bottom: 8px; }
+        .resultText :global(.resultList li:last-child) { margin-bottom: 0; }
+        .resultText :global(strong) { color: #17243a; font-weight: 900; }
+        .premiumBox {
+          margin-top: 30px;
+          padding: 34px 30px;
+          border: 1px solid #d7bd8c;
+          border-radius: 20px;
+          background:
+            radial-gradient(circle at 50% 0%,rgba(222,174,82,.16),transparent 48%),
+            linear-gradient(135deg,#f6ead3,#fffaf1);
+          box-shadow: 0 14px 34px rgba(122,84,25,.08);
           text-align: center;
         }
-
         .premiumBox h3 {
-          margin: 10px 0;
-          color: #17243a;
-          font-size: 23px;
+          margin: 12px 0;
+          font-size: 25px;
+          line-height: 1.45;
+          letter-spacing: -.035em;
+          word-break: keep-all;
         }
-
-        .premiumBox p {
-          max-width: 680px;
-          margin: 0 auto 20px;
+        .premiumIntro {
+          max-width: 650px;
+          margin: 0 auto 22px;
           color: #6f685e;
           font-size: 14px;
           line-height: 1.8;
+          word-break: keep-all;
         }
-
-        .premiumButton {
-          display: inline-flex;
-          width: min(100%, 430px);
-          min-height: 82px;
-          box-sizing: border-box;
-          padding: 13px 28px;
-          border: 2px solid #9d6c1d;
-          border-radius: 16px;
-          align-items: center;
-          justify-content: center;
+        .comparison {
+          display: grid;
+          grid-template-columns: repeat(2,minmax(0,1fr));
+          gap: 12px;
+          margin-bottom: 20px;
+          text-align: left;
+        }
+        .compareCard {
+          display: flex;
           flex-direction: column;
-          gap: 4px;
-          background: linear-gradient(135deg, #9f6d1e 0%, #c99434 48%, #a36f1e 100%);
-          color: #fff;
-          text-decoration: none;
-          box-shadow: 0 12px 26px rgba(133, 88, 18, 0.25);
+          padding: 20px;
+          border: 1px solid #e4d9c8;
+          border-radius: 14px;
+          background: rgba(255,255,255,.65);
         }
-
-        .premiumButtonTitle {
-          display: block;
-          font-size: 14px;
-          font-weight: 800;
-          line-height: 1.35;
+        .compareCard > span { color: #786f64; font-size: 11px; }
+        .compareCard > strong { margin-top: 7px; font-size: 18px; }
+        .compareCard p {
+          margin: 10px 0 16px;
+          color: #6f685e;
+          font-size: 13px;
+          line-height: 1.6;
         }
-
-        .premiumButtonPrice {
-          display: block;
-          font-size: 20px;
-          font-weight: 900;
-          line-height: 1.35;
-          letter-spacing: -0.02em;
+        .compareCard b { margin-top: auto; font-size: 24px; }
+        .compareCard b small {
+          display: inline-block;
+          color: #786f64;
+          font-size: 11px;
+          font-weight: 600;
         }
-
+        .premiumCompare {
+          border-color: #c99535;
+          background: #fff3da;
+        }
+        .premiumFeatures {
+          display: grid;
+          grid-template-columns: repeat(2,minmax(0,1fr));
+          gap: 14px;
+          margin: 0 0 26px;
+          text-align: left;
+        }
+        .premiumFeature {
+          display: flex;
+          gap: 10px;
+          padding: 15px;
+          border-radius: 12px;
+          background: rgba(255,255,255,.55);
+        }
+        .featureCheck { color: #9f6d1e; font-weight: 900; }
+        .premiumFeature strong { font-size: 14px; }
+        .premiumFeature p {
+          margin: 6px 0 0;
+          color: #6f685e;
+          font-size: 12px;
+          line-height: 1.7;
+          word-break: keep-all;
+        }
+        .premiumButton { transition: transform .16s ease; }
+        .premiumButton:hover { transform: translateY(-2px); }
+        .premiumButton:focus-visible {
+          outline: 3px solid #17243a;
+          outline-offset: 4px;
+        }
         .premiumPaymentGuide {
           max-width: 600px;
-          margin: 13px auto 0;
+          margin: 15px auto 0;
           color: #756b5d;
           font-size: 12px;
           font-weight: 600;
-          line-height: 1.65;
-          text-align: center;
+          line-height: 1.7;
+          word-break: keep-all;
         }
-
+        .premiumNotices {
+          margin-top: 19px;
+          padding-top: 16px;
+          border-top: 1px solid #e2d2b7;
+          color: #827666;
+          font-size: 11px;
+          line-height: 1.7;
+        }
+        .premiumNotices p { margin: 0 0 5px; }
+        .premiumNotices :global(a) {
+          display: inline-block;
+          margin-top: 5px;
+          color: #805719;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
         .retryButton {
           display: flex;
           align-items: center;
@@ -1109,237 +1248,55 @@ export default function SajuPage() {
           font-weight: 900;
           cursor: pointer;
         }
-
         .retryButton:hover {
           border-color: #b9852c;
           background: #fff8ec;
         }
-
         @media (max-width: 640px) {
-          .sajuPage {
-            padding: 30px 12px 58px;
-          }
-
-          .sajuCard,
-          .resultCard {
+          .sajuPage { padding: 30px 12px 58px; }
+          .sajuCard, .resultCard {
             padding: 30px 18px 26px;
             border-radius: 20px;
           }
-
-          .pageHeader {
-            margin-bottom: 28px;
-          }
-
-          .pageHeader h1 {
-            font-size: 30px;
-          }
-
-          .pageHeader p {
-            font-size: 14px;
-          }
-
-          .twoCol {
-            grid-template-columns: 1fr;
-          }
-
+          .pageHeader { margin-bottom: 28px; }
+          .pageHeader h1 { font-size: 30px; }
+          .pageHeader p { font-size: 14px; }
+          .twoCol { grid-template-columns: 1fr; }
           .pickerTop {
-            grid-template-columns: 40px 1fr 1fr 40px;
+            grid-template-columns: 36px minmax(0,1fr) minmax(0,1fr) 36px;
+            gap: 5px;
           }
-
-          .timeSelect,
-          .darkSelect {
-            font-size: 14px;
-          }
-
-          .resultCard h2 {
-            font-size: 24px;
-          }
-
-          .resultText :global(.resultHeadingLarge) {
-            font-size: 21px;
-          }
-
-          .resultText :global(.resultHeading) {
-            font-size: 18px;
-          }
-
-          .premiumButton,
-          .retryButton {
-            width: 100%;
-            box-sizing: border-box;
-          }
-        }
-      
-        /* MYEONGUN_RESULT_DESIGN_V3 */
-        .resultCard {
-          padding: 44px;
-        }
-
-        .resultCard h2 {
-          margin: 12px 0 22px;
-          font-size: 30px;
-          line-height: 1.35;
-          letter-spacing: -0.035em;
-        }
-
-        .resultText {
-          padding: 30px;
-          border-color: #e6dccb;
-          border-radius: 18px;
-          background: #fffdf9;
-          color: #45433f;
-          font-size: 15.5px;
-          line-height: 1.92;
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-        }
-
-        .resultText :global(.resultHeadingLarge) {
-          margin: 34px 0 16px;
-          padding-bottom: 12px;
-          border-bottom: 1px solid #e2d6c2;
-          font-size: 25px;
-          letter-spacing: -0.025em;
-        }
-
-        .resultText :global(.resultHeading) {
-          margin: 30px 0 14px;
-          padding: 11px 14px;
-          border-left: 4px solid #c89535;
-          border-radius: 0 10px 10px 0;
-          background: linear-gradient(
-            90deg,
-            #f6ead4 0%,
-            rgba(246, 234, 212, 0.28) 72%,
-            transparent 100%
-          );
-          color: #805719;
-          font-size: 20px;
-          letter-spacing: -0.02em;
-        }
-
-        .resultText :global(.resultHeadingSmall) {
-          margin: 22px 0 10px;
-          font-weight: 900;
-        }
-
-        .resultText :global(.resultParagraph) {
-          margin-bottom: 15px;
-          word-break: keep-all;
-        }
-
-        .resultText :global(.resultList) {
-          margin: 10px 0 20px;
-          padding: 15px 18px 15px 38px;
-          border: 1px solid #eee3d2;
-          border-radius: 12px;
-          background: #fbf7ef;
-        }
-
-        .resultText :global(.resultList li) {
-          margin-bottom: 8px;
-        }
-
-        .resultText :global(.resultList li:last-child) {
-          margin-bottom: 0;
-        }
-
-        .premiumBox {
-          margin-top: 30px;
-          padding: 34px 30px;
-          border-color: #d7bd8c;
-          border-radius: 20px;
-          background:
-            radial-gradient(
-              circle at 50% 0%,
-              rgba(222, 174, 82, 0.16),
-              transparent 48%
-            ),
-            linear-gradient(135deg, #f6ead3 0%, #fffaf1 100%);
-          box-shadow: 0 14px 34px rgba(122, 84, 25, 0.08);
-        }
-
-        .premiumButton {
-          display: flex;
-          width: min(100%, 430px);
-          min-height: 82px;
-          box-sizing: border-box;
-          margin: 0 auto;
-          padding: 13px 28px;
-          border: 2px solid #8f6018;
-          border-radius: 16px;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: 4px;
-          background: linear-gradient(
-            135deg,
-            #9f6d1e 0%,
-            #c99434 48%,
-            #a36f1e 100%
-          );
-          color: #ffffff;
-          text-decoration: none;
-          box-shadow:
-            0 12px 26px rgba(133, 88, 18, 0.28),
-            inset 0 1px 0 rgba(255, 255, 255, 0.24);
-          transition: transform 0.16s ease, box-shadow 0.16s ease;
-        }
-
-        .premiumButtonTitle {
-          display: block;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 800;
-          line-height: 1.35;
-        }
-
-        .premiumButtonPrice {
-          display: block;
-          color: #ffffff;
-          font-size: 20px;
-          font-weight: 900;
-          line-height: 1.35;
-          letter-spacing: -0.02em;
-        }
-
-        .premiumButton:hover {
-          transform: translateY(-2px);
-          box-shadow:
-            0 15px 30px rgba(133, 88, 18, 0.34),
-            inset 0 1px 0 rgba(255, 255, 255, 0.24);
-        }
-
-        @media (max-width: 640px) {
-          .resultCard {
-            padding: 30px 18px 26px;
-          }
-
+          .datePicker { padding: 12px; }
+          .timeSelect, .darkSelect { font-size: 14px; }
+          .resultCard h2 { font-size: 24px; }
+          .resultSteps { gap: 5px; }
+          .resultSteps span { padding: 10px 4px; font-size: 11px; }
           .resultText {
             padding: 20px 16px;
             font-size: 14.5px;
             line-height: 1.85;
           }
-
           .resultText :global(.resultHeadingLarge) {
             margin-top: 28px;
             font-size: 21px;
           }
-
           .resultText :global(.resultHeading) {
             margin-top: 25px;
             padding: 10px 11px;
             font-size: 18px;
           }
-
           .resultText :global(.resultList) {
             padding: 13px 12px 13px 31px;
           }
-
-          .premiumBox {
-            padding: 26px 18px;
-          }
+          .premiumBox { padding: 26px 16px; }
+          .premiumBox h3 { font-size: 22px; }
+          .comparison { gap: 8px; }
+          .compareCard { padding: 15px 12px; }
+          .compareCard b { font-size: 22px; }
+          .premiumFeatures { grid-template-columns: 1fr; gap: 9px; }
+          .retryButton { width: 100%; box-sizing: border-box; }
         }
-`}</style>
+      `}</style>
     </main>
   );
 }
