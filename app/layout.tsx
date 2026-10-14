@@ -1,5 +1,6 @@
 import "./globals.css";
 import Link from "next/link";
+import Script from "next/script";
 import SessionPrivacyCleanup from "./SessionPrivacyCleanup";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -33,6 +34,18 @@ export default function RootLayout({
       <body>
         <SessionPrivacyCleanup />
         <Analytics />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-E5JM4F9VDF"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-E5JM4F9VDF');
+          `}
+        </Script>
         <header className="mgSiteHeader">
           <div className="mgHeaderInner">
             <Link className="mgBrand" href="/" aria-label="명운 홈">
