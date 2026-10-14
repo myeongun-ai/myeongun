@@ -273,14 +273,17 @@ export default function PaymentPage() {
 
           <section className="benefitSection">
             <h2>상세 사주에 포함된 내용</h2>
+
             <div className="featureList">
               {features.map((feature) => (
                 <div className="feature" key={feature.title}>
                   <span className="check" aria-hidden="true">✓</span>
-                  <div className="featureContent">
-                    <strong>{feature.title}</strong>
-                    <p>{feature.text}</p>
-                  </div>
+                  <strong className="featureTitle">
+                    {feature.title}
+                  </strong>
+                  <p className="featureDescription">
+                    {feature.text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -517,41 +520,43 @@ export default function PaymentPage() {
           margin-bottom: 20px;
         }
         .benefitSection h2 {
-          margin: 0 0 26px;
+          margin: 0 0 24px;
           line-height: 1.6;
         }
         .featureList {
           display: grid;
-          gap: 22px;
+          gap: 18px;
         }
         .feature {
-          display: flex;
-          gap: 14px;
-          align-items: flex-start;
+          display: grid;
+          grid-template-columns: 20px 190px minmax(0,1fr);
+          align-items: center;
+          column-gap: 18px;
+          box-sizing: border-box;
+          min-height: 108px;
+          padding: 24px;
+          border-radius: 12px;
+          background: #f3efe7;
         }
         .check {
-          flex-shrink: 0;
           color: #a4772c;
+          font-size: 15px;
           font-weight: 900;
           line-height: 1.6;
+          text-align: center;
         }
-        .featureContent {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          min-width: 0;
-        }
-        .featureContent strong {
-          display: block;
+        .featureTitle {
           margin: 0;
           color: #17243a;
-          font-size: 15px;
-          line-height: 1.6;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.7;
+          word-break: keep-all;
         }
-        .featureContent p {
+        .featureDescription {
           margin: 0;
           color: #786f64;
-          font-size: 13px;
+          font-size: 12px;
           line-height: 1.85;
           word-break: keep-all;
           overflow-wrap: anywhere;
@@ -696,6 +701,13 @@ export default function PaymentPage() {
           text-decoration: underline;
           text-underline-offset: 3px;
         }
+        @media (max-width: 700px) {
+          .feature {
+            grid-template-columns: 20px 150px minmax(0,1fr);
+            column-gap: 12px;
+            padding: 22px 18px;
+          }
+        }
         @media (max-width: 600px) {
           .paymentPage { padding: 30px 12px 58px; }
           .paymentCard { padding: 30px 18px; border-radius: 20px; }
@@ -706,7 +718,16 @@ export default function PaymentPage() {
           .steps { gap: 5px; }
           .steps span { font-size: 11px; padding: 11px 4px; }
           .targetBox, .notice { padding: 18px; }
-          .benefitSection { padding: 22px 18px; }
+          .benefitSection { padding: 22px 16px; }
+          .featureList { gap: 14px; }
+          .feature {
+            grid-template-columns: 20px minmax(0,1fr);
+            column-gap: 12px;
+            row-gap: 12px;
+            min-height: 108px;
+            padding: 22px 16px;
+          }
+          .featureDescription { grid-column: 2; }
           .comparison { gap: 8px; }
           .compareBox { padding: 17px 12px; }
           .compareBox b { font-size: 22px; }
