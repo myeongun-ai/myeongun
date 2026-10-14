@@ -1,10 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
 
 type ConfirmState = "checking" | "success" | "error";
+
+type ConfirmResult = {
+  ok?: boolean;
+  message?: string;
+  saju?: unknown;
+  reopenCode?: string;
+};
+
+// 개발 환경의 React Strict Mode에서 같은 결제 승인 요청이
+// 중복 전송되지 않도록 동일 페이지의 진행 중인 요청을 공유합니다.
+const confirmationRequests = new Map<string, Promise<ConfirmResult>>();
+
+function confirmOnce(paymentKey: string, orderId: string, amount: number) {
+  const key = JSON.stringify([paymentKey, orderId, amount]);
+  const existing = confirmationRequests.get(key);
+  if (existing) return existing;
+
+  const request = (async (): Promise<ConfirmResult> => {
+    const response = await fetch("/api/payment/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ paymentKey, orderId, amount }),
+    });
+
+    const result = (await response.json()) as ConfirmResult;
+    if (!response.ok || !result.ok) {
+      throw new Error(result.message || "결제 승인 상태를 확인하지 못했습니다.");
+    }
+    return result;
+  })();
+
+  confirmationRequests.set(key, request);
+  // 실패한 요청은 이후 사용자가 페이지를 다시 열 때 재시도할 수 있습니다.
+  void request.catch(() => {
+    if (confirmationRequests.get(key) === request) {
+      confirmationRequests.delete(key);
+    }
+  });
+  return request;
+}
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -18,84 +63,92 @@ function PaymentSuccessContent() {
     "토스 결제 승인 정보를 확인하고 있습니다."
   );
   const [reopenCode, setReopenCode] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
     async function confirmPayment() {
-      document.cookie = "myeongun_paid=; Path=/; Max-Age=0; SameSite=Lax";
-
-      if (!paymentKey || !orderId || !amount) {
+      if (!paymentKey || !orderId || amount !== 9900) {
         if (!cancelled) {
           setState("error");
           setMessage(
-            "결제 승인 정보가 올바르지 않습니다. 다시 결제를 진행해 주세요."
+            "결제 승인 정보를 확인할 수 없습니다. 실제 결제가 완료되었을 수 있으므로 다시 결제하지 마시고 결제 내역을 확인해 주세요."
           );
         }
         return;
       }
 
       try {
-        const response = await fetch("/api/payment/confirm", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            paymentKey,
-            orderId,
-            amount,
-            saju: (() => {
-              try {
-                const saved = sessionStorage.getItem("myeongun_saju");
-                return saved ? JSON.parse(saved) : null;
-              } catch {
-                return null;
-              }
-            })(),
-          }),
-        });
+        // 기존 브라우저 저장값만으로 이용코드를 표시하지 않습니다.
+        // 서버의 결제 확인이 성공해야만 코드를 보여줍니다.
+        const result = await confirmOnce(paymentKey, orderId, amount);
 
-        const result = await response.json();
+        if (cancelled) return;
 
-        if (!response.ok) {
+        if (!result.saju || typeof result.saju !== "object") {
           throw new Error(
-            result?.message || result?.code || "결제 승인 확인에 실패했습니다."
+            "결제는 확인되었지만 사주정보를 확인하지 못했습니다. 다시 결제하지 마시고 고객센터로 문의해 주세요."
           );
         }
 
-        if (!cancelled) {
-          const recoveredSaju = result?.saju
-            ? JSON.stringify(result.saju)
-            : sessionStorage.getItem("myeongun_saju");
+        {
+          const sajuText = JSON.stringify(result.saju);
 
-          if (recoveredSaju) {
-            sessionStorage.setItem("myeongun_saju", recoveredSaju);
-            sessionStorage.setItem("myeongun_paid_saju", recoveredSaju);
-            sessionStorage.setItem("myeongun_active_saju", recoveredSaju);
-          }
-
-          if (result?.reopenCode) {
-            setReopenCode(String(result.reopenCode));
-            sessionStorage.setItem(
-              "myeongun_reopen_code",
-              String(result.reopenCode)
-            );
-          }
-
-          sessionStorage.setItem("myeongun_session_active", "1");
-          setState("success");
-          setMessage("결제 승인이 정상적으로 확인되었습니다.");
+          sessionStorage.setItem(
+            "myeongun_saju",
+            sajuText
+          );
+          sessionStorage.setItem(
+            "myeongun_paid_saju",
+            sajuText
+          );
+          sessionStorage.setItem(
+            "myeongun_active_saju",
+            sajuText
+          );
         }
+
+        if (typeof result.reopenCode !== "string" || !result.reopenCode) {
+          throw new Error(
+            "결제는 확인되었지만 이용코드를 확인하지 못했습니다. 다시 결제하지 마시고 주문번호와 함께 고객센터로 문의해 주세요."
+          );
+        }
+
+        {
+          const code = result.reopenCode;
+
+          sessionStorage.setItem(
+            "myeongun_reopen_order_id",
+            orderId
+          );
+          sessionStorage.setItem(
+            "myeongun_reopen_code",
+            code
+          );
+
+          setReopenCode(code);
+        }
+
+        sessionStorage.setItem(
+          "myeongun_session_active",
+          "1"
+        );
+
+        setState("success");
+        setMessage(
+          "결제 승인이 정상적으로 확인되었습니다."
+        );
       } catch (error) {
         console.error("결제 승인 확인 오류:", error);
 
         if (!cancelled) {
+          setReopenCode("");
           setState("error");
           setMessage(
             error instanceof Error
               ? error.message
-              : "결제 승인 확인 중 오류가 발생했습니다."
+              : "결제 승인 상태를 확인하지 못했습니다."
           );
         }
       }
@@ -107,6 +160,19 @@ function PaymentSuccessContent() {
       cancelled = true;
     };
   }, [paymentKey, orderId, amount]);
+
+  async function copyReopenCode() {
+    if (!reopenCode) return;
+
+    try {
+      await navigator.clipboard.writeText(reopenCode);
+      setCopyMessage("이용코드를 복사했습니다.");
+    } catch {
+      setCopyMessage(
+        "복사할 수 없습니다. 이용코드를 직접 메모해 주세요."
+      );
+    }
+  }
 
   return (
     <main
@@ -160,7 +226,11 @@ function PaymentSuccessContent() {
             fontSize: "38px",
           }}
         >
-          {state === "success" ? "✓" : state === "error" ? "!" : "…"}
+          {state === "success"
+            ? "✓"
+            : state === "error"
+              ? "!"
+              : "…"}
         </div>
 
         <h1
@@ -174,7 +244,7 @@ function PaymentSuccessContent() {
             ? "결제를 확인하고 있습니다"
             : state === "success"
               ? "결제가 완료되었습니다"
-              : "결제 확인에 실패했습니다"}
+              : "결제 상태를 확인해 주세요"}
         </h1>
 
         <p
@@ -200,7 +270,12 @@ function PaymentSuccessContent() {
           >
             {orderId && (
               <div style={{ marginBottom: "10px" }}>
-                <span style={{ color: "#888", fontSize: "12px" }}>
+                <span
+                  style={{
+                    color: "#888",
+                    fontSize: "12px",
+                  }}
+                >
                   주문번호
                 </span>
                 <strong
@@ -219,7 +294,12 @@ function PaymentSuccessContent() {
 
             {amount > 0 && (
               <div>
-                <span style={{ color: "#888", fontSize: "12px" }}>
+                <span
+                  style={{
+                    color: "#888",
+                    fontSize: "12px",
+                  }}
+                >
                   결제금액
                 </span>
                 <strong
@@ -254,8 +334,9 @@ function PaymentSuccessContent() {
                 fontWeight: 800,
               }}
             >
-              7일 재열람 코드
+              발급된 7일 재열람 코드
             </div>
+
             <div
               style={{
                 marginTop: "9px",
@@ -263,24 +344,58 @@ function PaymentSuccessContent() {
                 letterSpacing: "4px",
                 fontWeight: 900,
                 color: "#20251f",
+                wordBreak: "break-all",
               }}
             >
               {reopenCode}
             </div>
+
+            <button
+              type="button"
+              onClick={copyReopenCode}
+              style={{
+                marginTop: "14px",
+                padding: "10px 22px",
+                border: "1px solid #b9a57c",
+                borderRadius: "9px",
+                background: "#ffffff",
+                color: "#4c3d22",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              이용코드 복사하기
+            </button>
+
+            {copyMessage && (
+              <p
+                role="status"
+                style={{
+                  marginTop: "8px",
+                  fontSize: "12px",
+                  color: "#666",
+                }}
+              >
+                {copyMessage}
+              </p>
+            )}
+
             <p
               style={{
-                margin: "10px 0 0",
+                margin: "14px 0 0",
                 fontSize: "12px",
-                lineHeight: 1.7,
+                lineHeight: 1.8,
                 color: "#777",
               }}
             >
-              재열람 코드를 꼭 저장해 주세요.
+              재열람 코드를 반드시 별도로 저장해 주세요.
               <br />
-              결제일로부터 7일 동안 휴대폰이나 다른 PC에서도 상세 사주를 다시 볼 수 있습니다.
+              결제일로부터 7일 동안 다른 기기에서도
+              상세 사주를 재열람할 수 있습니다.
               <br />
-              재열람 코드를 잊어버리거나 분실하면 다시 확인할 수 없으므로,
-              메모하거나 캡처하여 보관해 주세요.
+              코드를 분실하면 다시 확인하기 어려울 수
+              있으므로 안전하게 보관해 주세요.
             </p>
           </div>
         )}
@@ -308,32 +423,36 @@ function PaymentSuccessContent() {
         )}
 
         {state === "error" && (
-          <Link
-            href="/payment"
+          <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              minHeight: "58px",
               marginTop: "25px",
+              padding: "20px",
               borderRadius: "12px",
-              background: "#20251f",
-              color: "#fff",
-              textDecoration: "none",
-              fontSize: "15px",
-              fontWeight: 700,
+              background: "#fff1ed",
+              color: "#8b3528",
+              fontSize: "13px",
+              lineHeight: 1.9,
+              textAlign: "left",
             }}
           >
-            결제 다시 진행하기
-          </Link>
+            <strong>중복 결제 주의</strong>
+            <p style={{ margin: "8px 0 0" }}>
+              결제가 이미 완료되었을 수 있습니다.
+              다시 결제하지 마시고 카드사 또는
+              토스페이먼츠 결제 내역을 확인해 주세요.
+              <br />
+              결제 내역이 있는데 이용코드를 받지
+              못하셨다면 주문번호와 함께 명운
+              고객센터로 문의해 주세요.
+            </p>
+          </div>
         )}
 
         <Link
           href="/saju"
           style={{
             display: "inline-block",
-            marginTop: "15px",
+            marginTop: "20px",
             color: "#777",
             fontSize: "13px",
             textDecoration: "none",

@@ -1,12 +1,107 @@
-import OpenAI from "openai";
+
 import { NextResponse } from "next/server";
 import { calculateMyeongunManseryeok } from "../../../../lib/manseryeok";
+
+export const runtime = "nodejs";
+
+type Element = "목" | "화" | "토" | "금" | "수";
+
+const ELEMENTS: Record<
+  Element,
+  {
+    money: string;
+    moneyStrength: string;
+    moneyCaution: string;
+    business: string;
+    businessStrength: string;
+    advice: string;
+    summary: string;
+  }
+> = {
+  목: {
+    money:
+      "성장과 새로운 기회를 중요하게 여기는 재물 성향으로 해석할 수 있습니다. 눈앞의 결과보다 앞으로 발전할 가능성에 관심을 두는 편입니다.",
+    moneyStrength: "꾸준히 배우고 새로운 기회를 탐색하는 자세",
+    moneyCaution: "여러 계획을 동시에 추진하면서 지출이 늘어나는 점",
+    business:
+      "새로운 아이디어를 구상하고 일을 발전시키는 과정에서 강점을 찾을 수 있습니다. 다만 시작한 일을 끝까지 관리하는 습관도 중요합니다.",
+    businessStrength: "기획과 성장 가능성 탐색",
+    advice: "새로운 계획을 세울 때는 필요한 비용과 준비 기간을 먼저 확인해 보세요.",
+    summary: "성장 가능성을 살피되 꾸준한 관리가 중요한 성향입니다.",
+  },
+  화: {
+    money:
+      "활동과 사람들과의 교류를 통해 기회를 찾으려는 재물 성향으로 해석할 수 있습니다. 적극성이 장점이지만 순간적인 판단에는 주의가 필요합니다.",
+    moneyStrength: "적극적으로 기회를 찾고 행동하는 자세",
+    moneyCaution: "기분이나 분위기에 따라 지출을 결정하는 점",
+    business:
+      "사람들과 소통하고 자신의 생각을 전달하는 활동에서 강점을 찾을 수 있습니다. 중요한 계약이나 결정에서는 충분한 검토가 도움이 됩니다.",
+    businessStrength: "소통과 적극적인 실행",
+    advice: "큰 지출이나 중요한 결정은 하루 정도 시간을 두고 다시 검토해 보세요.",
+    summary: "적극적인 실행력이 장점이며 신중한 판단이 필요한 성향입니다.",
+  },
+  토: {
+    money:
+      "안정과 꾸준한 관리를 중요하게 여기는 재물 성향으로 해석할 수 있습니다. 큰 변화보다 계획을 세우고 유지하는 방식에 편안함을 느낄 수 있습니다.",
+    moneyStrength: "책임감과 지속적인 관리",
+    moneyCaution: "변화가 필요한 상황에서도 익숙한 방식만 유지하는 점",
+    business:
+      "맡은 일을 안정적으로 운영하고 신뢰를 쌓는 과정에서 강점을 찾을 수 있습니다. 새로운 기회를 검토할 때는 안정성과 가능성을 함께 살펴보세요.",
+    businessStrength: "안정적인 운영과 책임감",
+    advice: "기존 계획을 유지하더라도 정기적으로 지출과 운영 상황을 점검해 보세요.",
+    summary: "안정적인 관리가 장점이며 변화에 대한 유연함도 필요한 성향입니다.",
+  },
+  금: {
+    money:
+      "기준과 원칙을 세워 돈을 관리하려는 재물 성향으로 해석할 수 있습니다. 판단 기준이 분명한 편이지만 지나친 완벽주의는 부담이 될 수 있습니다.",
+    moneyStrength: "분명한 기준과 꼼꼼한 검토",
+    moneyCaution: "세부적인 문제에 집중해 전체 흐름을 놓치는 점",
+    business:
+      "문제를 분석하고 업무의 기준을 정하는 활동에서 강점을 찾을 수 있습니다. 사업이나 조직 운영에서는 원칙과 함께 유연한 소통도 중요합니다.",
+    businessStrength: "분석과 체계적인 의사결정",
+    advice: "돈과 관련된 결정을 할 때는 세부 조건뿐 아니라 전체 상황도 함께 살펴보세요.",
+    summary: "체계적인 판단이 장점이며 상황에 맞는 유연함이 필요한 성향입니다.",
+  },
+  수: {
+    money:
+      "정보를 모으고 여러 가능성을 비교하려는 재물 성향으로 해석할 수 있습니다. 신중한 검토가 장점이지만 고민이 길어질 수 있습니다.",
+    moneyStrength: "정보 수집과 상황에 맞는 판단",
+    moneyCaution: "결정을 지나치게 미루거나 생각만 반복하는 점",
+    business:
+      "시장과 주변 상황을 관찰하고 변화에 대응하는 활동에서 강점을 찾을 수 있습니다. 충분히 검토했다면 작은 실행으로 경험을 쌓는 것도 도움이 됩니다.",
+    businessStrength: "정보 분석과 변화에 대한 적응",
+    advice: "정보를 충분히 확인했다면 실행 가능한 작은 목표부터 정해 보세요.",
+    summary: "정보를 살피는 능력이 장점이며 적절한 실행력이 필요한 성향입니다.",
+  },
+};
+
+function getStrengthAdvice(level: string): string {
+  if (level === "신강") {
+    return "자신의 판단을 적극적으로 활용할 수 있지만, 중요한 재무·사업 결정에서는 다른 사람의 의견과 객관적인 자료도 함께 확인하는 것이 좋습니다.";
+  }
+
+  if (level === "신약") {
+    return "새로운 일을 무리하게 확대하기보다 현재의 자원과 준비 상태를 점검하고, 필요할 때 주변의 도움을 활용하는 것이 좋습니다.";
+  }
+
+  return "자신의 판단과 외부 환경 사이에서 균형을 찾으며, 중요한 일은 계획과 실행 가능성을 함께 검토하는 것이 좋습니다.";
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    if (!body.birth || !body.time || !body.gender || !body.calendar) {
+    if (
+      !body ||
+      typeof body.birth !== "string" ||
+      typeof body.time !== "string" ||
+      typeof body.gender !== "string" ||
+      typeof body.calendar !== "string" ||
+      !body.birth.trim() ||
+      !body.time.trim() ||
+      !body.gender.trim() ||
+      !body.calendar.trim()
+    ) {
       return NextResponse.json(
         { error: "필수 정보를 모두 입력해 주세요." },
         { status: 400 }
@@ -19,233 +114,53 @@ export async function POST(req: Request) {
       calendar: body.calendar,
     });
 
-    const formatHiddenStems = (
-      pillar: typeof manseryeok.pillars.year
-    ) =>
-      pillar.hiddenStems
-        .map((item) => `${item.stem}(${item.tenGod})`)
-        .join(" · ");
+    const element = manseryeok.dayMaster.element as Element;
+    const info = ELEMENTS[element];
 
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
+    if (!info) {
       return NextResponse.json(
-        {
-          error:
-            "OPENAI_API_KEY가 설정되지 않았습니다. Vercel 환경변수를 확인해 주세요.",
-        },
+        { error: "재물·사업운 해석 정보를 확인하지 못했습니다." },
         { status: 500 }
       );
     }
 
-    const client = new OpenAI({
-      apiKey,
-    });
-
-    const seoulParts = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Seoul",
-      year: "numeric",
-      month: "numeric",
-    }).formatToParts(new Date());
-
-    const seoulYear = Number(
-      seoulParts.find((part) => part.type === "year")?.value
+    const strengthAdvice = getStrengthAdvice(
+      manseryeok.strength.level
     );
-    const seoulMonth = Number(
-      seoulParts.find((part) => part.type === "month")?.value
-    );
-    const targetYear = seoulMonth >= 9 ? seoulYear + 1 : seoulYear;
 
-    const prompt = `
-당신은 한국어로 쉽고 친절하게 설명하는 재물·사업운 전문 AI '명운'입니다.
+    const timeNotice = manseryeok.pillars.hour
+      ? ""
+      : "출생시간을 알 수 없어 시주를 제외한 참고 분석이며, 세부 해석에는 제한이 있습니다.";
 
-아래 입력정보와 실제 만세력 계산 결과를 근거로,
-처음 이용하는 고객이 자신의 기본적인 재물 성향과 사업 성향을 이해할 수 있을 정도의 핵심 내용만 보여 주세요.
+    const result = [
+      "## 1. 나의 재물 성향",
+      info.money,
+      `전통 명리에서는 고객님의 일간인 ${manseryeok.dayMaster.stem}을 ${element}의 기운과 연결하여 해석합니다. 이는 실제 재산이나 수입을 판단하는 기준이 아니라 기본적인 성향을 살펴보는 참고 자료입니다.`,
+      `- 강점: ${info.moneyStrength}`,
+      `- 주의할 점: ${info.moneyCaution}`,
 
-이 메뉴는 무료 재물·사업운 분석입니다.
+      "## 2. 나의 사업 성향",
+      info.business,
+      `특히 ${info.businessStrength}과 관련된 자신의 특징을 돌아볼 수 있습니다.`,
+      strengthAdvice,
 
-무료 결과만으로 재물, 사업, 직업, 앞으로의 돈 흐름에 대한 모든 궁금증이 해결되지 않도록 하세요.
+      "## 3. 지금 기억할 핵심 포인트",
+      `- ${info.advice}`,
+      "- 투자나 창업 등 중요한 결정은 실제 소득, 지출, 시장 상황과 위험 요소를 함께 확인해 보세요.",
 
-무료에서는
-"나는 돈을 어떤 방식으로 다루는 사람인가",
-"사업이나 독립적인 활동에서 어떤 성향이 나타나는가"
-정도까지 이해할 수 있도록 설명하세요.
-
-구체적인 돈의 흐름, 사업 확장 여부, 직업과 사업의 세부 방향,
-앞으로의 시기별 변화와 장기 전략은 상세 사주에서 확인할 수 있도록 남겨 두세요.
-
-[입력 정보]
-이름: ${body.name || "고객"}
-생년월일: ${body.birth}
-출생시간: ${body.time}
-성별: ${body.gender}
-달력 기준: ${body.calendar}
-
-[실제 만세력 계산 결과]
-연주: ${manseryeok.pillars.year.pillar}
-월주: ${manseryeok.pillars.month.pillar}
-일주: ${manseryeok.pillars.day.pillar}
-시주: ${manseryeok.pillars.hour?.pillar || "출생시간 미상"}
-
-일간: ${manseryeok.dayMaster.stem} (${manseryeok.dayMaster.element}, ${manseryeok.dayMaster.yinYang})
-
-오행:
-목 ${manseryeok.fiveElements.목},
-화 ${manseryeok.fiveElements.화},
-토 ${manseryeok.fiveElements.토},
-금 ${manseryeok.fiveElements.금},
-수 ${manseryeok.fiveElements.수}
-
-신강·신약:
-${manseryeok.strength.level} (${manseryeok.strength.score}점)
-- ${manseryeok.strength.reason}
-
-참고용 용신·희신:
-용신 ${manseryeok.yongshin?.yongshin || "미산출"},
-희신 ${manseryeok.yongshin?.heesin || "미산출"}
-- ${manseryeok.yongshin?.reason || "용신·희신 참고값 미산출"}
-
-지지 십성:
-연지 ${manseryeok.pillars.year.tenGodBranch},
-월지 ${manseryeok.pillars.month.tenGodBranch},
-일지 ${manseryeok.pillars.day.tenGodBranch},
-시지 ${manseryeok.pillars.hour?.tenGodBranch || "출생시간 미상"}
-
-지장간:
-연지 ${formatHiddenStems(manseryeok.pillars.year)},
-월지 ${formatHiddenStems(manseryeok.pillars.month)},
-일지 ${formatHiddenStems(manseryeok.pillars.day)},
-시지 ${
-      manseryeok.pillars.hour
-        ? formatHiddenStems(manseryeok.pillars.hour)
-        : "출생시간 미상"
-    }
-
-[가장 중요한 작성 원칙]
-
-- 위 만세력 계산값을 실제 해석 근거로 사용하세요.
-- 고객은 사주 전문지식이 전혀 없다고 생각하세요.
-- 어려운 명리 전문용어를 고객용 본문에 나열하지 마세요.
-- 계산값은 내부 분석에 사용하고 결과는 쉬운 생활 언어로 바꾸어 설명하세요.
-- 초등학생부터 어르신까지 이해할 수 있는 자연스러운 한국어를 사용하세요.
-- 문장은 짧고 명확하게 작성하세요.
-- 같은 의미를 반복하지 마세요.
-- 고객의 실제 돈 관리 방식과 일하는 모습에 연결해서 설명하세요.
-- 확정적인 미래 예언을 하지 마세요.
-- 투자 수익이나 사업 성공을 보장하지 마세요.
-- 특정 투자 종목, 가격, 수익률을 제시하지 마세요.
-- 사주는 참고자료이며 실제 투자·사업 결정에는 시장 상황과 재무 상태 등을 함께 고려해야 한다는 원칙을 유지하세요.
-- 대운 등 제공되지 않은 값을 임의로 만들어내지 마세요.
-- 모든 문장은 자연스러운 한국어 존댓말로 작성하세요.
-- 마크다운 제목과 목록을 사용해 휴대폰에서도 읽기 쉽게 작성하세요.
-
-[무료 분석에서 자세히 공개하지 않을 내용]
-
-아래 내용은 무료 결과에서 답을 자세하게 제공하지 마세요.
-
-- 앞으로 돈이 들어오고 나가는 구체적인 시기
-- 장기적인 재물 흐름
-- 구체적인 자산관리 전략
-- 세밀한 현금흐름 설계
-- 투자 방향과 투자 판단
-- 사업 시작에 적합한 구체적인 시기
-- 사업 확장 또는 축소 판단
-- 동업 여부에 대한 구체적인 판단
-- 대출이나 큰 자금 운용에 대한 판단
-- 구체적인 사업 아이템 추천
-- 직장과 사업 중 어느 쪽을 선택해야 하는지에 대한 최종 판단
-- 이직·독립·창업 시기
-- 장기적인 직업 방향
-- ${targetYear}년의 상세한 재물·사업 흐름
-- 월별 재물운
-- 월별 사업운
-- 앞으로의 연도별 변화
-- 상세한 위험관리 전략
-- 장기적인 사업 실행 계획
-
-위 내용은 상세 사주에서 더 깊게 다룰 수 있도록 남겨 두세요.
-
-무료 결과에서 고객이 이런 부분을 더 알고 싶어지는 것은 괜찮지만,
-구체적인 답을 미리 제공하지 마세요.
-
-[무료 결과 분량]
-
-전체 결과는 마크다운 제목을 포함하여 약 700~900자 정도로 작성하세요.
-
-각 항목은 핵심만 간결하게 설명하세요.
-
-무료 서비스이지만
-"내 사주를 실제로 분석했다"는 느낌을 받을 수 있을 정도의 개인화된 내용은 제공하세요.
-
-반대로 무료 결과만 읽고
-재물·사업에 관한 모든 궁금증이 해결될 정도로 자세하게 작성하지 마세요.
-
-[반드시 포함할 내용]
-
-## 1. 나의 재물 성향
-
-돈을 벌고, 사용하고, 관리할 때 나타날 수 있는 기본적인 성향을
-2~3문장으로 쉽게 설명하세요.
-
-이어 아래 두 항목만 작성하세요.
-
-- 강점:
-- 주의할 점:
-
-구체적인 자산관리 방법이나 미래의 돈 흐름까지 설명하지 마세요.
-
-## 2. 나의 사업 성향
-
-사업, 독립적인 활동, 의사결정에서 나타날 수 있는 기본 성향을
-2~3문장으로 설명하세요.
-
-영업, 협상, 조직운영, 독립성 등을 모두 세세하게 분석하지 말고
-가장 특징적인 부분만 선택해서 설명하세요.
-
-사업 성공 여부나 창업 시기를 단정하지 마세요.
-
-## 3. 지금 기억할 핵심 포인트
-
-현재 생활에서 참고할 수 있는 재물·사업 관련 조언을
-딱 2개만 목록으로 작성하세요.
-
-- 첫 번째 조언
-- 두 번째 조언
-
-조언은 바로 이해할 수 있는 쉬운 내용으로 작성하되
-장기적인 재무 전략이나 구체적인 사업 전략까지 제공하지 마세요.
-
-## 무료 재물·사업운 한눈에 보기
-
-이 사람의 재물·사업 성향을 한 문장으로 정리하세요.
-
-그 다음 별도의 짧은 문단으로 아래 취지를 자연스럽게 안내하세요.
-
-"무료 분석에서는 재물과 사업의 기본 성향까지 안내해 드렸습니다.
-돈의 세부 흐름, 사업·직업 방향, 앞으로의 변화와 구체적인 대응 방법은 상세 사주에서 더 깊게 확인할 수 있습니다."
-
-광고처럼 과장하지 마세요.
-결제를 강요하는 표현을 사용하지 마세요.
-무료 분석과 상세 사주의 차이가 자연스럽게 느껴지도록 작성하세요.
-`;
-
-    const response = await client.responses.create({
-      model: "gpt-5.6",
-      input: prompt,
-    });
-
-    const result = String(response.output_text || "").trim();
-
-    if (!result) {
-      return NextResponse.json(
-        { error: "재물·사업운 분석 결과를 생성하지 못했습니다." },
-        { status: 500 }
-      );
-    }
+      "## 무료 재물·사업운 한눈에 보기",
+      info.summary,
+      timeNotice,
+      "무료 분석에서는 재물과 사업의 기본 성향까지 안내해 드렸습니다. 돈의 세부 흐름, 사업·직업 방향, 앞으로의 변화와 구체적인 대응 방법은 상세 사주에서 더 깊게 확인할 수 있습니다.",
+      "",
+      "※ 본 분석은 전통 명리를 활용한 참고용 콘텐츠이며, 투자 수익이나 사업 성공을 보장하지 않습니다.",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     return NextResponse.json({
       result,
-      yongshin: manseryeok.yongshin,
+      yongshin: manseryeok.yongshin ?? null,
     });
   } catch (error) {
     console.error("business fortune API error:", error);
@@ -253,7 +168,7 @@ ${manseryeok.strength.level} (${manseryeok.strength.score}점)
     return NextResponse.json(
       {
         error:
-          "재물·사업운 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+          "재물·사업운 정보를 분석하지 못했습니다. 입력 내용을 확인한 후 다시 시도해 주세요.",
       },
       { status: 500 }
     );

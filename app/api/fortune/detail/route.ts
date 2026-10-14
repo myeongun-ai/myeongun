@@ -1,4 +1,7 @@
 import OpenAI from "openai";
+import { randomUUID } from "crypto";
+import { neon } from "@neondatabase/serverless";
+import { getPremiumResult, savePremiumResult } from "../../../../lib/premiumResultStore";
 import { NextRequest, NextResponse } from "next/server";
 import {
   entitlementCookie,
@@ -82,6 +85,43 @@ function isValidResult(value: unknown): value is PremiumResult {
   );
 }
 
+// 동일 주문의 AI 분석 중복 실행을 방지하는 데이터베이스 잠금입니다.
+// 서버가 중단되더라도 5분 후 다른 요청이 다시 시도할 수 있습니다.
+async function claimGeneration(orderId: string, claimId: string) {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error("DATABASE_URL이 설정되지 않았습니다.");
+  const sql = neon(databaseUrl);
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS myeongun_premium_generation_lock (
+      order_id TEXT PRIMARY KEY,
+      claim_id TEXT NOT NULL,
+      locked_until TIMESTAMPTZ NOT NULL
+    )
+  `;
+
+  const rows = await sql`
+    INSERT INTO myeongun_premium_generation_lock (order_id, claim_id, locked_until)
+    VALUES (${orderId}, ${claimId}, NOW() + INTERVAL '5 minutes')
+    ON CONFLICT (order_id) DO UPDATE
+    SET claim_id = EXCLUDED.claim_id,
+        locked_until = EXCLUDED.locked_until
+    WHERE myeongun_premium_generation_lock.locked_until < NOW()
+    RETURNING claim_id
+  `;
+  return rows.length > 0;
+}
+
+async function releaseGeneration(orderId: string, claimId: string) {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) return;
+  const sql = neon(databaseUrl);
+  await sql`
+    DELETE FROM myeongun_premium_generation_lock
+    WHERE order_id = ${orderId} AND claim_id = ${claimId}
+  `;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -116,6 +156,47 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
+
+    const sajuHash = hashSaju(saju);
+    const cached = await getPremiumResult(entitlement.orderId, sajuHash);
+    if (cached !== null) {
+      if (!isValidResult(cached)) {
+        throw new Error("저장된 상세 사주 결과 형식이 올바르지 않습니다.");
+      }
+      const cachedManseryeok = calculateMyeongunManseryeok({
+        birth: saju.birth, time: saju.time, calendar: saju.calendar,
+      });
+      return NextResponse.json({
+        ok: true, result: cached,
+        strength: cachedManseryeok.strength,
+        yongshin: cachedManseryeok.yongshin,
+        expiresAt: entitlement.exp,
+      }, { headers: { "Cache-Control": "no-store" } });
+    }
+
+    const claimId = randomUUID();
+    const claimed = await claimGeneration(entitlement.orderId, claimId);
+    if (!claimed) {
+      return NextResponse.json({
+        error: "상세 사주를 생성하고 있습니다. 잠시 후 다시 열어주세요.",
+      }, { status: 409, headers: { "Cache-Control": "no-store" } });
+    }
+
+    try {
+      // 잠금 대기 사이에 다른 요청이 저장했을 가능성을 한 번 더 확인합니다.
+      const saved = await getPremiumResult(entitlement.orderId, sajuHash);
+      if (saved !== null) {
+        if (!isValidResult(saved)) throw new Error("저장된 분석 결과가 올바르지 않습니다.");
+        const savedManseryeok = calculateMyeongunManseryeok({
+          birth: saju.birth, time: saju.time, calendar: saju.calendar,
+        });
+        return NextResponse.json({
+          ok: true, result: saved,
+          strength: savedManseryeok.strength,
+          yongshin: savedManseryeok.yongshin,
+          expiresAt: entitlement.exp,
+        }, { headers: { "Cache-Control": "no-store" } });
+      }
 
     const manseryeok = calculateMyeongunManseryeok({ birth: saju.birth, time: saju.time, calendar: saju.calendar });
 
@@ -312,7 +393,10 @@ export async function POST(request: NextRequest) {
 `;
 
     const response = await client.responses.create({
-      model: "gpt-5.6",
+      model: "gpt-4.1-mini",
+      temperature: 0.5,
+      max_output_tokens: 8000,
+      text: { format: { type: "json_object" } },
       input: prompt,
     });
 
@@ -322,10 +406,15 @@ export async function POST(request: NextRequest) {
       throw new Error("상세 분석 응답 형식이 올바르지 않습니다.");
     }
 
+    const storedResult = await savePremiumResult(entitlement.orderId, sajuHash, parsed);
+    if (!isValidResult(storedResult)) {
+      throw new Error("저장된 분석 결과의 형식이 올바르지 않습니다.");
+    }
+
     return NextResponse.json(
       {
         ok: true,
-        result: parsed,
+        result: storedResult,
         strength: manseryeok.strength,
         yongshin: manseryeok.yongshin,
         expiresAt: entitlement.exp,
@@ -337,13 +426,20 @@ export async function POST(request: NextRequest) {
         },
       }
     );
+    } finally {
+      try {
+        await releaseGeneration(entitlement.orderId, claimId);
+      } catch (releaseError) {
+        console.error("premium generation lock release error:", releaseError);
+      }
+    }
   } catch (error) {
     console.error("premium fortune detail API error:", error);
 
     return NextResponse.json(
       {
         error:
-          "상세 사주 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+          "상세 사주를 일시적으로 생성할 수 없습니다. 결제 이용권은 유지되며, 잠시 후 다시 시도해 주세요. 계속 실패하면 고객센터로 문의해 주세요.",
       },
       { status: 500 }
     );

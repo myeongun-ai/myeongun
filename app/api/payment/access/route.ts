@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!saju?.name || !saju?.birth || !saju?.time) {
       return NextResponse.json(
-        { paid: false, message: "?ъ＜ ?뺣낫媛 遺議깊빀?덈떎." },
+        { paid: false, message: "사주 정보가 부족합니다." },
         { status: 400, headers: { "Cache-Control": "no-store" } }
       );
     }

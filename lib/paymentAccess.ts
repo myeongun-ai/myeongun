@@ -1,3 +1,4 @@
+
 import { createHmac, timingSafeEqual } from "crypto";
 
 export type SajuAccessInput = {
@@ -55,7 +56,9 @@ export function hashSaju(saju: SajuAccessInput) {
     .digest("hex");
 }
 
-export function hashReopen(input: Pick<SajuAccessInput, "name" | "birth">) {
+export function hashReopen(
+  input: Pick<SajuAccessInput, "name" | "birth">
+) {
   return createHmac("sha256", getSigningKey())
     .update(canonicalReopen(input))
     .digest("hex");
@@ -71,20 +74,51 @@ function signEncoded(encoded: string) {
     .digest("base64url");
 }
 
-export function createEntitlement(orderId: string, saju: SajuAccessInput) {
+/**
+ * 기존 호출 방식:
+ * createEntitlement(orderId, saju)
+ *
+ * 최초 결제 만료일을 유지해야 하는 경우:
+ * createEntitlement(orderId, saju, expiresAt)
+ *
+ * expiresAt은 ISO 날짜 문자열, Date 또는 Unix 초 단위 숫자입니다.
+ */
+export function createEntitlement(
+  orderId: string,
+  saju: SajuAccessInput,
+  expiresAt?: string | Date | number
+) {
+  const now = Math.floor(Date.now() / 1000);
+  let exp = now + SEVEN_DAYS;
+
+  if (expiresAt !== undefined) {
+    if (typeof expiresAt === "number") {
+      exp = Math.floor(expiresAt);
+    } else {
+      const date = new Date(expiresAt);
+      exp = Math.floor(date.getTime() / 1000);
+    }
+
+    if (!Number.isFinite(exp) || exp <= now) {
+      throw new Error("이용권 만료일이 유효하지 않거나 만료되었습니다.");
+    }
+  }
+
   const payload: EntitlementPayload = {
     v: 1,
     orderId,
     sajuHash: hashSaju(saju),
     reopenHash: hashReopen(saju),
-    exp: Math.floor(Date.now() / 1000) + SEVEN_DAYS,
+    exp,
   };
 
   const encoded = encodePayload(payload);
   return `${encoded}.${signEncoded(encoded)}`;
 }
 
-export function verifyEntitlement(token: string | undefined | null) {
+export function verifyEntitlement(
+  token: string | undefined | null
+) {
   if (!token) return null;
 
   const [encoded, signature] = token.split(".");
@@ -105,12 +139,25 @@ export function verifyEntitlement(token: string | undefined | null) {
     ) as EntitlementPayload;
 
     if (payload.v !== 1) return null;
-    if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) return null;
+    if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
 
     return payload;
   } catch {
     return null;
   }
+}
+
+export function entitlementRemainingSeconds(expiresAt: string | Date | number) {
+  const exp =
+    typeof expiresAt === "number"
+      ? Math.floor(expiresAt)
+      : Math.floor(new Date(expiresAt).getTime() / 1000);
+
+  if (!Number.isFinite(exp)) return 0;
+
+  return Math.max(0, exp - Math.floor(Date.now() / 1000));
 }
 
 export const entitlementCookie = {
