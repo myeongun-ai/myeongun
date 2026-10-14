@@ -94,7 +94,9 @@ export default function PaymentPage() {
     if (!parsedSaju) {
       setSaju(null);
       setConfirmed(false);
-      setErrorMessage("사주 정보를 확인할 수 없습니다. 먼저 무료 사주를 분석해 주세요.");
+      setErrorMessage(
+        "사주 정보를 확인할 수 없습니다. 먼저 무료 사주를 분석해 주세요."
+      );
       return;
     }
 
@@ -215,7 +217,6 @@ export default function PaymentPage() {
               무료 분석에서 궁금했던 나의 일과 돈,
               인연과 앞으로의 흐름을 더 자세히 살펴보세요.
             </p>
-
             <div className="heroPrice">
               <strong>9,900원</strong>
               <span>1회 결제</span>
@@ -235,7 +236,6 @@ export default function PaymentPage() {
 
           <section className="targetBox" aria-label="분석 대상 정보">
             <h2>분석 대상 확인</h2>
-
             {!sessionChecked ? (
               <p>사주 정보를 확인하고 있습니다.</p>
             ) : saju ? (
@@ -277,7 +277,7 @@ export default function PaymentPage() {
               {features.map((feature) => (
                 <div className="feature" key={feature.title}>
                   <span className="check" aria-hidden="true">✓</span>
-                  <div>
+                  <div className="featureContent">
                     <strong>{feature.title}</strong>
                     <p>{feature.text}</p>
                   </div>
@@ -303,7 +303,6 @@ export default function PaymentPage() {
 
           <section className="notice">
             <h2>결제 전 꼭 확인해 주세요</h2>
-
             <p>
               <strong>① 이용기간과 AI 상담</strong>
               상세 사주 결제 권한 유효기간은 7일이며,
@@ -348,9 +347,7 @@ export default function PaymentPage() {
           </label>
 
           {errorMessage && (
-            <p className="errorMessage" role="alert">
-              {errorMessage}
-            </p>
+            <p className="errorMessage" role="alert">{errorMessage}</p>
           )}
 
           {scriptError && (
@@ -366,9 +363,7 @@ export default function PaymentPage() {
             disabled={!canPay}
             className="payButton"
           >
-            {loading
-              ? "결제창 준비 중..."
-              : "9,900원 결제하기 →"}
+            {loading ? "결제창 준비 중..." : "9,900원 결제하기 →"}
           </button>
 
           <p className="buttonGuide" aria-live="polite">
@@ -388,7 +383,6 @@ export default function PaymentPage() {
           <div className="policyLinks">
             <Link href="/refund">환불정책</Link>
           </div>
-
           <Link href="/saju" className="backLink">
             무료 사주 페이지로 돌아가기
           </Link>
@@ -516,22 +510,51 @@ export default function PaymentPage() {
           text-underline-offset: 3px;
         }
         .benefitSection {
-          padding: 24px;
+          padding: 26px;
           border: 1px solid #eadfc9;
           border-radius: 14px;
           background: #fffaf0;
           margin-bottom: 20px;
         }
-        .featureList { display: grid; gap: 16px; }
-        .feature { display: flex; gap: 12px; align-items: flex-start; }
-        .check { color: #a4772c; font-weight: 900; }
-        .feature strong { font-size: 14px; }
-        .feature p {
-          margin: 5px 0 0;
+        .benefitSection h2 {
+          margin: 0 0 26px;
+          line-height: 1.6;
+        }
+        .featureList {
+          display: grid;
+          gap: 22px;
+        }
+        .feature {
+          display: flex;
+          gap: 14px;
+          align-items: flex-start;
+        }
+        .check {
+          flex-shrink: 0;
+          color: #a4772c;
+          font-weight: 900;
+          line-height: 1.6;
+        }
+        .featureContent {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          min-width: 0;
+        }
+        .featureContent strong {
+          display: block;
+          margin: 0;
+          color: #17243a;
+          font-size: 15px;
+          line-height: 1.6;
+        }
+        .featureContent p {
+          margin: 0;
           color: #786f64;
           font-size: 13px;
-          line-height: 1.7;
+          line-height: 1.85;
           word-break: keep-all;
+          overflow-wrap: anywhere;
         }
         .comparison {
           display: grid;
@@ -682,7 +705,8 @@ export default function PaymentPage() {
           .heroBenefit { font-size: 12px; }
           .steps { gap: 5px; }
           .steps span { font-size: 11px; padding: 11px 4px; }
-          .targetBox, .benefitSection, .notice { padding: 18px; }
+          .targetBox, .notice { padding: 18px; }
+          .benefitSection { padding: 22px 18px; }
           .comparison { gap: 8px; }
           .compareBox { padding: 17px 12px; }
           .compareBox b { font-size: 22px; }
