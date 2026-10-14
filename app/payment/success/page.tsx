@@ -15,6 +15,10 @@ type ConfirmResult = {
   message?: string;
   saju?: unknown;
   reopenCode?: string;
+  orderId?: string;
+  amount?: number;
+  status?: string;
+  alreadyIssued?: boolean;
 };
 
 // 개발 환경의 React Strict Mode에서 같은 결제 승인 요청이
@@ -51,6 +55,55 @@ function confirmOnce(paymentKey: string, orderId: string, amount: number) {
   return request;
 }
 
+// 구매 이벤트는 서버가 확인한 주문번호와 금액만 사용합니다.
+// 기존 이용권 복구는 새 구매로 기록하지 않습니다.
+const queuedPurchases = new Set<string>();
+
+function trackVerifiedPurchase(result: ConfirmResult, expectedOrderId: string) {
+  if (
+    result.ok !== true || result.status !== "DONE" ||
+    result.orderId !== expectedOrderId || result.amount !== 9900 ||
+    result.alreadyIssued === true || queuedPurchases.has(expectedOrderId)
+  ) return;
+
+  const storageKey = `myeongun_ga_purchase:${expectedOrderId}`;
+  try {
+    if (sessionStorage.getItem(storageKey) === "queued") return;
+  } catch {
+    // 저장소를 사용할 수 없어도 결제 완료 화면에는 영향을 주지 않습니다.
+  }
+
+  try {
+    const analyticsWindow = window as Window & { dataLayer?: unknown[] };
+    analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];
+    // 태그 로딩 전에도 이벤트를 대기열에 넣어둘 수 있습니다.
+    function queueEvent(..._args: unknown[]) {
+      analyticsWindow.dataLayer!.push(arguments);
+    }
+    queueEvent("event", "purchase", {
+      send_to: "G-E5JM4F9VDF",
+      transaction_id: result.orderId,
+      value: result.amount,
+      currency: "KRW",
+      page_location: window.location.origin + window.location.pathname,
+      items: [{
+        item_id: "myeongun_premium_saju",
+        item_name: "명운 상세 사주",
+        price: result.amount,
+        quantity: 1,
+      }],
+    });
+    queuedPurchases.add(expectedOrderId);
+    try {
+      sessionStorage.setItem(storageKey, "queued");
+    } catch {
+      // 메모리 내 중복 방지는 계속 적용됩니다.
+    }
+  } catch {
+    // 분석 이벤트 전송 실패가 결제 결과를 바꾸지 않도록 합니다.
+  }
+}
+
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
 
@@ -85,6 +138,8 @@ function PaymentSuccessContent() {
         const result = await confirmOnce(paymentKey, orderId, amount);
 
         if (cancelled) return;
+
+        trackVerifiedPurchase(result, orderId);
 
         if (!result.saju || typeof result.saju !== "object") {
           throw new Error(
