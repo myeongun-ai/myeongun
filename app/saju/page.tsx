@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import UsageBenefits from "../UsageBenefits";
 
@@ -211,7 +211,32 @@ function renderFreeResult(text: string) {
   return nodes;
 }
 
+// 입력값과 사주 결과를 보내지 않고 고정된 단계 이름만 기록합니다.
+function trackFunnelEvent(
+  eventName: "free_saju_complete" | "premium_guide_click" | "premium_guide_view" | "begin_checkout"
+) {
+  try {
+    const analyticsWindow = window as Window & { dataLayer?: unknown[] };
+    analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];
+    function queueEvent(..._args: unknown[]) {
+      analyticsWindow.dataLayer!.push(arguments);
+    }
+    queueEvent("event", eventName, {
+      send_to: "G-E5JM4F9VDF",
+      page_location: window.location.origin + window.location.pathname,
+      ...(eventName === "begin_checkout" ? {
+        currency: "KRW",
+        value: 9900,
+        items: [{ item_id: "myeongun_premium_saju", item_name: "명운 상세 사주", price: 9900, quantity: 1 }],
+      } : {}),
+    });
+  } catch {
+    // 추적 오류가 분석이나 결제 흐름을 중단하지 않도록 합니다.
+  }
+}
+
 export default function SajuPage() {
+  const homeResultTracked = useRef(false);
   const router = useRouter();
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -268,6 +293,10 @@ export default function SajuPage() {
       const resultText = String(savedResult?.result || "").trim();
       if (!resultText) return;
 
+      if (!homeResultTracked.current) {
+        trackFunnelEvent("free_saju_complete");
+        homeResultTracked.current = true;
+      }
       setFreeResult(resultText);
       setYongshin(savedResult?.yongshin || null);
       setShowInputForm(false);
@@ -419,6 +448,7 @@ export default function SajuPage() {
       sessionStorage.setItem("myeongun_saju", JSON.stringify(payload));
       sessionStorage.setItem("myeongun_saju_result", JSON.stringify(parsed));
 
+      trackFunnelEvent("free_saju_complete");
       setForm(payload);
       setFreeResult(resultText);
       setYongshin(parsed?.yongshin || null);
@@ -760,6 +790,7 @@ export default function SajuPage() {
 
             <Link
               href="/payment"
+              onClick={() => trackFunnelEvent("premium_guide_click")}
               className="premiumButton"
               style={{
                 display: "flex",

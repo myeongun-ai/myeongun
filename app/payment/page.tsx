@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 declare global {
@@ -71,7 +71,32 @@ function readSavedSaju(): SajuForm | null {
   }
 }
 
+// 입력값과 사주 결과를 보내지 않고 고정된 단계 이름만 기록합니다.
+function trackFunnelEvent(
+  eventName: "free_saju_complete" | "premium_guide_click" | "premium_guide_view" | "begin_checkout"
+) {
+  try {
+    const analyticsWindow = window as Window & { dataLayer?: unknown[] };
+    analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];
+    function queueEvent(..._args: unknown[]) {
+      analyticsWindow.dataLayer!.push(arguments);
+    }
+    queueEvent("event", eventName, {
+      send_to: "G-E5JM4F9VDF",
+      page_location: window.location.origin + window.location.pathname,
+      ...(eventName === "begin_checkout" ? {
+        currency: "KRW",
+        value: 9900,
+        items: [{ item_id: "myeongun_premium_saju", item_name: "명운 상세 사주", price: 9900, quantity: 1 }],
+      } : {}),
+    });
+  } catch {
+    // 추적 오류가 분석이나 결제 흐름을 중단하지 않도록 합니다.
+  }
+}
+
 export default function PaymentPage() {
+  const guideTracked = useRef(false);
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [saju, setSaju] = useState<SajuForm | null>(null);
@@ -81,6 +106,10 @@ export default function PaymentPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    if (!guideTracked.current) {
+      trackFunnelEvent("premium_guide_view");
+      guideTracked.current = true;
+    }
     setSaju(readSavedSaju());
     setSessionChecked(true);
   }, []);
@@ -149,6 +178,8 @@ export default function PaymentPage() {
             "결제 준비 정보를 저장하지 못했습니다."
         );
       }
+
+      trackFunnelEvent("begin_checkout");
 
       await payment.requestPayment({
         method: "CARD",
