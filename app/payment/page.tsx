@@ -1,8 +1,7 @@
-
 "use client";
 
 import Script from "next/script";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 declare global {
@@ -11,67 +10,116 @@ declare global {
   }
 }
 
+type SajuForm = {
+  name: string;
+  birth: string;
+  time: string;
+  gender: string;
+  calendar: string;
+};
+
 const features = [
-  "나의 타고난 성향과 강점 상세 분석",
-  "재물운 · 사업운 · 직업운",
-  "인연 · 인간관계 · 앞으로의 흐름",
-  "상세 사주 결제 후 AI 상담 7일간 최대 20회",
+  {
+    title: "나의 성향과 강점",
+    text: "타고난 성향과 강점을 더 자세히 이해해 보세요.",
+  },
+  {
+    title: "재물·사업·직업운",
+    text: "돈과 일에 관한 운세의 흐름을 살펴보세요.",
+  },
+  {
+    title: "인연과 앞으로의 흐름",
+    text: "인간관계와 앞으로의 운세 방향을 확인하세요.",
+  },
+  {
+    title: "AI 상담 포함",
+    text: "결제 후 7일간 최대 20회 질문할 수 있습니다.",
+  },
 ];
+
+function readSavedSaju(): SajuForm | null {
+  try {
+    const saved = sessionStorage.getItem("myeongun_saju");
+    if (!saved) return null;
+
+    const parsed = JSON.parse(saved);
+
+    if (
+      typeof parsed?.name !== "string" ||
+      !parsed.name.trim() ||
+      typeof parsed?.birth !== "string" ||
+      !parsed.birth ||
+      typeof parsed?.time !== "string" ||
+      !parsed.time ||
+      typeof parsed?.gender !== "string" ||
+      !parsed.gender ||
+      typeof parsed?.calendar !== "string" ||
+      !parsed.calendar
+    ) {
+      return null;
+    }
+
+    return {
+      name: parsed.name.trim(),
+      birth: parsed.birth,
+      time: parsed.time,
+      gender: parsed.gender,
+      calendar: parsed.calendar,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [saju, setSaju] = useState<SajuForm | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [scriptReady, setScriptReady] = useState(false);
+  const [scriptError, setScriptError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    setSaju(readSavedSaju());
+    setSessionChecked(true);
+  }, []);
 
   const handlePayment = async () => {
     if (!confirmed || loading) return;
+    setErrorMessage("");
+
+    const parsedSaju = readSavedSaju();
+
+    if (!parsedSaju) {
+      setSaju(null);
+      setConfirmed(false);
+      setErrorMessage("사주 정보를 확인할 수 없습니다. 먼저 무료 사주를 분석해 주세요.");
+      return;
+    }
+
+    setSaju(parsedSaju);
+
+    const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+
+    if (!clientKey) {
+      setErrorMessage(
+        "현재 결제를 준비할 수 없습니다. 잠시 후 다시 시도해 주세요."
+      );
+      return;
+    }
+
+    if (!window.TossPayments) {
+      setErrorMessage(
+        "결제창을 불러오지 못했습니다. 페이지를 새로고침한 후 다시 시도해 주세요."
+      );
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const savedSaju = sessionStorage.getItem("myeongun_saju");
-
-      if (!savedSaju) {
-        alert("먼저 사주 정보를 입력해주세요.");
-        window.location.href = "/saju";
-        return;
-      }
-
-      let parsedSaju: any;
-
-      try {
-        parsedSaju = JSON.parse(savedSaju);
-
-        if (
-          !parsedSaju?.name ||
-          !parsedSaju?.birth ||
-          !parsedSaju?.time
-        ) {
-          alert("먼저 사주 정보를 입력해주세요.");
-          window.location.href = "/saju";
-          return;
-        }
-      } catch {
-        alert("먼저 사주 정보를 입력해주세요.");
-        window.location.href = "/saju";
-        return;
-      }
-
-      setLoading(true);
-
-      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
-
-      if (!clientKey) {
-        alert("토스 클라이언트 키가 설정되지 않았습니다.");
-        return;
-      }
-
-      if (!window.TossPayments) {
-        alert(
-          "토스 결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요."
-        );
-        return;
-      }
-
       const tossPayments = window.TossPayments(clientKey);
-
       const payment = tossPayments.payment({
         customerKey: "ANONYMOUS",
       });
@@ -112,63 +160,140 @@ export default function PaymentPage() {
         successUrl: `${window.location.origin}/payment/success`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
-    } catch (error: any) {
-      console.error(error);
+    } catch (error: unknown) {
+      const code =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error
+          ? String(error.code)
+          : "";
 
       if (
-        error?.code === "USER_CANCEL" ||
-        error?.code === "PAY_PROCESS_CANCELED"
+        code === "USER_CANCEL" ||
+        code === "PAY_PROCESS_CANCELED"
       ) {
         return;
       }
 
-      alert("결제를 진행할 수 없습니다.");
+      setErrorMessage(
+        "결제창을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요."
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const canPay =
+    sessionChecked &&
+    !!saju &&
+    scriptReady &&
+    !scriptError &&
+    confirmed &&
+    !loading;
 
   return (
     <>
       <Script
         src="https://js.tosspayments.com/v2/standard"
         strategy="afterInteractive"
+        onReady={() => {
+          setScriptReady(true);
+          setScriptError(false);
+        }}
+        onError={() => {
+          setScriptReady(false);
+          setScriptError(true);
+        }}
       />
 
-      <main className="payment-page">
-        <section className="payment-card">
-          <div className="eyebrow">MYEONGUN PREMIUM</div>
+      <main className="paymentPage">
+        <section className="paymentCard">
+          <header className="pageHeader">
+            <div className="eyebrow">MYEONGUN PREMIUM</div>
+            <h1>명운 상세 사주 분석</h1>
+            <p>
+              무료 분석에서 궁금했던 나의 일과 돈,
+              인연과 앞으로의 흐름을 더 자세히 살펴보세요.
+            </p>
 
-          <h1>명운 상세 사주 분석</h1>
+            <div className="heroPrice">
+              <strong>9,900원</strong>
+              <span>1회 결제</span>
+            </div>
+            <div className="heroBenefit">
+              개인별 상세 사주 분석 + AI 상담 7일간 최대 20회
+            </div>
+          </header>
 
-          <p className="intro">
-            무료 사주에서 확인한 나의 성향과 운세를
-            <br />
-            더욱 자세히 살펴보세요.
-          </p>
+          <div className="steps" aria-label="이용 순서">
+            <span>① 무료 결과 확인</span>
+            <span className="active" aria-current="step">
+              ② 이용 조건·결제
+            </span>
+            <span>③ 상세 분석 확인</span>
+          </div>
 
-          <div className="benefit-section">
-            <h2>상세 사주에서 확인할 수 있는 내용</h2>
+          <section className="targetBox" aria-label="분석 대상 정보">
+            <h2>분석 대상 확인</h2>
 
-            <div className="feature-list">
+            {!sessionChecked ? (
+              <p>사주 정보를 확인하고 있습니다.</p>
+            ) : saju ? (
+              <>
+                <div className="targetName">{saju.name}님</div>
+                <dl className="targetDetails">
+                  <div>
+                    <dt>생년월일</dt>
+                    <dd>{saju.birth} · {saju.calendar}</dd>
+                  </div>
+                  <div>
+                    <dt>출생시간</dt>
+                    <dd>{saju.time}</dd>
+                  </div>
+                  <div>
+                    <dt>성별</dt>
+                    <dd>{saju.gender}</dd>
+                  </div>
+                </dl>
+                <Link href="/saju" className="textLink">
+                  사주 정보 다시 입력하기 →
+                </Link>
+              </>
+            ) : (
+              <>
+                <p>
+                  먼저 사주 정보를 입력하고 무료 분석을 확인해 주세요.
+                </p>
+                <Link href="/saju" className="textLink">
+                  무료 사주 분석하러 가기 →
+                </Link>
+              </>
+            )}
+          </section>
+
+          <section className="benefitSection">
+            <h2>상세 사주에 포함된 내용</h2>
+            <div className="featureList">
               {features.map((feature) => (
-                <div className="feature" key={feature}>
-                  <span className="check">✓</span>
-                  <span>{feature}</span>
+                <div className="feature" key={feature.title}>
+                  <span className="check" aria-hidden="true">✓</span>
+                  <div>
+                    <strong>{feature.title}</strong>
+                    <p>{feature.text}</p>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
           <div className="comparison">
-            <div className="compare-box">
+            <div className="compareBox">
               <strong>무료 사주</strong>
               <p>기본 성향 및 운세 방향</p>
               <p>AI 상담 3회</p>
               <b>0원</b>
             </div>
-
-            <div className="compare-box premium">
+            <div className="compareBox premium">
               <strong>상세 사주</strong>
               <p>더 깊은 개인별 사주 분석</p>
               <p>AI 상담 7일간 최대 20회</p>
@@ -176,335 +301,391 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          <div className="notice">
+          <section className="notice">
             <h2>결제 전 꼭 확인해 주세요</h2>
 
             <p>
-              <strong>① AI 상담 이용</strong>
-              <br />
+              <strong>① 이용기간과 AI 상담</strong>
               상세 사주 결제 권한 유효기간은 7일이며,
               해당 기간 동안 AI 상담을 최대 20회 이용할 수 있습니다.
             </p>
-
             <p>
               <strong>② 이용코드 보관</strong>
-              <br />
               결제 후 발급되는 이용코드는 상세 사주 재열람에
               필요합니다. 반드시 별도로 저장하고 보관해 주세요.
             </p>
-
             <p>
               <strong>③ 이용코드 분실</strong>
-              <br />
-              명운에서는 개인정보 보호를 위해 분실한
-              이용코드를 확인하거나 재발급해 드리지 못할 수 있습니다.
-              이용코드 분실에 따른 이용 제한 및 환불 관련 사항은
-              환불정책을 확인해 주세요.
+              명운에서는 개인정보 보호를 위해 분실한 이용코드를
+              확인하거나 재발급해 드리지 못할 수 있습니다.
+              이용코드 분실에 따른 이용 제한 및 환불 관련 사항은{" "}
+              <Link href="/refund">환불정책</Link>을 확인해 주세요.
             </p>
-
             <p>
               <strong>④ 분석 안내</strong>
-              <br />
               사주 분석은 전통 명리학을 바탕으로 제공하는
               참고용 콘텐츠이며, 미래의 결과를 보장하지 않습니다.
             </p>
-          </div>
+          </section>
 
-          <div className="price-section">
-            <span>명운 프리미엄 상세 사주 분석</span>
+          <div className="priceSection">
+            <span>명운 상세 사주 분석 · 1회 결제</span>
             <strong>9,900원</strong>
-            <small>1회 결제</small>
+            <small>AI 상담 7일간 최대 20회 포함</small>
           </div>
 
           <label className="agreement">
             <input
               type="checkbox"
               checked={confirmed}
-              onChange={(event) =>
-                setConfirmed(event.target.checked)
-              }
+              disabled={!saju || loading}
+              onChange={(event) => setConfirmed(event.target.checked)}
             />
             <span>
-              상세 사주 제공 내용, AI 상담 이용기간,
+              상세 사주 제공 내용, 7일 이용기간, AI 상담 최대 20회,
               이용코드 보관 안내 및 환불정책을 확인했습니다.
             </span>
           </label>
 
+          {errorMessage && (
+            <p className="errorMessage" role="alert">
+              {errorMessage}
+            </p>
+          )}
+
+          {scriptError && (
+            <p className="errorMessage" role="alert">
+              결제창을 불러오지 못했습니다.
+              페이지를 새로고침한 후 다시 시도해 주세요.
+            </p>
+          )}
+
           <button
             type="button"
             onClick={handlePayment}
-            disabled={loading || !confirmed}
-            className="pay-button"
+            disabled={!canPay}
+            className="payButton"
           >
             {loading
               ? "결제창 준비 중..."
-              : "9,900원 결제하기"}
+              : "9,900원 결제하기 →"}
           </button>
 
-          <div className="policy-links">
+          <p className="buttonGuide" aria-live="polite">
+            {!sessionChecked
+              ? "사주 정보를 확인하고 있습니다."
+              : !saju
+                ? "무료 사주 분석 후 결제할 수 있습니다."
+                : scriptError
+                  ? "새로고침 후 결제를 다시 시도해 주세요."
+                  : !scriptReady
+                    ? "결제 서비스를 불러오고 있습니다."
+                    : !confirmed
+                      ? "위 안내 확인란에 체크하면 결제 버튼이 활성화됩니다."
+                      : "토스 결제창에서 결제를 진행합니다."}
+          </p>
+
+          <div className="policyLinks">
             <Link href="/refund">환불정책</Link>
-            <span>·</span>
-            <Link href="/privacy">개인정보처리방침</Link>
           </div>
 
-          <p className="bottom-note">
-            결제 전 서비스 내용과 이용 조건을
-            충분히 확인해 주세요.
-          </p>
+          <Link href="/saju" className="backLink">
+            무료 사주 페이지로 돌아가기
+          </Link>
         </section>
       </main>
 
       <style jsx>{`
-        .payment-page {
+        .paymentPage {
           min-height: 100vh;
-          background: #f5f1e8;
+          padding: 58px 20px 80px;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(225,185,105,.15), transparent 32%),
+            linear-gradient(180deg, #f7f2e8, #fbf8f1 58%, #f5efe4);
+          color: #17243a;
+        }
+        .paymentCard {
+          box-sizing: border-box;
+          width: 100%;
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 42px 36px;
+          border: 1px solid #dfd4c2;
+          border-radius: 24px;
+          background: #fffdf8;
+          box-shadow: 0 20px 50px rgba(31,39,53,.08);
+        }
+        .pageHeader { text-align: center; }
+        .eyebrow {
+          margin-bottom: 14px;
+          color: #a17a27;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 3px;
+        }
+        h1 {
+          margin: 0 0 14px;
+          font-size: 32px;
+          line-height: 1.35;
+          letter-spacing: -.04em;
+        }
+        .pageHeader p {
+          max-width: 520px;
+          margin: 0 auto;
+          color: #786f64;
+          font-size: 15px;
+          line-height: 1.8;
+          word-break: keep-all;
+        }
+        .heroPrice {
           display: flex;
           justify-content: center;
-          align-items: flex-start;
-          padding: 70px 20px;
+          align-items: baseline;
+          gap: 10px;
+          margin-top: 23px;
         }
-
-        .payment-card {
-          width: 100%;
-          max-width: 650px;
-          background: #fffdf8;
-          border: 1px solid #e0d4c0;
-          border-radius: 22px;
-          padding: 42px 36px;
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+        .heroPrice strong {
+          font-size: 40px;
+          letter-spacing: -.04em;
         }
-
-        .eyebrow {
-          text-align: center;
+        .heroPrice span { color: #786f64; font-size: 13px; }
+        .heroBenefit {
+          margin-top: 8px;
+          color: #8b651f;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.7;
+          word-break: keep-all;
+        }
+        .steps {
+          display: grid;
+          grid-template-columns: repeat(3,minmax(0,1fr));
+          gap: 8px;
+          margin: 28px 0 24px;
+        }
+        .steps span {
+          padding: 12px 5px;
+          border: 1px solid #e5dccd;
+          border-radius: 10px;
+          background: #f8f5ef;
+          color: #81776a;
           font-size: 12px;
-          letter-spacing: 2px;
-          color: #a17a27;
-          margin-bottom: 14px;
-        }
-
-        h1 {
+          font-weight: 700;
+          line-height: 1.5;
           text-align: center;
-          font-size: 30px;
-          color: #20251f;
-          margin: 0 0 15px;
         }
-
-        .intro {
-          text-align: center;
-          color: #666;
-          font-size: 15px;
-          line-height: 1.9;
-          margin-bottom: 30px;
+        .steps .active {
+          border-color: #c99535;
+          background: #f6ead4;
+          color: #805719;
         }
-
-        h2 {
-          font-size: 16px;
-          color: #263029;
-          margin: 0 0 18px;
+        h2 { margin: 0 0 17px; font-size: 17px; }
+        .targetBox {
+          margin-bottom: 22px;
+          padding: 23px;
+          border: 1px solid #e4d9c8;
+          border-radius: 14px;
+          background: #f8f5ef;
         }
-
-        .benefit-section {
+        .targetBox > p {
+          margin: 0 0 12px;
+          color: #786f64;
+          font-size: 13px;
+          line-height: 1.7;
+        }
+        .targetName { font-size: 21px; font-weight: 900; }
+        .targetDetails {
+          display: grid;
+          gap: 9px;
+          margin: 14px 0;
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .targetDetails > div {
+          display: grid;
+          grid-template-columns: 76px minmax(0,1fr);
+          gap: 10px;
+        }
+        .targetDetails dt { color: #786f64; }
+        .targetDetails dd { margin: 0; overflow-wrap: anywhere; }
+        .targetBox :global(.textLink) {
+          color: #805719;
+          font-size: 12px;
+          font-weight: 700;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        .benefitSection {
           padding: 24px;
           border: 1px solid #eadfc9;
           border-radius: 14px;
           background: #fffaf0;
           margin-bottom: 20px;
         }
-
-        .feature-list {
-          display: grid;
-          gap: 13px;
+        .featureList { display: grid; gap: 16px; }
+        .feature { display: flex; gap: 12px; align-items: flex-start; }
+        .check { color: #a4772c; font-weight: 900; }
+        .feature strong { font-size: 14px; }
+        .feature p {
+          margin: 5px 0 0;
+          color: #786f64;
+          font-size: 13px;
+          line-height: 1.7;
+          word-break: keep-all;
         }
-
-        .feature {
-          display: flex;
-          gap: 11px;
-          align-items: flex-start;
-          font-size: 14px;
-          color: #4c4b43;
-          line-height: 1.6;
-        }
-
-        .check {
-          color: #a4772c;
-          font-weight: 800;
-        }
-
         .comparison {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2,minmax(0,1fr));
           gap: 12px;
           margin-bottom: 22px;
         }
-
-        .compare-box {
-          background: #f6f5f1;
-          border: 1px solid #e7e1d6;
-          border-radius: 14px;
-          padding: 20px 15px;
+        .compareBox {
           display: flex;
           flex-direction: column;
-          min-height: 170px;
+          padding: 20px 16px;
+          border: 1px solid #e7e1d6;
+          border-radius: 14px;
+          background: #f6f5f1;
         }
-
-        .compare-box.premium {
+        .compareBox.premium {
+          border-color: #d3ad6a;
           background: #fff1d6;
-          border-color: #e3c18b;
         }
-
-        .compare-box strong {
-          font-size: 15px;
-          color: #253026;
-          margin-bottom: 13px;
-        }
-
-        .compare-box p {
-          font-size: 12px;
-          color: #625d54;
+        .compareBox strong { margin-bottom: 13px; font-size: 16px; }
+        .compareBox p {
           margin: 0 0 9px;
-          line-height: 1.5;
+          color: #625d54;
+          font-size: 12px;
+          line-height: 1.6;
         }
-
-        .compare-box b {
-          font-size: 22px;
+        .compareBox b {
           margin-top: auto;
-          color: #252d26;
+          padding-top: 10px;
+          font-size: 24px;
         }
-
         .notice {
-          background: #f8f4ec;
+          padding: 23px;
           border: 1px solid #e8dcc9;
           border-radius: 14px;
-          padding: 23px;
-          margin-bottom: 25px;
+          background: #f8f4ec;
         }
-
         .notice p {
-          font-size: 13px;
+          margin: 0 0 18px;
           color: #605d55;
+          font-size: 13px;
           line-height: 1.85;
-          margin: 0 0 17px;
+          word-break: keep-all;
         }
-
-        .notice p:last-child {
-          margin-bottom: 0;
-        }
-
+        .notice p:last-child { margin-bottom: 0; }
         .notice strong {
-          color: #3e4138;
+          display: block;
+          margin-bottom: 4px;
+          color: #17243a;
         }
-
-        .price-section {
-          border-top: 1px solid #e5ddcf;
-          border-bottom: 1px solid #e5ddcf;
-          padding: 24px 0;
-          margin-bottom: 23px;
-          text-align: center;
+        .notice :global(a) {
+          color: #805719;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        .priceSection {
           display: flex;
           flex-direction: column;
           gap: 8px;
+          margin: 25px 0 23px;
+          padding: 24px 0;
+          border-top: 1px solid #e5ddcf;
+          border-bottom: 1px solid #e5ddcf;
+          text-align: center;
         }
-
-        .price-section span {
-          font-size: 13px;
-          color: #777;
-        }
-
-        .price-section strong {
-          font-size: 34px;
-          color: #20251f;
-        }
-
-        .price-section small {
-          color: #777;
-        }
-
+        .priceSection span { color: #786f64; font-size: 13px; }
+        .priceSection strong { font-size: 36px; }
+        .priceSection small { color: #8b651f; font-size: 12px; }
         .agreement {
           display: flex;
           align-items: flex-start;
-          gap: 10px;
-          font-size: 13px;
-          color: #4c4b43;
-          line-height: 1.6;
+          gap: 11px;
           margin-bottom: 20px;
+          color: #4c4b43;
+          font-size: 13px;
+          line-height: 1.7;
           cursor: pointer;
         }
-
         .agreement input {
-          width: 17px;
-          height: 17px;
+          width: 19px;
+          height: 19px;
           margin-top: 2px;
           flex-shrink: 0;
           accent-color: #a4772c;
         }
-
-        .pay-button {
-          width: 100%;
-          border: none;
+        .errorMessage {
+          margin: 0 0 15px;
+          padding: 12px;
           border-radius: 10px;
-          padding: 18px;
-          background: #20251f;
-          color: #fff;
-          font-size: 16px;
-          font-weight: 700;
-          cursor: pointer;
+          background: #fff0ed;
+          color: #a43d32;
+          font-size: 13px;
+          line-height: 1.7;
         }
-
-        .pay-button:disabled {
-          opacity: 0.45;
+        .payButton {
+          width: 100%;
+          min-height: 62px;
+          padding: 16px;
+          border: 1px solid #8f6018;
+          border-radius: 14px;
+          background: linear-gradient(135deg,#9f6d1e,#c99434 48%,#a36f1e);
+          color: #fff;
+          font-size: 18px;
+          font-weight: 900;
+          cursor: pointer;
+          box-shadow: 0 12px 26px rgba(133,88,18,.22);
+        }
+        .payButton:disabled {
+          border-color: #d8c7a7;
+          background: #e8dcc6;
+          color: #746651;
+          box-shadow: none;
           cursor: not-allowed;
         }
-
-        .policy-links {
-          display: flex;
-          justify-content: center;
-          gap: 12px;
-          margin-top: 22px;
-          font-size: 13px;
+        .payButton:focus-visible {
+          outline: 3px solid #17243a;
+          outline-offset: 4px;
         }
-
-        .policy-links a {
-          color: #86642e;
-          text-decoration: underline;
-        }
-
-        .bottom-note {
-          text-align: center;
+        .buttonGuide {
+          margin: 12px 0 0;
+          color: #786f64;
           font-size: 12px;
-          color: #888;
-          margin-top: 15px;
+          line-height: 1.7;
+          text-align: center;
         }
-
+        .policyLinks { margin-top: 20px; text-align: center; }
+        .policyLinks :global(a) {
+          color: #86642e;
+          font-size: 13px;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        .paymentCard :global(.backLink) {
+          display: block;
+          margin-top: 22px;
+          color: #786f64;
+          font-size: 12px;
+          text-align: center;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
         @media (max-width: 600px) {
-          .payment-page {
-            padding: 30px 12px;
-          }
-
-          .payment-card {
-            padding: 30px 18px;
-            border-radius: 16px;
-          }
-
-          h1 {
-            font-size: 25px;
-          }
-
-          .benefit-section,
-          .notice {
-            padding: 18px;
-          }
-
-          .comparison {
-            gap: 8px;
-          }
-
-          .compare-box {
-            padding: 15px 11px;
-          }
-
-          .compare-box b {
-            font-size: 19px;
-          }
+          .paymentPage { padding: 30px 12px 58px; }
+          .paymentCard { padding: 30px 18px; border-radius: 20px; }
+          h1 { font-size: 27px; }
+          .pageHeader p { font-size: 14px; }
+          .heroPrice strong { font-size: 35px; }
+          .heroBenefit { font-size: 12px; }
+          .steps { gap: 5px; }
+          .steps span { font-size: 11px; padding: 11px 4px; }
+          .targetBox, .benefitSection, .notice { padding: 18px; }
+          .comparison { gap: 8px; }
+          .compareBox { padding: 17px 12px; }
+          .compareBox b { font-size: 22px; }
         }
       `}</style>
     </>
