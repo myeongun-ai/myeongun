@@ -12,6 +12,14 @@ type SajuForm = {
   calendar: string;
 };
 
+type BusinessPremiumReport = {
+  headline: string;
+  overview: string;
+  sections: { title: string; summary: string; points: string[]; advice: string }[];
+  actionPlan: string[];
+  disclaimer: string;
+};
+
 type YongshinInfo = {
   yongshin?: string;
   heesin?: string;
@@ -317,6 +325,10 @@ export default function BusinessFortunePage() {
   const [error, setError] = useState("");
   const [result, setResult] = useState("");
   const [yongshin, setYongshin] = useState<YongshinInfo | null>(null);
+  const [premiumLoading, setPremiumLoading] = useState(false);
+  const [premiumError, setPremiumError] = useState("");
+  const [premiumReport, setPremiumReport] = useState<BusinessPremiumReport | null>(null);
+  const [premiumSaved, setPremiumSaved] = useState(false);
 
   const years = useMemo(
     () =>
@@ -343,6 +355,8 @@ export default function BusinessFortunePage() {
     setResult("");
     setYongshin(null);
     setError("");
+    setPremiumReport(null);
+    setPremiumError("");
   }
 
   function openPicker() {
@@ -459,6 +473,40 @@ export default function BusinessFortunePage() {
     }
   }
 
+  async function loadPremiumReport() {
+    const payload: SajuForm = {
+      name: form.name.trim(), birth: form.birth, time: form.time,
+      gender: form.gender, calendar: form.calendar,
+    };
+    if (!payload.name || !payload.birth || !payload.time || !payload.gender || !payload.calendar) {
+      setPremiumError("먼저 결제하신 본인의 사주 정보를 입력해 주세요.");
+      return;
+    }
+    setPremiumError("");
+    setPremiumLoading(true);
+    try {
+      const response = await fetch("/api/fortune/business/premium", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ saju: payload }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "유료 분석을 불러오지 못했습니다.");
+      if (!data?.result || !Array.isArray(data.result.sections)) {
+        throw new Error("유료 분석 결과 형식이 올바르지 않습니다.");
+      }
+      setPremiumReport(data.result as BusinessPremiumReport);
+      setPremiumSaved(Boolean(data.saved));
+      saveActiveSaju(payload);
+      window.setTimeout(() => document.getElementById("business-premium-report")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    } catch (err) {
+      setPremiumError(err instanceof Error ? err.message : "유료 분석 중 오류가 발생했습니다.");
+    } finally {
+      setPremiumLoading(false);
+    }
+  }
+
   function resetAnalysis() {
     setForm({
       name: "",
@@ -471,6 +519,8 @@ export default function BusinessFortunePage() {
     setResult("");
     setYongshin(null);
     setError("");
+    setPremiumReport(null);
+    setPremiumError("");
     setPickerOpen(false);
 
     window.scrollTo({
@@ -528,7 +578,7 @@ export default function BusinessFortunePage() {
             <h2>재물·사업운 정보 입력</h2>
             <p>
               분석할 분의 정보를 직접 입력해 주세요.
-              이전에 입력한 사주 정보는 자동으로 불러오지 않습니다.
+              이전에 입력한 사주 정보가 있으면 편의를 위해 자동으로 표시됩니다.
             </p>
           </div>
 
@@ -819,7 +869,7 @@ export default function BusinessFortunePage() {
               이미 결제하셨나요?
             </p>
             <Link href="/payment/reopen" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
-              이용코드로 상세 사주 다시 보기 →
+              이용코드로 결제 이용권 복원하기 →
             </Link>
           </div>
 
@@ -924,7 +974,7 @@ export default function BusinessFortunePage() {
                   이미 결제하셨나요?
                 </p>
                 <Link href="/payment/reopen" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
-                  이용코드로 상세 사주 다시 보기 →
+                  이용코드로 결제 이용권 복원하기 →
                 </Link>
               </div>
 
@@ -948,6 +998,59 @@ export default function BusinessFortunePage() {
             </button>
           </section>
         </>
+      )}
+
+      <section className="businessCard" style={{ textAlign: "center" }}>
+        <div className="cardTitle">
+          <span>PREMIUM WEALTH · BUSINESS</span>
+          <h2>재물·사업운 유료 심층 보고서</h2>
+          <p>기존 9,900원 상세 사주 이용권으로 추가 결제 없이 확인할 수 있습니다. 결제하신 본인의 사주 정보를 사용해 주세요.</p>
+        </div>
+        <button type="button" className="analyzeButton" disabled={premiumLoading || !form.name.trim() || !form.birth || !form.time} onClick={loadPremiumReport}>
+          {premiumLoading ? "유료 재물·사업운을 확인하는 중..." : premiumReport ? "저장된 재물·사업운 다시 확인하기" : "유료 재물·사업운 상세 분석 보기"}
+        </button>
+        {premiumError && <p className="errorMessage" role="alert">{premiumError}</p>}
+        <p style={{ marginTop: 16, color: "#786f64", lineHeight: 1.8, fontSize: 14 }}>
+          이용권이 없거나 만료되었다면 <Link href="/payment/reopen">이용코드로 이용권 복원하기</Link>를 이용해 주세요.
+          이용권은 최초 결제일부터 7일 동안 유효합니다.
+        </p>
+      </section>
+
+      {premiumReport && (
+        <section id="business-premium-report" className="businessCard reportCard">
+          <div className="cardTitle left">
+            <span>MYEONGUN PREMIUM REPORT</span>
+            <h2>{premiumReport.headline}</h2>
+            <p>{premiumSaved ? "암호화 저장된 재물·사업운 보고서를 다시 불러왔습니다." : "재물·사업운 보고서가 생성되어 암호화 저장되었습니다."}</p>
+          </div>
+          <div className="premiumBusinessResult">
+            <div className="businessIntroCard"><p className="businessParagraph">{premiumReport.overview}</p></div>
+            <div className="businessSectionGrid">
+              {premiumReport.sections.map((section, index) => (
+                <section className="businessAnalysisCard" key={`${index}-${section.title}`}>
+                  <header className="businessAnalysisHeader">
+                    <div className="businessSectionNumber">{String(index + 1).padStart(2, "0")}</div>
+                    <div className="businessSectionTitleWrap">
+                      <span className="businessSectionLabel">PREMIUM WEALTH · BUSINESS</span>
+                      <h3 className="businessHeading">{section.title}</h3>
+                    </div>
+                  </header>
+                  <div className="businessAnalysisContent">
+                    <p className="businessParagraph">{section.summary}</p>
+                    <ul className="businessResultList">{section.points.map((point, i) => <li key={i}>{point}</li>)}</ul>
+                    <h4 className="businessHeadingSmall">실천 조언</h4>
+                    <p className="businessParagraph">{section.advice}</p>
+                  </div>
+                </section>
+              ))}
+            </div>
+            <section className="businessIntroCard">
+              <h3>실천 계획</h3>
+              <ol style={{ lineHeight: 2, paddingLeft: 22 }}>{premiumReport.actionPlan.map((item, i) => <li key={i}>{item}</li>)}</ol>
+              <p style={{ color: "#786f64", fontSize: 13, lineHeight: 1.8 }}>{premiumReport.disclaimer}</p>
+            </section>
+          </div>
+        </section>
       )}
 
       <style jsx>{`
