@@ -35,6 +35,16 @@ type ProfileInfo = {
   } | null;
 };
 
+type PremiumYearSection = { title: string; summary: string; points: string[]; advice: string };
+type PremiumYearReport = {
+  headline: string;
+  overview: string;
+  sections: PremiumYearSection[];
+  months: { year: number; month: number; title: string; summary: string; advice: string }[];
+  actionPlan: string[];
+  disclaimer: string;
+};
+
 function readReusableSaju(): SajuForm | null {
   try {
     const candidates = [
@@ -342,6 +352,11 @@ export default function Fortune2026Page() {
   const [error, setError] = useState("");
   const [result, setResult] = useState("");
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
+  const [premiumLoading, setPremiumLoading] = useState(false);
+  const [premiumError, setPremiumError] = useState("");
+  const [premiumReport, setPremiumReport] = useState<PremiumYearReport | null>(null);
+  const [premiumSaved, setPremiumSaved] = useState(false);
+
 
   const years = useMemo(
     () =>
@@ -380,6 +395,9 @@ export default function Fortune2026Page() {
     setResult("");
     setProfile(null);
     setError("");
+    setPremiumReport(null);
+    setPremiumError("");
+    setPremiumSaved(false);
   }
 
   function openPicker() {
@@ -515,6 +533,35 @@ export default function Fortune2026Page() {
     }
   }
 
+  async function handlePremiumAnalysis() {
+    if (premiumLoading || !canAnalyze) return;
+    setPremiumLoading(true);
+    setPremiumError("");
+    setPremiumReport(null);
+    try {
+      const response = await fetch("/api/fortune/2026/premium", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ saju: {
+          name: form.name.trim(), birth: form.birth, time: form.time,
+          gender: form.gender, calendar: form.calendar,
+        } }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok || !data?.result) {
+        throw new Error(data?.error || "유료 신년운세를 불러오지 못했습니다.");
+      }
+      setPremiumReport(data.result as PremiumYearReport);
+      setPremiumSaved(Boolean(data.saved));
+      window.setTimeout(() => document.getElementById("newyear-premium-result")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    } catch (err) {
+      setPremiumError(err instanceof Error ? err.message : "유료 신년운세를 불러오지 못했습니다.");
+    } finally {
+      setPremiumLoading(false);
+    }
+  }
+
   function resetAll() {
     setForm({
       name: "",
@@ -527,6 +574,9 @@ export default function Fortune2026Page() {
     setResult("");
     setProfile(null);
     setError("");
+    setPremiumReport(null);
+    setPremiumError("");
+    setPremiumSaved(false);
     setPickerOpen(false);
 
     window.scrollTo({
@@ -862,6 +912,68 @@ export default function Fortune2026Page() {
           </div>
 
           <UsageBenefits compact />
+
+          <div className="premiumBox">
+            <div className="premiumEyebrow">MYEONGUN PREMIUM NEW YEAR</div>
+            <h3>{targetYear}년 AI 신년운세 심층 분석</h3>
+            <p>
+              기존 9,900원 상세 사주 이용권으로 연간 8개 분야를 분석하고,
+              {targetYear > currentYear ? ` ${currentYear}년 남은 월별 운세도 함께` : " 연간 운세를"} 확인할 수 있습니다.
+              추가 결제 없이 이용권 유효기간 내 저장된 결과를 다시 볼 수 있습니다.
+            </p>
+            <button
+              type="button"
+              className="newyearPremiumAction"
+              onClick={handlePremiumAnalysis}
+              disabled={premiumLoading || !canAnalyze}
+            >
+              {premiumLoading ? "AI 신년운세 상세 분석 중..." : `유료 ${targetYear}년 신년운세 상세 분석 보기`}
+            </button>
+            {premiumError && <div className="errorBox" role="alert">{premiumError}</div>}
+            <p className="newyearPremiumHint">이용권이 없다면 아래 결제 안내를 확인하거나 이용코드로 복원해 주세요.</p>
+          </div>
+
+          {premiumReport && (
+            <section className="newyearPremiumReport" id="newyear-premium-result">
+              <div className="resultTitle">
+                <span>MYEONGUN · PREMIUM {targetYear}</span>
+                <h2>{form.name}님의 {targetYear}년 AI 신년운세 상세 보고서</h2>
+                <p>{premiumSaved ? "저장된 보고서를 다시 불러왔습니다." : "새 보고서를 생성하고 저장했습니다."}</p>
+              </div>
+              <div className="newyearPremiumOverview">
+                <h3>{premiumReport.headline}</h3>
+                <p>{premiumReport.overview}</p>
+              </div>
+              <div className="newyearPremiumSections">
+                {premiumReport.sections.map((section, index) => (
+                  <article className="newyearPremiumSection" key={`${index}-${section.title}`}>
+                    <header><span>{String(index + 1).padStart(2, "0")}</span><h3>{section.title}</h3></header>
+                    <p>{section.summary}</p>
+                    <ul>{section.points.map((point, i) => <li key={i}>{point}</li>)}</ul>
+                    <p className="newyearPremiumAdvice"><strong>실천 조언</strong> {section.advice}</p>
+                  </article>
+                ))}
+              </div>
+              {premiumReport.months.length > 0 && (
+                <section className="newyearPremiumMonths">
+                  <h3>{premiumReport.months[0].year}년 남은 월별 운세</h3>
+                  <p>현재 시점부터 연말까지의 생활 점검과 준비 방향입니다.</p>
+                  {premiumReport.months.map((month) => (
+                    <article key={`${month.year}-${month.month}`}>
+                      <h4>{month.year}년 {month.month}월 · {month.title}</h4>
+                      <p>{month.summary}</p>
+                      <p><strong>조언:</strong> {month.advice}</p>
+                    </article>
+                  ))}
+                </section>
+              )}
+              <section className="newyearPremiumPlan">
+                <h3>올해와 새해를 위한 실천 계획</h3>
+                <ol>{premiumReport.actionPlan.map((action, index) => <li key={index}>{action}</li>)}</ol>
+              </section>
+              <p className="newyearPremiumDisclaimer">{premiumReport.disclaimer}</p>
+            </section>
+          )}
 
           <div className="premiumBox">
             <div className="premiumEyebrow">
@@ -1336,6 +1448,38 @@ export default function Fortune2026Page() {
           box-shadow: 0 14px 34px rgba(31, 39, 53, 0.08);
         }
 
+        .newyearPremiumAction {
+          display: block; width: min(100%, 520px); min-height: 62px;
+          margin: 20px auto 0; padding: 12px 20px; border: 1px solid #80520f;
+          border-radius: 14px; background: #a66f18; color: #fff;
+          font-size: 16px; font-weight: 900; cursor: pointer;
+          box-shadow: 0 12px 26px rgba(133, 88, 18, 0.2);
+        }
+        .newyearPremiumAction:disabled { opacity: .6; cursor: default; }
+        .newyearPremiumHint { font-size: 12px !important; margin-top: 12px !important; }
+        .newyearPremiumReport { margin-top: 32px; scroll-margin-top: 30px; }
+        .newyearPremiumOverview, .newyearPremiumSection, .newyearPremiumMonths,
+        .newyearPremiumPlan { border: 1px solid #dfd4c2; border-radius: 18px;
+          background: #fffdfa; padding: 26px; margin-bottom: 18px; }
+        .newyearPremiumOverview { background: linear-gradient(135deg, #f5ead7, #fffaf1); }
+        .newyearPremiumOverview h3, .newyearPremiumMonths h3, .newyearPremiumPlan h3
+          { color: #17243a; font-size: 21px; margin: 0 0 14px; }
+        .newyearPremiumOverview p, .newyearPremiumSection p, .newyearPremiumMonths p,
+        .newyearPremiumPlan li { color: #5f5a52; line-height: 1.9; word-break: keep-all; }
+        .newyearPremiumSection header { display: flex; align-items: center; gap: 15px;
+          margin-bottom: 16px; border-bottom: 1px solid #e7dac6; padding-bottom: 14px; }
+        .newyearPremiumSection header span { display: flex; align-items: center;
+          justify-content: center; flex: 0 0 44px; height: 44px; border-radius: 50%;
+          background: #a97924; color: white; font-weight: 900; }
+        .newyearPremiumSection header h3 { margin: 0; color: #17243a; font-size: 19px; }
+        .newyearPremiumSection ul { padding-left: 22px; line-height: 1.85; color: #5f5a52; }
+        .newyearPremiumSection li { margin-bottom: 8px; }
+        .newyearPremiumAdvice { background: #f8f2e7; padding: 15px; border-radius: 12px; }
+        .newyearPremiumMonths article { border-top: 1px solid #e7dac6; padding-top: 18px; margin-top: 18px; }
+        .newyearPremiumMonths h4 { margin: 0 0 10px; color: #805d21; font-size: 17px; }
+        .newyearPremiumPlan ol { padding-left: 24px; }
+        .newyearPremiumDisclaimer { font-size: 12px; color: #756d62; line-height: 1.8;
+          text-align: center; padding: 12px; }
         .premiumBox {
           margin-top: 22px;
           padding: 28px 24px;
