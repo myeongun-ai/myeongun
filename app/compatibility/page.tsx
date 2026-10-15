@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import UsageBenefits from "../UsageBenefits";
 
 type PersonForm = {
@@ -63,19 +63,44 @@ const emptyPartner: PersonForm = {
   calendar: "양력",
 };
 
-function saveActiveSaju(saju: PersonForm) {
+// 기존 유료 이용권은 출생시간 문자열 자체로 인증하므로 값을 변경하지 않습니다.
+const BIRTH_TIME_OPTIONS = [
+  "子(자) 23:30 ~ 01:29",
+  "丑(축) 01:30 ~ 03:29",
+  "寅(인) 03:30 ~ 05:29",
+  "卯(묘) 05:30 ~ 07:29",
+  "辰(진) 07:30 ~ 09:29",
+  "巳(사) 09:30 ~ 11:29",
+  "午(오) 11:30 ~ 13:29",
+  "未(미) 13:30 ~ 15:29",
+  "申(신) 15:30 ~ 17:29",
+  "酉(유) 17:30 ~ 19:29",
+  "戌(술) 19:30 ~ 21:29",
+  "亥(해) 21:30 ~ 23:29",
+];
+
+function isPersonForm(value: unknown): value is PersonForm {
+  if (!value || typeof value !== "object") return false;
+  const person = value as Record<string, unknown>;
+  return typeof person.name === "string" && typeof person.birth === "string" &&
+    typeof person.time === "string" &&
+    (person.gender === "남성" || person.gender === "여성") &&
+    (person.calendar === "양력" || person.calendar === "음력");
+}
+
+function readSavedMe(): PersonForm | null {
   try {
-    sessionStorage.setItem(
-      "myeongun_saju",
-      JSON.stringify({
-        name: saju.name.trim(),
-        birth: saju.birth,
-        time: saju.time,
-        gender: saju.gender,
-        calendar: saju.calendar,
-      })
-    );
-  } catch {}
+    // 결제/재열람 정보를 최우선으로 사용합니다.
+    for (const key of ["myeongun_paid_saju", "myeongun_active_saju", "myeongun_saju"]) {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) continue;
+      const parsed: unknown = JSON.parse(raw);
+      if (isPersonForm(parsed) && parsed.name.trim() && parsed.birth) return parsed;
+    }
+  } catch {
+    // 저장된 값이 손상되었더라도 직접 입력할 수 있습니다.
+  }
+  return null;
 }
 
 function pad2(value: number) {
@@ -287,6 +312,11 @@ export default function CompatibilityPage() {
   const [deepResult, setDeepResult] = useState<DeepCompatibility | null>(null);
   const [usage, setUsage] = useState<PremiumUsage | null>(null);
   const [checkingUsage, setCheckingUsage] = useState(false);
+
+  useEffect(() => {
+    const saved = readSavedMe();
+    if (saved) setMe(saved);
+  }, []);
 
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -549,7 +579,6 @@ export default function CompatibilityPage() {
         );
       } catch {}
 
-      saveActiveSaju(me);
 
       setResult(resultText);
       setPeople(data?.people || null);
@@ -736,28 +765,20 @@ export default function CompatibilityPage() {
 
               <div className="field">
                 <span>출생시간</span>
-                <div className="timeFieldRow">
-                  <input
-                    type="time"
-                    value={me.time === "모름" ? "" : me.time}
-                    disabled={me.time === "모름"}
-                    onChange={(e) => updateMe("time", e.target.value)}
-                    aria-label="나의 출생시간"
-                  />
-                  <button
-                    type="button"
-                    className={
-                      me.time === "모름"
-                        ? "unknownTimeButton active"
-                        : "unknownTimeButton"
-                    }
-                    onClick={() =>
-                      updateMe("time", me.time === "모름" ? "" : "모름")
-                    }
-                  >
-                    모름
-                  </button>
-                </div>
+                <select
+                  value={me.time}
+                  onChange={(e) => updateMe("time", e.target.value)}
+                  aria-label="나의 출생시간"
+                >
+                  <option value="">출생시간을 선택하세요</option>
+                  {me.time && me.time !== "모름" && !BIRTH_TIME_OPTIONS.includes(me.time) && (
+                    <option value={me.time}>{me.time} (기존 저장값)</option>
+                  )}
+                  {BIRTH_TIME_OPTIONS.map((time) => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                  <option value="모름">모름</option>
+                </select>
               </div>
 
               <label className="field">
@@ -938,33 +959,20 @@ export default function CompatibilityPage() {
 
               <div className="field">
                 <span>출생시간</span>
-                <div className="timeFieldRow">
-                  <input
-                    type="time"
-                    value={partner.time === "모름" ? "" : partner.time}
-                    disabled={partner.time === "모름"}
-                    onChange={(e) =>
-                      updatePartner("time", e.target.value)
-                    }
-                    aria-label="상대방 출생시간"
-                  />
-                  <button
-                    type="button"
-                    className={
-                      partner.time === "모름"
-                        ? "unknownTimeButton active"
-                        : "unknownTimeButton"
-                    }
-                    onClick={() =>
-                      updatePartner(
-                        "time",
-                        partner.time === "모름" ? "" : "모름"
-                      )
-                    }
-                  >
-                    모름
-                  </button>
-                </div>
+                <select
+                  value={partner.time}
+                  onChange={(e) => updatePartner("time", e.target.value)}
+                  aria-label="상대방 출생시간"
+                >
+                  <option value="">출생시간을 선택하세요</option>
+                  {partner.time && partner.time !== "모름" && !BIRTH_TIME_OPTIONS.includes(partner.time) && (
+                    <option value={partner.time}>{partner.time} (기존 저장값)</option>
+                  )}
+                  {BIRTH_TIME_OPTIONS.map((time) => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                  <option value="모름">모름</option>
+                </select>
               </div>
 
               <label className="field">
