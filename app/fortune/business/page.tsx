@@ -1010,8 +1010,9 @@ export default function BusinessFortunePage() {
           {premiumLoading ? "유료 재물·사업운을 확인하는 중..." : premiumReport ? "저장된 재물·사업운 다시 확인하기" : "유료 재물·사업운 상세 분석 보기"}
         </button>
         {premiumError && <p className="errorMessage" role="alert">{premiumError}</p>}
-        <p style={{ marginTop: 16, color: "#786f64", lineHeight: 1.8, fontSize: 14 }}>
-          이용권이 없거나 만료되었다면 <Link href="/payment/reopen?returnTo=%2Ffortune%2Fbusiness" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>이용코드로 재물·사업운 다시 보기 →</Link>를 이용해 주세요.
+        <p style={{ marginTop: 16, color: "#786f64", lineHeight: 1.8, fontSize: 14, textAlign: "center" }}>
+          기존 결제 고객은 위쪽 정보 입력 화면의 이용코드 버튼으로 이용권을 복원할 수 있습니다.
+          <br />
           이용권은 최초 결제일부터 7일 동안 유효합니다.
         </p>
       </section>
