@@ -709,6 +709,10 @@ export default function SajuPage() {
           </button>
         </form>
 
+        <Link href="/payment/reopen" className="reopenLink">
+          이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
+        </Link>
+
         <p className="privacyText">
           입력하신 정보는 사주 분석을 위한 용도로만 사용됩니다.
         </p>
@@ -817,6 +821,10 @@ export default function SajuPage() {
               <span style={{ color: "#fff", fontSize: "13px", fontWeight: 700 }}>
                 9,900원 · AI 상담 7일간 최대 20회 포함
               </span>
+            </Link>
+
+            <Link href="/payment/reopen" className="reopenLink">
+              이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
             </Link>
 
             <p className="premiumPaymentGuide">
@@ -1003,6 +1011,31 @@ export default function SajuPage() {
           background: #e8dcc6;
           box-shadow: none;
           cursor: default;
+        }
+        .sajuPage :global(.reopenLink) {
+          display: block;
+          width: fit-content;
+          max-width: 100%;
+          box-sizing: border-box;
+          margin: 18px auto 0;
+          padding: 13px 18px;
+          border: 1px solid #d9c9ad;
+          border-radius: 12px;
+          background: #fffaf1;
+          color: #805719;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.6;
+          text-align: center;
+          text-decoration: none;
+        }
+        .sajuPage :global(.reopenLink:hover) {
+          border-color: #b9852c;
+          background: #fff4df;
+        }
+        .sajuPage :global(.reopenLink:focus-visible) {
+          outline: 3px solid #17243a;
+          outline-offset: 3px;
         }
         .privacyText {
           margin: 17px 0 0;

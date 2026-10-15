@@ -814,6 +814,15 @@ export default function BusinessFortunePage() {
             </button>
           </form>
 
+          <div style={{ marginTop: "18px", textAlign: "center" }}>
+            <p style={{ margin: "0 0 10px", color: "#6f685e", fontSize: "14px", fontWeight: 700 }}>
+              이미 결제하셨나요?
+            </p>
+            <Link href="/payment/reopen" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
+              이용코드로 상세 사주 다시 보기 →
+            </Link>
+          </div>
+
           <p className="privacyText">
             입력하신 정보는 현재 재물·사업운 분석을 위한
             용도로만 사용하며, 이 페이지에서 이전 사주 정보를
@@ -909,6 +918,15 @@ export default function BusinessFortunePage() {
                   9,900원 결제하기 →
                 </strong>
               </Link>
+
+              <div style={{ marginTop: "18px" }}>
+                <p style={{ margin: "0 0 10px", color: "#6f685e", fontSize: "14px", fontWeight: 700 }}>
+                  이미 결제하셨나요?
+                </p>
+                <Link href="/payment/reopen" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
+                  이용코드로 상세 사주 다시 보기 →
+                </Link>
+              </div>
 
               <div className="premiumPaymentGuide">
                 결제 후 상세 사주 전체 내용과 AI 상담을 7일간 최대 20회 이용할 수 있습니다.

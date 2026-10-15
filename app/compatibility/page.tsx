@@ -32,6 +32,16 @@ type PersonSummary = {
   } | null;
 };
 
+type DeepCompatibility = {
+  headline: string;
+  overview: string;
+  sections: { title: string; analysis: string; advice: string }[];
+  actionPlan: string[];
+  disclaimer: string;
+};
+
+type PremiumUsage = { used: number; remaining: number; busy: boolean; expiresAt?: number };
+
 type CompatibilityPeople = {
   me?: PersonSummary;
   partner?: PersonSummary;
@@ -273,6 +283,10 @@ export default function CompatibilityPage() {
   const [error, setError] = useState("");
   const [result, setResult] = useState("");
   const [people, setPeople] = useState<CompatibilityPeople | null>(null);
+  const [mode, setMode] = useState<"free" | "premium">("free");
+  const [deepResult, setDeepResult] = useState<DeepCompatibility | null>(null);
+  const [usage, setUsage] = useState<PremiumUsage | null>(null);
+  const [checkingUsage, setCheckingUsage] = useState(false);
 
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -317,6 +331,8 @@ export default function CompatibilityPage() {
     }));
     setResult("");
     setPeople(null);
+    setDeepResult(null);
+    setUsage(null);
     setError("");
   }
 
@@ -330,6 +346,7 @@ export default function CompatibilityPage() {
     }));
     setResult("");
     setPeople(null);
+    setDeepResult(null);
     setError("");
   }
 
@@ -423,23 +440,64 @@ export default function CompatibilityPage() {
     setPartnerPickerOpen(false);
   }
 
+  async function checkPremiumUsage() {
+    if (!me.name.trim() || !me.birth || !me.time) {
+      setError("먼저 결제한 본인의 이름·생년월일·출생시간을 입력해 주세요.");
+      return;
+    }
+    setCheckingUsage(true);
+    setError("");
+    try {
+      const response = await fetch("/api/fortune/compatibility/premium", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "status", me: { ...me, name: me.name.trim() } }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "이용권 확인에 실패했습니다.");
+      setUsage({ used: data.used, remaining: data.remaining, busy: data.busy, expiresAt: data.expiresAt });
+    } catch (err) {
+      setUsage(null);
+      setError(err instanceof Error ? err.message : "이용권 확인에 실패했습니다.");
+    } finally {
+      setCheckingUsage(false);
+    }
+  }
+
+  async function copyDeepResult() {
+    if (!deepResult) return;
+    const text = [deepResult.headline, deepResult.overview,
+      ...deepResult.sections.flatMap((section, index) => [
+        `${index + 1}. ${section.title}`, section.analysis, section.advice,
+      ]), "실천 조언", ...deepResult.actionPlan, deepResult.disclaimer].join("\n\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      window.alert("심화 궁합 결과를 복사했습니다. 메모장 등에 붙여넣어 저장해 주세요.");
+    } catch {
+      window.alert("자동 복사에 실패했습니다. 화면의 내용을 직접 복사해 주세요.");
+    }
+  }
+
   async function analyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!canAnalyze || loading) return;
+    if (!canAnalyze || loading || (mode === "premium" && (!usage || usage.remaining <= 0 || usage.busy))) return;
 
     setLoading(true);
     setError("");
     setResult("");
     setPeople(null);
+    setDeepResult(null);
 
     try {
-      const response = await fetch("/api/fortune/compatibility", {
+      const isPremium = mode === "premium";
+      const response = await fetch(isPremium ? "/api/fortune/compatibility/premium" : "/api/fortune/compatibility", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          ...(isPremium ? { action: "analyze" } : {}),
           me: {
             ...me,
             name: me.name.trim(),
@@ -454,9 +512,24 @@ export default function CompatibilityPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (isPremium) setUsage(null);
+        if (isPremium && typeof data?.remaining === "number") {
+          setUsage({ used: data.used, remaining: data.remaining, busy: Boolean(data.busy) });
+        }
         throw new Error(
           data?.error || "궁합 분석 중 오류가 발생했습니다."
         );
+      }
+
+      if (isPremium) {
+        const deep = data?.result as DeepCompatibility | undefined;
+        if (!deep || !Array.isArray(deep.sections)) {
+          throw new Error("심화 궁합 결과를 확인하지 못했습니다.");
+        }
+        setDeepResult(deep);
+        setUsage({ used: data.used, remaining: data.remaining, busy: Boolean(data.busy), expiresAt: data.expiresAt });
+        window.setTimeout(() => document.getElementById("compatibility-result")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        return;
       }
 
       const resultText = String(data?.result || "").trim();
@@ -505,6 +578,9 @@ export default function CompatibilityPage() {
     setPartner(emptyPartner);
     setResult("");
     setPeople(null);
+    setDeepResult(null);
+    setUsage(null);
+    setMode("free");
     setError("");
 
     window.scrollTo({
@@ -948,14 +1024,37 @@ export default function CompatibilityPage() {
           </p>
         </section>
 
+        <section className="premiumModeChooser" aria-label="궁합 분석 종류">
+          <button type="button" className={mode === "free" ? "modeOption selected" : "modeOption"}
+            onClick={() => { setMode("free"); setUsage(null); setError(""); setDeepResult(null); setResult(""); }}>
+            무료 궁합 <small>누구나 이용 가능</small>
+          </button>
+          <button type="button" className={mode === "premium" ? "modeOption selected" : "modeOption"}
+            onClick={() => { setMode("premium"); setUsage(null); setError(""); setDeepResult(null); setResult(""); }}>
+            심화 궁합 <small>9,900원 결제 고객 · 7일간 3회</small>
+          </button>
+        </section>
+        {mode === "premium" && (
+          <div className="premiumUsagePanel">
+            <strong>심화 궁합 이용권</strong>
+            <p>결제한 본인의 정보를 정확히 입력해 주세요. 상대방 정보는 매회 변경할 수 있습니다.</p>
+            <button type="button" className="checkUsageButton" onClick={checkPremiumUsage} disabled={checkingUsage || loading}>
+              {checkingUsage ? "이용권 확인 중..." : "남은 심화 궁합 횟수 확인"}
+            </button>
+            {!usage && <p>심화 궁합 분석을 시작하려면 먼저 위 버튼에서 유효한 결제 이용권을 확인해 주세요.</p>}
+            {usage && <p className="usageCount">남은 횟수 <strong>{usage.remaining} / 3회</strong>{usage.busy ? " · 다른 분석 진행 중" : ""}</p>}
+            <p>분석 성공 시 1회 차감됩니다. 결과는 별도로 저장되지 않으니 화면에서 복사해 보관해 주세요.</p>
+            <p>이용권이 없거나 다른 기기에서 재접속한 경우 <Link href="/payment/reopen">이용코드로 재열람</Link> 후 다시 이용해 주세요. 처음 이용하는 고객은 <Link href="/payment">상세 사주 결제 안내</Link>를 확인해 주세요.</p>
+          </div>
+        )}
         {error && <div className="errorBox">{error}</div>}
 
         <button
           type="submit"
           className="analyzeButton"
-          disabled={!canAnalyze || loading}
+          disabled={!canAnalyze || loading || (mode === "premium" && (!usage || usage.remaining <= 0 || usage.busy))}
         >
-          {loading ? "두 사람의 궁합을 분석하고 있습니다..." : "궁합 분석 시작"}
+          {loading ? "두 사람의 궁합을 분석하고 있습니다..." : mode === "premium" ? !usage ? "이용권 확인 후 심화 궁합 분석 가능" : usage.busy ? "다른 심화 궁합 분석 진행 중" : usage.remaining <= 0 ? "심화 궁합 이용 횟수 없음" : "심화 궁합 분석 시작 (1회 사용)" : "무료 궁합 분석 시작"}
         </button>
 
         <p className="privacyText">
@@ -963,7 +1062,7 @@ export default function CompatibilityPage() {
         </p>
       </form>
 
-      {result && (
+      {(result || deepResult) && (
         <section
           className="resultArea"
           id="compatibility-result"
@@ -1052,19 +1151,40 @@ export default function CompatibilityPage() {
           )}
 
           <div className="resultBody">
-            {renderCompatibilityResult(result)}
+            {deepResult ? (
+              <div className="deepResult">
+                <h3>{deepResult.headline}</h3>
+                <p>{deepResult.overview}</p>
+                {deepResult.sections.map((section, index) => (
+                  <section className="deepSection" key={`${section.title}-${index}`}>
+                    <h3>{index + 1}. {section.title}</h3>
+                    <p>{section.analysis}</p>
+                    <h4>실천 조언</h4>
+                    <p>{section.advice}</p>
+                  </section>
+                ))}
+                <section className="deepSection">
+                  <h3>실천 계획</h3>
+                  <ul>{deepResult.actionPlan.map((item, index) => <li key={index}>{item}</li>)}</ul>
+                </section>
+                <p className="deepDisclaimer">{deepResult.disclaimer}</p>
+                <button type="button" className="copyResultButton" onClick={copyDeepResult}>심화 궁합 전체 결과 복사하기</button>
+                <p className="deepDisclaimer">결과는 서버에 별도 저장되지 않습니다. 페이지를 닫기 전에 복사하여 보관해 주세요.</p>
+                {usage && <p className="usageCount">남은 심화 궁합 분석: {usage.remaining} / 3회</p>}
+              </div>
+            ) : renderCompatibilityResult(result)}
           </div>
 
           <UsageBenefits compact />
 
-          <div className="premiumBox">
+          {!deepResult && <div className="premiumBox">
              <div className="premiumEyebrow">PREMIUM SAJU REPORT</div>
 
              <h3>두 사람의 관계를 더 깊이 알고 싶으신가요?</h3>
 
              <p>
                  결혼·장기 관계, 재물·생활 궁합과 앞으로의 관계 방향을
-                 상세 사주에서 더 깊게 확인할 수 있습니다.
+                 결제 고객에게 제공되는 심화 궁합 3회 혜택으로 확인할 수 있습니다.
              </p>
 
              <Link href="/payment" className="premiumButton">
@@ -1077,9 +1197,9 @@ export default function CompatibilityPage() {
              </Link>
 
              <div className="premiumPaymentGuide">
-                결제 후 상세 사주 전체 내용과 AI 상담을 7일간 최대 20회 이용할 수 있습니다.
+                결제 후 7일간 상세 사주 재열람, AI 상담 최대 20회, 심화 궁합 3회를 이용할 수 있습니다.
              </div>
-          </div>
+          </div>}
 
           <div className="noticeBox">
             본 궁합 분석은 전통 명리 관점을 참고한 AI 분석입니다.
@@ -1467,6 +1587,22 @@ export default function CompatibilityPage() {
           word-break: keep-all;
         }
 
+        .premiumModeChooser { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+        .modeOption { padding: 17px 12px; border: 1px solid #dfd4c2; border-radius: 13px; background: #fffdfa; color: #51493e; font-weight: 900; cursor: pointer; font-size: 16px; }
+        .modeOption.selected { border: 2px solid #b9862e; background: #f7eddc; color: #805d21; }
+        .modeOption small { display: block; margin-top: 5px; font-size: 12px; font-weight: 500; }
+        .premiumUsagePanel { margin-top: 16px; padding: 20px; border: 1px solid #dec99f; border-radius: 14px; background: #fffaf1; color: #5d564c; line-height: 1.7; }
+        .premiumUsagePanel p { margin: 8px 0; font-size: 13px; }
+        .checkUsageButton, .copyResultButton { border: 0; border-radius: 11px; background: #a66f18; color: white; padding: 13px 18px; font-weight: 900; cursor: pointer; }
+        .checkUsageButton:disabled { opacity: .6; cursor: default; }
+        .usageCount { font-weight: 800; color: #805d21; }
+        .deepResult { display: grid; gap: 18px; }
+        .deepResult > h3 { font-size: 23px; color: #805d21; }
+        .deepResult p, .deepResult li { line-height: 1.9; color: #5f5a52; white-space: pre-line; }
+        .deepSection { padding: 22px; border: 1px solid #dfd4c2; border-radius: 16px; background: #fffdfa; }
+        .deepSection h3 { margin: 0 0 15px; color: #17243a; font-size: 19px; }
+        .deepSection h4 { margin-bottom: 6px; color: #805d21; }
+        .deepDisclaimer { font-size: 12px; }
         .analyzeButton {
           display: block;
           width: 100%;
@@ -1652,6 +1788,7 @@ export default function CompatibilityPage() {
         }
 
         @media (max-width: 680px) {
+          .premiumModeChooser { grid-template-columns: 1fr; }
           .compatPage {
             width: min(100% - 24px, 1120px);
             padding: 30px 0 58px;

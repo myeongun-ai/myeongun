@@ -331,6 +331,11 @@ export default function FortuneDetailPage() {
           <button type="button" onClick={() => window.location.reload()}>
             다시 시도하기
           </button>
+          <div style={{ marginTop: "18px" }}>
+            <Link href="/payment/reopen" style={{ color: "#8f6a2d", fontSize: "13px", fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "3px" }}>
+              이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
+            </Link>
+          </div>
         </section>
 
         <style jsx>{`
@@ -617,6 +622,12 @@ export default function FortuneDetailPage() {
         <div className="notice">
           <strong>안내</strong>
           <p>{result.disclaimer}</p>
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <Link href="/payment/reopen" style={{ color: "#805719", fontSize: "13px", fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "3px" }}>
+            이용코드로 상세 사주 다시 보기 →
+          </Link>
         </div>
 
         <div className="bottomActions">

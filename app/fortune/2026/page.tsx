@@ -789,6 +789,12 @@ export default function Fortune2026Page() {
             : `${targetYear}년 신년 운세 분석 시작`}
         </button>
 
+        <div style={{ marginTop: 16, textAlign: "center" }}>
+          <Link href="/payment/reopen" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
+            이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
+          </Link>
+        </div>
+
         <p className="privacyText">
           입력한 정보는 {targetYear}년 신년 운세 분석 요청에 사용됩니다.
         </p>
@@ -883,6 +889,12 @@ export default function Fortune2026Page() {
             <div className="premiumPaymentGuide">
               결제 후 상세 사주 전체 내용과 AI 상담을
               7일간 최대 20회 이용할 수 있습니다.
+            </div>
+
+            <div style={{ marginTop: 18, textAlign: "center" }}>
+              <Link href="/payment/reopen" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
+                이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
+              </Link>
             </div>
           </div>
 

@@ -35,6 +35,10 @@ const features = [
     title: "AI 상담 포함",
     text: "결제 후 7일간 최대 20회 질문할 수 있습니다.",
   },
+  {
+    title: "심화 궁합 분석 3회 포함",
+    text: "7일간 최대 3회 이용할 수 있습니다. 본인 정보는 결제한 사주 정보와 일치해야 하며, 상대방은 매회 변경할 수 있습니다.",
+  },
 ];
 
 function readSavedSaju(): SajuForm | null {
@@ -253,7 +257,7 @@ export default function PaymentPage() {
               <span>1회 결제</span>
             </div>
             <div className="heroBenefit">
-              개인별 상세 사주 분석 + AI 상담 7일간 최대 20회
+              개인별 상세 사주 분석 + AI 상담 최대 20회 + 심화 궁합 최대 3회 (7일간)
             </div>
           </header>
 
@@ -331,6 +335,7 @@ export default function PaymentPage() {
               <strong>상세 사주</strong>
               <p>더 깊은 개인별 사주 분석</p>
               <p>AI 상담 7일간 최대 20회</p>
+              <p>심화 궁합 7일간 최대 3회</p>
               <b>9,900원</b>
             </div>
           </div>
@@ -343,19 +348,25 @@ export default function PaymentPage() {
               해당 기간 동안 AI 상담을 최대 20회 이용할 수 있습니다.
             </p>
             <p>
-              <strong>② 이용코드 보관</strong>
+              <strong>② 심화 궁합 이용 조건</strong>
+              심화 궁합은 결제 권한 유효기간인 7일 동안 최대 3회 이용할 수 있습니다.
+              본인 정보는 결제한 사주 정보와 일치해야 하며, 상대방 정보는 매회 변경할 수 있습니다.
+              분석 결과는 별도로 저장되지 않으므로 결과가 표시되면 직접 복사하여 보관해 주세요.
+            </p>
+            <p>
+              <strong>③ 이용코드 보관</strong>
               결제 후 발급되는 이용코드는 상세 사주 재열람에
               필요합니다. 반드시 별도로 저장하고 보관해 주세요.
             </p>
             <p>
-              <strong>③ 이용코드 분실</strong>
+              <strong>④ 이용코드 분실</strong>
               명운에서는 개인정보 보호를 위해 분실한 이용코드를
               확인하거나 재발급해 드리지 못할 수 있습니다.
               이용코드 분실에 따른 이용 제한 및 환불 관련 사항은{" "}
               <Link href="/refund">환불정책</Link>을 확인해 주세요.
             </p>
             <p>
-              <strong>④ 분석 안내</strong>
+              <strong>⑤ 분석 안내</strong>
               사주 분석은 전통 명리학을 바탕으로 제공하는
               참고용 콘텐츠이며, 미래의 결과를 보장하지 않습니다.
             </p>
@@ -364,7 +375,7 @@ export default function PaymentPage() {
           <div className="priceSection">
             <span>명운 상세 사주 분석 · 1회 결제</span>
             <strong>9,900원</strong>
-            <small>AI 상담 7일간 최대 20회 포함</small>
+            <small>7일간 AI 상담 최대 20회 · 심화 궁합 최대 3회 포함</small>
           </div>
 
           <label className="agreement">
@@ -376,7 +387,8 @@ export default function PaymentPage() {
             />
             <span>
               상세 사주 제공 내용, 7일 이용기간, AI 상담 최대 20회,
-              이용코드 보관 안내 및 환불정책을 확인했습니다.
+              심화 궁합 최대 3회 및 결과 미저장 안내,
+              이용코드 보관 안내와 환불정책을 확인했습니다.
             </span>
           </label>
 
@@ -413,6 +425,14 @@ export default function PaymentPage() {
                       ? "위 안내 확인란에 체크하면 결제 버튼이 활성화됩니다."
                       : "토스 결제창에서 결제를 진행합니다."}
           </p>
+
+          <div className="reopenSection">
+            <p>이미 결제하셨나요?</p>
+            <Link href="/payment/reopen" className="reopenLink">
+              이용코드로 상세 사주 다시 보기 →
+            </Link>
+            <small>결제 후 발급받은 이용코드로 유효기간 내 재열람할 수 있습니다.</small>
+          </div>
 
           <div className="policyLinks">
             <Link href="/refund">환불정책</Link>
@@ -715,6 +735,42 @@ export default function PaymentPage() {
           font-size: 12px;
           line-height: 1.7;
           text-align: center;
+        }
+        .reopenSection {
+          margin-top: 24px;
+          padding: 20px 16px;
+          border: 1px solid #e2d4bb;
+          border-radius: 14px;
+          background: #fffaf1;
+          text-align: center;
+        }
+        .reopenSection p {
+          margin: 0 0 12px;
+          color: #51483a;
+          font-size: 14px;
+          font-weight: 800;
+        }
+        .reopenSection :global(.reopenLink) {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 50px;
+          padding: 10px 16px;
+          border: 1px solid #b78b4b;
+          border-radius: 11px;
+          background: #fffdf8;
+          color: #805719;
+          font-size: 14px;
+          font-weight: 800;
+          text-decoration: none;
+        }
+        .reopenSection :global(.reopenLink:hover) { background: #f7eddc; }
+        .reopenSection small {
+          display: block;
+          margin-top: 11px;
+          color: #786f64;
+          font-size: 11px;
+          line-height: 1.6;
         }
         .policyLinks { margin-top: 20px; text-align: center; }
         .policyLinks :global(a) {
