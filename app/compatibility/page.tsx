@@ -1052,7 +1052,7 @@ export default function CompatibilityPage() {
             {!usage && <p>심화 궁합 분석을 시작하려면 먼저 위 버튼에서 유효한 결제 이용권을 확인해 주세요.</p>}
             {usage && <p className="usageCount">남은 횟수 <strong>{usage.remaining} / 3회</strong>{usage.busy ? " · 다른 분석 진행 중" : ""}</p>}
             <p>분석 성공 시 1회 차감됩니다. 결과는 별도로 저장되지 않으니 화면에서 복사해 보관해 주세요.</p>
-            <p>이용권이 없거나 다른 기기에서 재접속한 경우 <Link href="/payment/reopen">이용코드로 재열람</Link> 후 다시 이용해 주세요. 처음 이용하는 고객은 <Link href="/payment">상세 사주 결제 안내</Link>를 확인해 주세요.</p>
+            <p>이용권이 없거나 다른 기기에서 재접속한 경우 <Link href="/payment/reopen?returnTo=%2Fcompatibility">이용코드로 심화 궁합 이용권 복원하기</Link> 후 다시 이용해 주세요. 처음 이용하는 고객은 <Link href="/payment">상세 사주 결제 안내</Link>를 확인해 주세요.</p>
           </div>
         )}
         {error && <div className="errorBox">{error}</div>}

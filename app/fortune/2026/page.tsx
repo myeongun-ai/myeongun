@@ -840,8 +840,8 @@ export default function Fortune2026Page() {
         </button>
 
         <div style={{ marginTop: 16, textAlign: "center" }}>
-          <Link href="/payment/reopen" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
-            이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
+          <Link href="/payment/reopen?returnTo=%2Ffortune%2F2026" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
+            이미 결제하셨나요? 이용코드로 {targetYear}년 신년운세 상세 분석 보기 →
           </Link>
         </div>
 
@@ -1004,8 +1004,8 @@ export default function Fortune2026Page() {
             </div>
 
             <div style={{ marginTop: 18, textAlign: "center" }}>
-              <Link href="/payment/reopen" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
-                이미 결제하셨나요? 이용코드로 상세 사주 다시 보기 →
+              <Link href="/payment/reopen?returnTo=%2Ffortune%2F2026" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
+                이미 결제하셨나요? 이용코드로 {targetYear}년 신년운세 상세 분석 보기 →
               </Link>
             </div>
           </div>

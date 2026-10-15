@@ -24,6 +24,25 @@ function daysInMonth(year: number, month: number) {
 
 export default function ReopenPaymentPage() {
   const router = useRouter();
+  const [returnTo, setReturnTo] = useState("/fortune/detail");
+
+  useEffect(() => {
+    const requestedReturn = new URLSearchParams(window.location.search).get("returnTo");
+    if (
+      requestedReturn === "/fortune/2026" ||
+      requestedReturn === "/fortune/business" ||
+      requestedReturn === "/compatibility"
+    ) {
+      setReturnTo(requestedReturn);
+    }
+  }, []);
+  const reportLabel = returnTo === "/fortune/2026"
+    ? "신년운세 상세 분석"
+    : returnTo === "/fortune/business"
+      ? "재물·사업운 상세 분석"
+      : returnTo === "/compatibility"
+        ? "궁합 상세 분석"
+        : "상세 사주";
 
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -177,7 +196,7 @@ export default function ReopenPaymentPage() {
       sessionStorage.setItem("myeongun_active_saju", JSON.stringify(result.saju));
       sessionStorage.setItem("myeongun_session_active", "1");
 
-      router.replace("/fortune/detail");
+      router.replace(returnTo);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -250,7 +269,7 @@ export default function ReopenPaymentPage() {
             fontSize: "28px",
           }}
         >
-          결제한 상세 사주 다시 보기
+          {reportLabel} 다시 보기
         </h1>
 
         <p
@@ -583,7 +602,7 @@ export default function ReopenPaymentPage() {
               cursor: loading ? "wait" : "pointer",
             }}
           >
-            {loading ? "확인 중..." : "상세 사주 다시 보기"}
+            {loading ? "확인 중..." : `${reportLabel} 다시 보기`}
           </button>
         </form>
 
@@ -596,7 +615,7 @@ export default function ReopenPaymentPage() {
             textAlign: "center",
           }}
         >
-          재열람 코드는 결제한 상세 사주에만 사용할 수 있으며 7일 후 만료됩니다.
+          재열람 코드는 기존 결제 이용권을 복원하는 데 사용되며, 최초 결제일부터 7일 후 만료됩니다.
         </p>
       </section>
     </main>

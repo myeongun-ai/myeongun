@@ -868,8 +868,8 @@ export default function BusinessFortunePage() {
             <p style={{ margin: "0 0 10px", color: "#6f685e", fontSize: "14px", fontWeight: 700 }}>
               이미 결제하셨나요?
             </p>
-            <Link href="/payment/reopen" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
-              이용코드로 결제 이용권 복원하기 →
+            <Link href="/payment/reopen?returnTo=%2Ffortune%2Fbusiness" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
+              이용코드로 재물·사업운 이용권 복원하기 →
             </Link>
           </div>
 
@@ -973,8 +973,8 @@ export default function BusinessFortunePage() {
                 <p style={{ margin: "0 0 10px", color: "#6f685e", fontSize: "14px", fontWeight: 700 }}>
                   이미 결제하셨나요?
                 </p>
-                <Link href="/payment/reopen" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
-                  이용코드로 결제 이용권 복원하기 →
+                <Link href="/payment/reopen?returnTo=%2Ffortune%2Fbusiness" style={{ display: "inline-block", padding: "12px 20px", border: "1px solid #d3bd94", borderRadius: "12px", background: "#fffaf1", color: "#805d21", fontWeight: 800, textDecoration: "none" }}>
+                  이용코드로 재물·사업운 이용권 복원하기 →
                 </Link>
               </div>
 
@@ -1011,7 +1011,7 @@ export default function BusinessFortunePage() {
         </button>
         {premiumError && <p className="errorMessage" role="alert">{premiumError}</p>}
         <p style={{ marginTop: 16, color: "#786f64", lineHeight: 1.8, fontSize: 14 }}>
-          이용권이 없거나 만료되었다면 <Link href="/payment/reopen">이용코드로 이용권 복원하기</Link>를 이용해 주세요.
+          이용권이 없거나 만료되었다면 <Link href="/payment/reopen?returnTo=%2Ffortune%2Fbusiness">이용코드로 재물·사업운 이용권 복원하기</Link>를 이용해 주세요.
           이용권은 최초 결제일부터 7일 동안 유효합니다.
         </p>
       </section>
