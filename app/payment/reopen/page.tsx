@@ -196,6 +196,10 @@ export default function ReopenPaymentPage() {
       sessionStorage.setItem("myeongun_active_saju", JSON.stringify(result.saju));
       sessionStorage.setItem("myeongun_session_active", "1");
 
+      if (returnTo === "/fortune/2026") {
+        sessionStorage.setItem("myeongun_restore_newyear", "1");
+      }
+
       router.replace(returnTo);
     } catch (error) {
       setMessage(

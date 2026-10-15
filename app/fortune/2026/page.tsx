@@ -356,6 +356,45 @@ export default function Fortune2026Page() {
   const [premiumError, setPremiumError] = useState("");
   const [premiumReport, setPremiumReport] = useState<PremiumYearReport | null>(null);
   const [premiumSaved, setPremiumSaved] = useState(false);
+  // 이용코드 복원 직후에만 기존 저장 보고서를 조회합니다.
+  useEffect(() => {
+    if (sessionStorage.getItem("myeongun_restore_newyear") !== "1") return;
+    sessionStorage.removeItem("myeongun_restore_newyear");
+    const saved = readReusableSaju();
+    if (!saved) {
+      setPremiumError("복원된 사주 정보를 찾을 수 없습니다. 이용코드를 다시 확인해 주세요.");
+      return;
+    }
+    let active = true;
+    setForm(saved);
+    setPremiumLoading(true);
+    setPremiumError("");
+    fetch("/api/fortune/2026/premium", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ saju: saved, restoreOnly: true }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !data?.ok || !data?.result) {
+          throw new Error(data?.error || "저장된 신년운세 보고서를 불러오지 못했습니다.");
+        }
+        return data;
+      })
+      .then((data) => {
+        if (!active) return;
+        setPremiumReport(data.result as PremiumYearReport);
+        setPremiumSaved(true);
+        window.setTimeout(() => document.getElementById("newyear-premium-result")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      })
+      .catch((err) => {
+        if (active) setPremiumError(err instanceof Error ? err.message : "저장된 신년운세 보고서를 불러오지 못했습니다.");
+      })
+      .finally(() => { if (active) setPremiumLoading(false); });
+    return () => { active = false; };
+  }, []);
+
 
 
   const years = useMemo(
@@ -840,8 +879,8 @@ export default function Fortune2026Page() {
         </button>
 
         <div style={{ marginTop: 16, textAlign: "center" }}>
-          <Link href="/payment/reopen?returnTo=%2Ffortune%2F2026" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
-            이미 결제하셨나요? 이용코드로 {targetYear}년 신년운세 상세 분석 보기 →
+          <Link href="/payment/reopen?returnTo=%2Ffortune%2F2026" className="reopenLink">
+            이용코드로 신년운세 다시 보기 →
           </Link>
         </div>
 
@@ -933,7 +972,68 @@ export default function Fortune2026Page() {
             <p className="newyearPremiumHint">이용권이 없다면 아래 결제 안내를 확인하거나 이용코드로 복원해 주세요.</p>
           </div>
 
-          {premiumReport && (
+
+
+          <div className="premiumBox">
+            <div className="premiumEyebrow">
+              PREMIUM SAJU REPORT
+            </div>
+
+            <h3>
+              {targetYear}년의 흐름을 더 깊이 알고 싶으신가요?
+            </h3>
+
+            <p>
+              재물·직업·관계와 앞으로의 흐름을
+              상세 사주에서 더 깊게 확인할 수 있습니다.
+            </p>
+
+            <Link href="/payment" className="premiumButton">
+              <span className="premiumButtonTitle">
+                상세 사주 전체보기
+              </span>
+              <strong className="premiumButtonPrice">
+                9,900원 결제하기 →
+              </strong>
+            </Link>
+
+            <div className="premiumPaymentGuide">
+              결제 후 상세 사주 전체 내용과 AI 상담을
+              7일간 최대 20회 이용할 수 있습니다.
+            </div>
+
+            <div style={{ marginTop: 18, textAlign: "center" }}>
+              <Link href="/payment/reopen?returnTo=%2Ffortune%2F2026" className="reopenLink">
+                이용코드로 신년운세 다시 보기 →
+              </Link>
+            </div>
+          </div>
+
+          <div className="noticeBox">
+            본 분석은 전통 명리 관점을 참고한 AI 운세
+            분석입니다. 미래를 확정적으로 예언하지 않으며,
+            실제 재물·투자·사업·직업 결정은 현재 상황과
+            객관적인 정보도 함께 고려해 주세요.
+          </div>
+
+          <button
+            type="button"
+            className="resetButton"
+            onClick={resetAll}
+          >
+            다른 정보로 {targetYear}년 신년 운세 보기
+          </button>
+        </section>
+      )}
+      {!result && (premiumLoading || premiumError) && (
+        <section className="newyearRestoreStatus" role="status">
+          {premiumLoading && <p>저장된 신년운세 상세 보고서를 확인하고 있습니다...</p>}
+          {premiumError && <div className="errorBox" role="alert">{premiumError}</div>}
+        </section>
+      )}
+      {premiumReport && (
+        <div className="newyearRestoredReport">
+
             <section className="newyearPremiumReport" id="newyear-premium-result">
               <div className="resultTitle">
                 <span>MYEONGUN · PREMIUM {targetYear}</span>
@@ -973,59 +1073,10 @@ export default function Fortune2026Page() {
               </section>
               <p className="newyearPremiumDisclaimer">{premiumReport.disclaimer}</p>
             </section>
-          )}
 
-          <div className="premiumBox">
-            <div className="premiumEyebrow">
-              PREMIUM SAJU REPORT
-            </div>
-
-            <h3>
-              {targetYear}년의 흐름을 더 깊이 알고 싶으신가요?
-            </h3>
-
-            <p>
-              재물·직업·관계와 앞으로의 흐름을
-              상세 사주에서 더 깊게 확인할 수 있습니다.
-            </p>
-
-            <Link href="/payment" className="premiumButton">
-              <span className="premiumButtonTitle">
-                상세 사주 전체보기
-              </span>
-              <strong className="premiumButtonPrice">
-                9,900원 결제하기 →
-              </strong>
-            </Link>
-
-            <div className="premiumPaymentGuide">
-              결제 후 상세 사주 전체 내용과 AI 상담을
-              7일간 최대 20회 이용할 수 있습니다.
-            </div>
-
-            <div style={{ marginTop: 18, textAlign: "center" }}>
-              <Link href="/payment/reopen?returnTo=%2Ffortune%2F2026" style={{ color: "#805d21", fontSize: 14, fontWeight: 800, textDecoration: "underline", textUnderlineOffset: 4 }}>
-                이미 결제하셨나요? 이용코드로 {targetYear}년 신년운세 상세 분석 보기 →
-              </Link>
-            </div>
-          </div>
-
-          <div className="noticeBox">
-            본 분석은 전통 명리 관점을 참고한 AI 운세
-            분석입니다. 미래를 확정적으로 예언하지 않으며,
-            실제 재물·투자·사업·직업 결정은 현재 상황과
-            객관적인 정보도 함께 고려해 주세요.
-          </div>
-
-          <button
-            type="button"
-            className="resetButton"
-            onClick={resetAll}
-          >
-            다른 정보로 {targetYear}년 신년 운세 보기
-          </button>
-        </section>
+        </div>
       )}
+
       <style jsx>{`
         .fortune2026Page {
           width: min(980px, calc(100% - 40px));
@@ -1356,6 +1407,31 @@ export default function Fortune2026Page() {
           transform: none;
         }
 
+        .fortune2026Page :global(.reopenLink) {
+          display: block;
+          width: fit-content;
+          max-width: 100%;
+          box-sizing: border-box;
+          margin: 18px auto 0;
+          padding: 13px 18px;
+          border: 1px solid #d9c9ad;
+          border-radius: 12px;
+          background: #fffaf1;
+          color: #805719;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.6;
+          text-align: center;
+          text-decoration: none;
+        }
+        .fortune2026Page :global(.reopenLink:hover) {
+          border-color: #b9852c;
+          background: #fff4df;
+        }
+        .fortune2026Page :global(.reopenLink:focus-visible) {
+          outline: 3px solid #17243a;
+          outline-offset: 3px;
+        }
         .privacyText {
           margin: 11px 0 0;
           color: #938a7d;
@@ -1458,6 +1534,8 @@ export default function Fortune2026Page() {
         .newyearPremiumAction:disabled { opacity: .6; cursor: default; }
         .newyearPremiumHint { font-size: 12px !important; margin-top: 12px !important; }
         .newyearPremiumReport { margin-top: 32px; scroll-margin-top: 30px; }
+        .newyearRestoreStatus { margin-top: 28px; text-align: center; color: #805d21; }
+        .newyearRestoredReport { margin-top: 32px; }
         .newyearPremiumOverview, .newyearPremiumSection, .newyearPremiumMonths,
         .newyearPremiumPlan { border: 1px solid #dfd4c2; border-radius: 18px;
           background: #fffdfa; padding: 26px; margin-bottom: 18px; }

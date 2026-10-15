@@ -1052,7 +1052,10 @@ export default function CompatibilityPage() {
             {!usage && <p>심화 궁합 분석을 시작하려면 먼저 위 버튼에서 유효한 결제 이용권을 확인해 주세요.</p>}
             {usage && <p className="usageCount">남은 횟수 <strong>{usage.remaining} / 3회</strong>{usage.busy ? " · 다른 분석 진행 중" : ""}</p>}
             <p>분석 성공 시 1회 차감됩니다. 결과는 별도로 저장되지 않으니 화면에서 복사해 보관해 주세요.</p>
-            <p>이용권이 없거나 다른 기기에서 재접속한 경우 <Link href="/payment/reopen?returnTo=%2Fcompatibility">이용코드로 심화 궁합 이용권 복원하기</Link> 후 다시 이용해 주세요. 처음 이용하는 고객은 <Link href="/payment">상세 사주 결제 안내</Link>를 확인해 주세요.</p>
+            <p>이용권이 없거나 다른 기기에서 재접속한 경우 아래 이용코드 버튼으로 이용권을 복원한 뒤 다시 이용해 주세요. 처음 이용하는 고객은 <Link href="/payment">상세 사주 결제 안내</Link>를 확인해 주세요.</p>
+            <Link href="/payment/reopen?returnTo=%2Fcompatibility" className="reopenLink">
+              이용코드로 심화 궁합 다시 보기 →
+            </Link>
           </div>
         )}
         {error && <div className="errorBox">{error}</div>}
@@ -1601,6 +1604,31 @@ export default function CompatibilityPage() {
         .modeOption small { display: block; margin-top: 5px; font-size: 12px; font-weight: 500; }
         .premiumUsagePanel { margin-top: 16px; padding: 20px; border: 1px solid #dec99f; border-radius: 14px; background: #fffaf1; color: #5d564c; line-height: 1.7; }
         .premiumUsagePanel p { margin: 8px 0; font-size: 13px; }
+        .compatPage :global(.reopenLink) {
+          display: block;
+          width: fit-content;
+          max-width: 100%;
+          box-sizing: border-box;
+          margin: 18px auto 0;
+          padding: 13px 18px;
+          border: 1px solid #d9c9ad;
+          border-radius: 12px;
+          background: #fffaf1;
+          color: #805719;
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 1.6;
+          text-align: center;
+          text-decoration: none;
+        }
+        .compatPage :global(.reopenLink:hover) {
+          border-color: #b9852c;
+          background: #fff4df;
+        }
+        .compatPage :global(.reopenLink:focus-visible) {
+          outline: 3px solid #17243a;
+          outline-offset: 3px;
+        }
         .checkUsageButton, .copyResultButton { border: 0; border-radius: 11px; background: #a66f18; color: white; padding: 13px 18px; font-weight: 900; cursor: pointer; }
         .checkUsageButton:disabled { opacity: .6; cursor: default; }
         .usageCount { font-weight: 800; color: #805d21; }

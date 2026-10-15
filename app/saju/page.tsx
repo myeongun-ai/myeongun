@@ -710,7 +710,7 @@ export default function SajuPage() {
         </form>
 
         <Link href="/payment/reopen" className="reopenLink">
-          이미 결제하셨나요? 이용코드로 결제한 상세 사주 다시 보기 →
+          이용코드로 상세 사주 다시 보기 →
         </Link>
 
         <p className="privacyText">
@@ -824,7 +824,7 @@ export default function SajuPage() {
             </Link>
 
             <Link href="/payment/reopen" className="reopenLink">
-              이미 결제하셨나요? 이용코드로 결제한 상세 사주 다시 보기 →
+              이용코드로 상세 사주 다시 보기 →
             </Link>
 
             <p className="premiumPaymentGuide">

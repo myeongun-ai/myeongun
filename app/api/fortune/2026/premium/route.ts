@@ -66,11 +66,13 @@ export async function POST(request: NextRequest) {
       ? Array.from({ length: 12 - today.month + 1 }, (_, i) => today.month + i)
       : [];
     reportKey = `newyear-${targetYear}-v1`;
+    const restoreOnly = body?.restoreOnly === true;
     const existing = await getPremiumReport(orderId, reportKey, sajuHash);
     if (existing !== null) {
       if (!isReport(existing)) throw new Error("저장된 신년운세 보고서 형식이 올바르지 않습니다.");
       return respond({ ok: true, result: existing, targetYear, saved: true, expiresAt: entitlement.exp });
     }
+    if (restoreOnly) return respond({ error: "저장된 신년운세 상세 보고서가 없습니다. 유효한 이용권으로 유료 상세 분석을 처음 실행하면 보고서가 저장됩니다.", code: "REPORT_NOT_FOUND" }, 404);
     claimId = await claimPremiumReport(orderId, reportKey);
     if (!claimId) return respond({ error: "신년운세 상세 분석을 생성 중입니다. 잠시 후 다시 시도해 주세요." }, 409);
     const savedDuringWait = await getPremiumReport(orderId, reportKey, sajuHash);
