@@ -169,6 +169,10 @@ async function ensureTable() {
     ADD COLUMN IF NOT EXISTS code_ciphertext TEXT
   `;
   await sql`
+    ALTER TABLE myeongun_reopen_access
+    ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ
+  `;
+  await sql`
     CREATE INDEX IF NOT EXISTS idx_myeongun_reopen_access_expires_at
     ON myeongun_reopen_access (expires_at)
   `;
@@ -259,7 +263,8 @@ export async function getExistingReopenForVerifiedPayment(orderId: string) {
  */
 export async function saveCrossDeviceReopen(
   orderId: string,
-  saju: SajuAccessInput
+  saju: SajuAccessInput,
+  approvedAt?: string | null
 ) {
   await ensureTable();
   const code = generateCode(8);
@@ -270,6 +275,13 @@ export async function saveCrossDeviceReopen(
   const expiresAt = new Date(
     Date.now() + REOPEN_DAYS * 24 * 60 * 60 * 1000
   );
+  // 결제 승인 시각은 토스에서 확인된 값만 기록합니다.
+  // 기존 결제 기록에 임의의 결제일을 채우지 않습니다.
+  const parsedApprovedAt = approvedAt ? new Date(approvedAt) : null;
+  const verifiedApprovedAt =
+    parsedApprovedAt && !Number.isNaN(parsedApprovedAt.getTime())
+      ? parsedApprovedAt.toISOString()
+      : null;
   const sql = sqlClient();
   const inserted = (await sql`
     INSERT INTO myeongun_reopen_access (
@@ -279,6 +291,7 @@ export async function saveCrossDeviceReopen(
       reopen_hash,
       saju_ciphertext,
       expires_at,
+      approved_at,
       updated_at
     )
     VALUES (
@@ -288,6 +301,7 @@ export async function saveCrossDeviceReopen(
       ${reopenHash},
       ${ciphertext},
       ${expiresAt.toISOString()},
+      ${verifiedApprovedAt},
       NOW()
     )
     ON CONFLICT (order_id) DO NOTHING
