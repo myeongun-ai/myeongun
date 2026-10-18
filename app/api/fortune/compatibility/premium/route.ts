@@ -10,7 +10,10 @@ import {
 import {
   getCompatibilityUsage,
   claimCompatibilityUsage,
-  completeCompatibilityUsage,
+  getSavedCompatibilityReport,
+  listSavedCompatibilityReports,
+  reopenSavedCompatibilityReport,
+  saveAndCompleteCompatibilityUsage,
   releaseCompatibilityUsage,
 } from "../../../../../lib/compatibilityPremiumUsage";
 
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
     if (!isPerson(me)) {
       return json({ error: "결제한 본인의 사주 정보를 모두 입력해 주세요." }, 400);
     }
-    if (action !== "status" && action !== "analyze") {
+    if (action !== "status" && action !== "analyze" && action !== "reopen") {
       return json({ error: "올바르지 않은 요청입니다." }, 400);
     }
 
@@ -100,11 +103,27 @@ export async function POST(request: NextRequest) {
 
     if (action === "status") {
       const usage = await getCompatibilityUsage(entitlement.orderId, entitlement.exp);
-      return json({ ok: true, ...usage, expiresAt: entitlement.exp });
+      const reports = await listSavedCompatibilityReports(entitlement.orderId);
+      return json({ ok: true, ...usage, reports, expiresAt: entitlement.exp });
+    }
+
+    if (action === "reopen") {
+      const reportId = typeof body?.reportId === "string" ? body.reportId : "";
+      const saved = await reopenSavedCompatibilityReport(entitlement.orderId, reportId);
+      if (!saved) return json({ error: "저장된 궁합 결과가 없거나 이용기간이 만료되었습니다." }, 404);
+      const usage = await getCompatibilityUsage(entitlement.orderId, entitlement.exp);
+      return json({ ok: true, ...saved, ...usage, cached: true, expiresAt: entitlement.exp });
     }
 
     if (!isPerson(partner)) {
       return json({ error: "상대방의 사주 정보를 모두 입력해 주세요." }, 400);
+    }
+
+    // 동일한 두 사람은 AI를 다시 호출하지 않고 기존 결과를 돌려줍니다.
+    const savedBefore = await getSavedCompatibilityReport(entitlement.orderId, me, partner);
+    if (savedBefore) {
+      const usage = await getCompatibilityUsage(entitlement.orderId, entitlement.exp);
+      return json({ ok: true, result: savedBefore, ...usage, cached: true, expiresAt: entitlement.exp });
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -119,7 +138,9 @@ export async function POST(request: NextRequest) {
 
     claimId = await claimCompatibilityUsage(entitlement.orderId, entitlement.exp);
     if (!claimId) {
+      const savedAfter = await getSavedCompatibilityReport(entitlement.orderId, me, partner);
       const usage = await getCompatibilityUsage(entitlement.orderId, entitlement.exp);
+      if (savedAfter) return json({ ok: true, result: savedAfter, ...usage, cached: true, expiresAt: entitlement.exp });
       return json({
         error: usage.busy
           ? "다른 심화 궁합 분석이 진행 중입니다. 잠시 후 다시 시도해 주세요."
@@ -182,10 +203,17 @@ export async function POST(request: NextRequest) {
     const parsed: unknown = JSON.parse(response.output_text);
     if (!validResult(parsed)) throw new Error("심화 궁합 AI 결과 형식이 올바르지 않습니다.");
 
-    // 결과는 DB에 저장하지 않습니다. 성공적으로 생성한 뒤에만 1회 차감합니다.
-    completed = await completeCompatibilityUsage(entitlement.orderId, claimId);
+    // 암호화된 결과 저장과 사용 횟수 차감을 단일 SQL 문장으로 실행합니다.
+    completed = await saveAndCompleteCompatibilityUsage(
+      entitlement.orderId, claimId, entitlement.exp, me, partner, parsed
+    );
     if (!completed) {
-      return json({ error: "분석 이용권 확인에 실패했습니다. 다시 시도해 주세요." }, 409);
+      const existing = await getSavedCompatibilityReport(entitlement.orderId, me, partner);
+      if (existing) {
+        const usage = await getCompatibilityUsage(entitlement.orderId, entitlement.exp);
+        return json({ ok: true, result: existing, ...usage, cached: true, expiresAt: entitlement.exp });
+      }
+      return json({ error: "분석 결과 저장에 실패했습니다. 횟수 차감 여부를 확인해 주세요." }, 409);
     }
 
     const usage = await getCompatibilityUsage(entitlement.orderId, entitlement.exp);

@@ -40,6 +40,7 @@ type DeepCompatibility = {
   disclaimer: string;
 };
 
+type SavedPremiumReport = { id: string; partnerName: string; partner: PersonForm; createdAt: string };
 type PremiumUsage = { used: number; remaining: number; busy: boolean; expiresAt?: number };
 
 type CompatibilityPeople = {
@@ -312,6 +313,7 @@ export default function CompatibilityPage() {
   const [deepResult, setDeepResult] = useState<DeepCompatibility | null>(null);
   const [usage, setUsage] = useState<PremiumUsage | null>(null);
   const [checkingUsage, setCheckingUsage] = useState(false);
+  const [savedReports, setSavedReports] = useState<SavedPremiumReport[]>([]);
 
   useEffect(() => {
     const saved = readSavedMe();
@@ -363,6 +365,7 @@ export default function CompatibilityPage() {
     setPeople(null);
     setDeepResult(null);
     setUsage(null);
+    setSavedReports([]);
     setError("");
   }
 
@@ -486,11 +489,40 @@ export default function CompatibilityPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "이용권 확인에 실패했습니다.");
       setUsage({ used: data.used, remaining: data.remaining, busy: data.busy, expiresAt: data.expiresAt });
+      setSavedReports(Array.isArray(data.reports) ? data.reports : []);
     } catch (err) {
       setUsage(null);
+      setSavedReports([]);
       setError(err instanceof Error ? err.message : "이용권 확인에 실패했습니다.");
     } finally {
       setCheckingUsage(false);
+    }
+  }
+
+  async function reopenPremiumReport(report: SavedPremiumReport) {
+    if (loading) return;
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/fortune/compatibility/premium", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reopen", me: { ...me, name: me.name.trim() }, reportId: report.id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "궁합 결과를 불러오지 못했습니다.");
+      if (!data?.result || !Array.isArray(data.result.sections)) throw new Error("저장된 궁합 결과가 올바르지 않습니다.");
+      setMode("premium");
+      setPartner(data.partner as PersonForm);
+      setResult("");
+      setPeople(null);
+      setDeepResult(data.result as DeepCompatibility);
+      setUsage({ used: data.used, remaining: data.remaining, busy: Boolean(data.busy), expiresAt: data.expiresAt });
+      window.setTimeout(() => document.getElementById("compatibility-result")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "궁합 결과를 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -511,7 +543,7 @@ export default function CompatibilityPage() {
   async function analyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!canAnalyze || loading || (mode === "premium" && (!usage || usage.remaining <= 0 || usage.busy))) return;
+    if (!canAnalyze || loading || (mode === "premium" && (!usage || usage.busy))) return;
 
     setLoading(true);
     setError("");
@@ -609,6 +641,7 @@ export default function CompatibilityPage() {
     setPeople(null);
     setDeepResult(null);
     setUsage(null);
+    setSavedReports([]);
     setMode("free");
     setError("");
 
@@ -1034,11 +1067,11 @@ export default function CompatibilityPage() {
 
         <section className="premiumModeChooser" aria-label="궁합 분석 종류">
           <button type="button" className={mode === "free" ? "modeOption selected" : "modeOption"}
-            onClick={() => { setMode("free"); setUsage(null); setError(""); setDeepResult(null); setResult(""); }}>
+            onClick={() => { setMode("free"); setUsage(null); setSavedReports([]); setError(""); setDeepResult(null); setResult(""); }}>
             무료 궁합 <small>누구나 이용 가능</small>
           </button>
           <button type="button" className={mode === "premium" ? "modeOption selected" : "modeOption"}
-            onClick={() => { setMode("premium"); setUsage(null); setError(""); setDeepResult(null); setResult(""); }}>
+            onClick={() => { setMode("premium"); setUsage(null); setSavedReports([]); setError(""); setDeepResult(null); setResult(""); }}>
             심화 궁합 <small>9,900원 결제 고객 · 7일간 3회</small>
           </button>
         </section>
@@ -1051,10 +1084,21 @@ export default function CompatibilityPage() {
             </button>
             {!usage && <p>심화 궁합 분석을 시작하려면 먼저 위 버튼에서 유효한 결제 이용권을 확인해 주세요.</p>}
             {usage && <p className="usageCount">남은 횟수 <strong>{usage.remaining} / 3회</strong>{usage.busy ? " · 다른 분석 진행 중" : ""}</p>}
-            <p>분석 성공 시 1회 차감됩니다. 결과는 별도로 저장되지 않으니 화면에서 복사해 보관해 주세요.</p>
+            <p>새로운 두 사람의 분석에만 1회 차감됩니다. 동일한 두 사람의 결과는 7일 이용기간 내 다시 볼 수 있습니다.</p>
+            {savedReports.length > 0 && (
+              <div className="savedCompatibilityReports">
+                <strong>저장된 심화 궁합 결과</strong>
+                {savedReports.map((report) => (
+                  <button key={report.id} type="button" className="checkUsageButton" disabled={loading}
+                    onClick={() => reopenPremiumReport(report)} style={{ display: "block", marginTop: 8 }}>
+                    {report.partnerName}님과의 궁합 다시 보기 (횟수 차감 없음)
+                  </button>
+                ))}
+              </div>
+            )}
             <p>이용권이 없거나 다른 기기에서 재접속한 경우 아래 이용코드 버튼으로 이용권을 복원한 뒤 다시 이용해 주세요. 처음 이용하는 고객은 <Link href="/payment">상세 사주 결제 안내</Link>를 확인해 주세요.</p>
             <Link href="/payment/reopen?returnTo=%2Fcompatibility" className="reopenLink">
-              이용코드로 심화 궁합 다시 보기 →
+              이용코드로 이용권 복원하기 →
             </Link>
           </div>
         )}
@@ -1063,9 +1107,9 @@ export default function CompatibilityPage() {
         <button
           type="submit"
           className="analyzeButton"
-          disabled={!canAnalyze || loading || (mode === "premium" && (!usage || usage.remaining <= 0 || usage.busy))}
+          disabled={!canAnalyze || loading || (mode === "premium" && (!usage || usage.busy))}
         >
-          {loading ? "두 사람의 궁합을 분석하고 있습니다..." : mode === "premium" ? !usage ? "이용권 확인 후 심화 궁합 분석 가능" : usage.busy ? "다른 심화 궁합 분석 진행 중" : usage.remaining <= 0 ? "심화 궁합 이용 횟수 없음" : "심화 궁합 분석 시작 (1회 사용)" : "무료 궁합 분석 시작"}
+          {loading ? "두 사람의 궁합을 분석하고 있습니다..." : mode === "premium" ? !usage ? "이용권 확인 후 심화 궁합 분석 가능" : usage.busy ? "다른 심화 궁합 분석 진행 중" : usage.remaining <= 0 ? "기존 분석 결과 확인 (신규 분석 불가)" : "심화 궁합 분석 / 기존 결과 다시 보기" : "무료 궁합 분석 시작"}
         </button>
 
         <p className="privacyText">
@@ -1180,7 +1224,7 @@ export default function CompatibilityPage() {
                 </section>
                 <p className="deepDisclaimer">{deepResult.disclaimer}</p>
                 <button type="button" className="copyResultButton" onClick={copyDeepResult}>심화 궁합 전체 결과 복사하기</button>
-                <p className="deepDisclaimer">결과는 서버에 별도 저장되지 않습니다. 페이지를 닫기 전에 복사하여 보관해 주세요.</p>
+                <p className="deepDisclaimer">새로 분석한 심화 궁합 결과는 암호화되어 이용기간 동안 저장됩니다. 이용권 확인 후 다시 열람할 수 있습니다.</p>
                 {usage && <p className="usageCount">남은 심화 궁합 분석: {usage.remaining} / 3회</p>}
               </div>
             ) : renderCompatibilityResult(result)}

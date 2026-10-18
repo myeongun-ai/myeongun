@@ -1,4 +1,5 @@
-import { randomUUID } from "crypto";
+import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, randomUUID } from "crypto";
+import { hashSaju, type SajuAccessInput } from "./paymentAccess";
 import { neon } from "@neondatabase/serverless";
 
 const MAX_USES = 3;
@@ -133,4 +134,145 @@ export async function releaseCompatibilityUsage(
         updated_at = NOW()
     WHERE order_id = ${orderId} AND claim_id = ${claimId}
   `;
+}
+
+
+// 저장 데이터는 주문번호와 이용기간으로 제한하며, 고객의 입력 및 결과는 AES-256-GCM으로 암호화합니다.
+function resultKey(): Buffer {
+  const secret = process.env.TOSS_SECRET_KEY;
+  if (!secret) throw new Error("암호화 환경 설정이 없습니다.");
+  return createHash("sha256").update(`${secret}|myeongun-compatibility-report-v1`).digest();
+}
+
+function pairHash(me: SajuAccessInput, partner: SajuAccessInput): string {
+  const secret = process.env.TOSS_SECRET_KEY;
+  if (!secret) throw new Error("암호화 환경 설정이 없습니다.");
+  return createHmac("sha256", secret)
+    .update(JSON.stringify(["compatibility-v1", hashSaju(me), hashSaju(partner)]))
+    .digest("hex");
+}
+
+function encryptReport(value: unknown): string {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", resultKey(), iv);
+  const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value), "utf8"), cipher.final()]);
+  return [iv.toString("base64url"), cipher.getAuthTag().toString("base64url"), ciphertext.toString("base64url")].join(".");
+}
+
+function decryptReport(value: string): unknown {
+  const [iv, tag, data] = value.split(".");
+  if (!iv || !tag || !data) throw new Error("저장된 궁합 결과 형식이 올바르지 않습니다.");
+  const decipher = createDecipheriv("aes-256-gcm", resultKey(), Buffer.from(iv, "base64url"));
+  decipher.setAuthTag(Buffer.from(tag, "base64url"));
+  return JSON.parse(Buffer.concat([decipher.update(Buffer.from(data, "base64url")), decipher.final()]).toString("utf8"));
+}
+
+async function ensureReportTable() {
+  const sql = db();
+  await sql`
+    CREATE TABLE IF NOT EXISTS myeongun_compatibility_premium_reports (
+      order_id TEXT NOT NULL,
+      pair_hash TEXT NOT NULL,
+      partner_ciphertext TEXT NOT NULL,
+      result_ciphertext TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (order_id, pair_hash)
+    )
+  `;
+  // 만료된 결과는 조회되지 않으며, 다음 이용 시 자동 정리합니다.
+  await sql`DELETE FROM myeongun_compatibility_premium_reports WHERE expires_at <= NOW()`;
+}
+
+type ReportRow = { pair_hash: string; partner_ciphertext: string; result_ciphertext: string; created_at: string | Date };
+
+/** 인증된 주문에 한해서만 호출해야 합니다. */
+export async function getSavedCompatibilityReport(orderId: string, me: SajuAccessInput, partner: SajuAccessInput) {
+  await ensureReportTable();
+  const sql = db();
+  const hash = pairHash(me, partner);
+  const rows = (await sql`
+    SELECT pair_hash, partner_ciphertext, result_ciphertext, created_at
+    FROM myeongun_compatibility_premium_reports
+    WHERE order_id = ${orderId} AND pair_hash = ${hash} AND expires_at > NOW()
+    LIMIT 1
+  `) as ReportRow[];
+  return rows[0] ? decryptReport(rows[0].result_ciphertext) : null;
+}
+
+/** 저장된 상대방 목록. 공개 API에서 사용 시 반드시 이용권과 본인 사주를 검증하세요. */
+export async function listSavedCompatibilityReports(orderId: string) {
+  await ensureReportTable();
+  const sql = db();
+  const rows = (await sql`
+    SELECT pair_hash, partner_ciphertext, result_ciphertext, created_at
+    FROM myeongun_compatibility_premium_reports
+    WHERE order_id = ${orderId} AND expires_at > NOW()
+    ORDER BY created_at DESC
+    LIMIT 3
+  `) as ReportRow[];
+  return rows.map((row) => {
+    const partner = decryptReport(row.partner_ciphertext) as SajuAccessInput;
+    return { id: row.pair_hash, partnerName: partner.name || "상대방", partner, createdAt: new Date(row.created_at).toISOString() };
+  });
+}
+
+/** 목록에서 선택한 저장 결과를 불러옵니다. */
+export async function reopenSavedCompatibilityReport(orderId: string, reportId: string) {
+  if (!/^[a-f0-9]{64}$/.test(reportId)) return null;
+  await ensureReportTable();
+  const sql = db();
+  const rows = (await sql`
+    SELECT pair_hash, partner_ciphertext, result_ciphertext, created_at
+    FROM myeongun_compatibility_premium_reports
+    WHERE order_id = ${orderId} AND pair_hash = ${reportId} AND expires_at > NOW()
+    LIMIT 1
+  `) as ReportRow[];
+  if (!rows[0]) return null;
+  return { result: decryptReport(rows[0].result_ciphertext), partner: decryptReport(rows[0].partner_ciphertext) as SajuAccessInput };
+}
+
+/**
+ * 저장과 횟수 차감은 하나의 SQL 문장으로 처리합니다.
+ * 저장이 실패하거나 이미 저장된 두 사람이라면 사용 횟수를 추가 차감하지 않습니다.
+ */
+export async function saveAndCompleteCompatibilityUsage(
+  orderId: string,
+  claimId: string,
+  expiresAtUnix: number,
+  me: SajuAccessInput,
+  partner: SajuAccessInput,
+  result: unknown
+): Promise<boolean> {
+  await ensureReportTable();
+  const sql = db();
+  const hash = pairHash(me, partner);
+  const encryptedPartner = encryptReport(partner);
+  const encryptedResult = encryptReport(result);
+  const expiresAt = expiryDate(expiresAtUnix);
+  const rows = await sql`
+    WITH inserted AS (
+      INSERT INTO myeongun_compatibility_premium_reports
+        (order_id, pair_hash, partner_ciphertext, result_ciphertext, expires_at)
+      SELECT ${orderId}, ${hash}, ${encryptedPartner}, ${encryptedResult},
+             LEAST(u.expires_at, ${expiresAt}::timestamptz)
+      FROM myeongun_compatibility_premium_usage u
+      WHERE u.order_id = ${orderId} AND u.claim_id = ${claimId}
+        AND u.claimed_until > NOW() AND u.expires_at > NOW()
+        AND u.used_count < ${MAX_USES}
+      ON CONFLICT (order_id, pair_hash) DO NOTHING
+      RETURNING order_id
+    ), completed AS (
+      UPDATE myeongun_compatibility_premium_usage u
+      SET used_count = u.used_count + 1, claim_id = NULL,
+          claimed_until = NULL, updated_at = NOW()
+      WHERE u.order_id = ${orderId} AND u.claim_id = ${claimId}
+        AND u.claimed_until > NOW() AND u.expires_at > NOW()
+        AND u.used_count < ${MAX_USES}
+        AND EXISTS (SELECT 1 FROM inserted)
+      RETURNING u.order_id
+    )
+    SELECT order_id FROM completed
+  `;
+  return rows.length === 1;
 }
