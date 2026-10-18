@@ -119,7 +119,8 @@ months 항목 형태: {"year":${today.year},"month":10,"title":"월별 제목","
 반드시 sections는 8개, months는 지정한 달만 모두 작성하세요.`;
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await client.responses.create({
-      model: "gpt-4.1-mini", temperature: 0.5, max_output_tokens: 8500,
+      model: "gpt-4.1-mini",
+      store: false, temperature: 0.5, max_output_tokens: 8500,
       text: { format: { type: "json_object" } }, input: prompt,
     });
     const result: unknown = JSON.parse(response.output_text);

@@ -394,6 +394,7 @@ export async function POST(request: NextRequest) {
 
     const response = await client.responses.create({
       model: "gpt-4.1-mini",
+      store: false,
       temperature: 0.5,
       max_output_tokens: 8000,
       text: { format: { type: "json_object" } },

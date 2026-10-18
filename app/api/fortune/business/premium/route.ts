@@ -105,6 +105,7 @@ sections는 반드시 6개를 모두 채우세요.`;
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await client.responses.create({
       model: "gpt-4.1-mini",
+      store: false,
       temperature: 0.5,
       max_output_tokens: 6500,
       text: { format: { type: "json_object" } },

@@ -474,6 +474,7 @@ ${targetYear}년의 흐름을 사용자의 질문 주제와 연결해 설명하�
 
     const response = await client.responses.create({
       model: "gpt-4.1-mini",
+      store: false,
       input: prompt,
     });
 
