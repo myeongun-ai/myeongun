@@ -19,6 +19,7 @@ type TossPayment = {
   orderId?: string;
   totalAmount?: number;
   status?: string;
+  approvedAt?: string | null;
   code?: string;
   message?: string;
 };
@@ -78,7 +79,7 @@ async function confirmTossPayment(
   const payment = await readTossResponse(response);
   if (response.ok) return { verified: true, payment };
 
-  // 승인 요청의 응답이 실패했더라도 이미 승인되었을 가능성이 있습니다.
+  // 응답이 실패했더라도 실제 승인 여부를 토스에서 재조회합니다.
   const lookup = await lookupTossPayment(paymentKey, secretKey);
   if (lookup.verified) return lookup;
   return { verified: false, payment };
@@ -95,6 +96,27 @@ function isMatchingCompletedPayment(
     payment.totalAmount === PREMIUM_PRICE &&
     payment.status === "DONE"
   );
+}
+
+/**
+ * 토스 승인이 끝난 뒤 DB에 일시적 연결 오류가 발생하면 저장만 한 번 더 시도합니다.
+ * 결제 승인 POST를 재호출하지 않으며, 기존 주문번호의 이용코드를 변경하지 않습니다.
+ * DB 저장 함수는 동일 주문번호에 대해 ON CONFLICT DO NOTHING을 사용합니다.
+ */
+async function saveReopenWithOneRetry(
+  orderId: string,
+  saju: Parameters<typeof saveCrossDeviceReopen>[1],
+  approvedAt?: string | null
+) {
+  try {
+    return await saveCrossDeviceReopen(orderId, saju, approvedAt);
+  } catch (firstError) {
+    console.error("결제 승인 후 이용코드 저장 1차 실패:", {
+      orderId,
+      error: firstError,
+    });
+    return await saveCrossDeviceReopen(orderId, saju, approvedAt);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -120,15 +142,14 @@ export async function POST(request: NextRequest) {
       return json({ message: "현재 결제 처리를 완료할 수 없습니다." }, 503);
     }
 
-    // 토스 승인 요청 전에 결제 준비 정보의 유효성을 먼저 확인합니다.
+    // 신규 결제는 만료되지 않은 준비 정보가 있어야만 승인 요청을 보냅니다.
     const pendingSaju = await consumePendingPayment(orderId);
     const hasPending = Boolean(
       pendingSaju?.name && pendingSaju?.birth && pendingSaju?.time &&
       pendingSaju?.gender && pendingSaju?.calendar
     );
 
-    // 결제 준비 정보가 만료된 경우에는 신규 승인 요청을 절대 보내지 않습니다.
-    // 이미 발급된 이용권을 가진 고객에게만 기존 결제의 조회를 허용합니다.
+    // 준비 정보가 없다면 서명된 기존 이용권이 있는 주문만 조회 방식으로 복구합니다.
     let existing: Awaited<ReturnType<typeof getExistingReopenForVerifiedPayment>> = null;
     if (!hasPending) {
       const token = request.cookies.get(entitlementCookie.name)?.value;
@@ -146,8 +167,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 신규 승인 가능 상태에서는 승인 요청 후 결과를 검증합니다.
-    // 준비 정보가 없는 기존 이용권 복구는 승인 POST 없이 조회 GET만 사용합니다.
     const tossResult = hasPending
       ? await confirmTossPayment(paymentKey, orderId, secretKey)
       : await lookupTossPayment(paymentKey, secretKey);
@@ -174,7 +193,7 @@ export async function POST(request: NextRequest) {
 
     const saju = hasPending ? pendingSaju! : existing!.saju;
     const reopen = hasPending
-      ? await saveCrossDeviceReopen(orderId, saju)
+      ? await saveReopenWithOneRetry(orderId, saju, tossResult.payment.approvedAt)
       : {
           code: existing!.code,
           expiresAt: existing!.expiresAt,

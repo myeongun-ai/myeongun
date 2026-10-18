@@ -46,6 +46,7 @@ async function checkAiService(): Promise<boolean> {
           },
           body: JSON.stringify({
             model: "gpt-4.1-mini",
+            store: false,
             input: "정상",
             max_output_tokens: 16,
           }),
