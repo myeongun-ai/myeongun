@@ -1,8 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
-import Script from "next/script";
 import SessionPrivacyCleanup from "./SessionPrivacyCleanup";
-import { Analytics } from "@vercel/analytics/next";
+import ConsentAnalytics from "./ConsentAnalytics";
 
 export const metadata = {
   title: "명운 | 사주 · 재물사업 · 궁합 · 신년 운세 · AI 상담",
@@ -33,19 +32,7 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <SessionPrivacyCleanup />
-        <Analytics />
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-E5JM4F9VDF"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-E5JM4F9VDF');
-          `}
-        </Script>
+        <ConsentAnalytics />
         <header className="mgSiteHeader">
           <div className="mgHeaderInner">
             <Link className="mgBrand" href="/" aria-label="명운 홈">

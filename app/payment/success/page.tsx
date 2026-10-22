@@ -1,5 +1,7 @@
 "use client";
 
+import { isAnalyticsAllowed } from "../../analyticsConsent";
+
 import Link from "next/link";
 import {
   Suspense,
@@ -60,6 +62,7 @@ function confirmOnce(paymentKey: string, orderId: string, amount: number) {
 const queuedPurchases = new Set<string>();
 
 function trackVerifiedPurchase(result: ConfirmResult, expectedOrderId: string) {
+  if (!isAnalyticsAllowed()) return;
   if (
     result.ok !== true || result.status !== "DONE" ||
     result.orderId !== expectedOrderId || result.amount !== 9900 ||
