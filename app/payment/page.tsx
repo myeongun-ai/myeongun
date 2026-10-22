@@ -1,5 +1,7 @@
 "use client";
 
+import { isAnalyticsAllowed } from "../analyticsConsent";
+
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -79,6 +81,7 @@ function readSavedSaju(): SajuForm | null {
 function trackFunnelEvent(
   eventName: "free_saju_complete" | "premium_guide_click" | "premium_guide_view" | "begin_checkout"
 ) {
+  if (!isAnalyticsAllowed()) return;
   try {
     const analyticsWindow = window as Window & { dataLayer?: unknown[] };
     analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];

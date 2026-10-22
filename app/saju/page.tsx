@@ -1,5 +1,7 @@
 "use client";
 
+import { isAnalyticsAllowed } from "../analyticsConsent";
+
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -215,6 +217,7 @@ function renderFreeResult(text: string) {
 function trackFunnelEvent(
   eventName: "free_saju_complete" | "premium_guide_click" | "premium_guide_view" | "begin_checkout"
 ) {
+  if (!isAnalyticsAllowed()) return;
   try {
     const analyticsWindow = window as Window & { dataLayer?: unknown[] };
     analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];
