@@ -5,25 +5,27 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * 개인정보 보관기간 정리 API.
- * CRON_SECRET 인증 필수. CLEANUP_EXECUTE=true가 아니면 조회만 합니다.
- * 결제 승인일이 없는 기존 주문은 자동 삭제하지 않습니다.
- * 결제 준비 정보는 30분 뒤 사용 불가, 실제 삭제는 만료 24시간 후입니다.
- * 실제 삭제 쿼리는 하나의 DB 트랜잭션으로 실행합니다.
+ * 개인정보 정리 API - 검토용, 읽기 전용.
+ *
+ * 이 버전은 데이터베이스에서 어떤 기록이 정리 대상인지 집계만 합니다.
+ * DELETE 쿼리는 포함하지 않습니다. 자동 실행/실제 삭제 활성화 전에
+ * 보관기간, 예외 처리, DB 스키마와 법적 의무를 별도 검증해야 합니다.
+ *
+ * CRON_SECRET을 Authorization: Bearer <secret> 헤더로 전달해야 합니다.
  */
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!process.env.DATABASE_URL) {
+
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
-  const sql = neon(process.env.DATABASE_URL);
-  const execute = process.env.CLEANUP_EXECUTE === "true";
-
   try {
+    const sql = neon(databaseUrl);
     const schema = await sql`
       SELECT table_name, column_name
       FROM information_schema.columns
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
           'myeongun_premium_results',
           'myeongun_premium_reports',
           'myeongun_compatibility_premium_usage',
+          'myeongun_compatibility_premium_reports',
           'myeongun_premium_generation_lock',
           'myeongun_premium_report_locks',
           'myeongun_reopen_rate_limit'
@@ -46,147 +49,91 @@ export async function GET(request: NextRequest) {
       if (!columns.has(table)) columns.set(table, new Set<string>());
       columns.get(table)!.add(String(row.column_name));
     }
-    const exists = (name: string) => columns.has(name);
-    const approved = columns.get("myeongun_reopen_access")?.has("approved_at") === true;
-
-    const count = async (table: string, query: () => Promise<unknown>) => {
-      if (!exists(table)) return null;
-      const rows = (await query()) as Array<{ n: number | string }>;
+    const has = (table: string, ...required: string[]) =>
+      required.every((column) => columns.get(table)?.has(column) === true);
+    const count = async (query: () => PromiseLike<Record<string, any>[]>) => {
+      const rows = await query();
       return Number(rows[0]?.n ?? 0);
     };
 
-    const before = {
-      expiredPending: await count("myeongun_payment_pending", () => sql`
-        SELECT COUNT(*)::int AS n FROM myeongun_payment_pending WHERE expires_at <= NOW()
-      `),
-      pendingEligibleForDeletion: await count("myeongun_payment_pending", () => sql`
-        SELECT COUNT(*)::int AS n FROM myeongun_payment_pending
-        WHERE expires_at <= NOW() - INTERVAL '24 hours'
-      `),
-      eligibleApprovedOrders: approved
-        ? await count("myeongun_reopen_access", () => sql`
-            SELECT COUNT(*)::int AS n FROM myeongun_reopen_access
-            WHERE approved_at IS NOT NULL AND approved_at <= NOW() - INTERVAL '30 days'
+    // 삭제 후보 수만 확인합니다. 실제 DELETE는 이 파일에 없습니다.
+    const counts = {
+      expiredPending: has("myeongun_payment_pending", "expires_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_payment_pending
+            WHERE expires_at <= NOW()
           `)
         : null,
-      missingApprovalDate: await count("myeongun_reopen_access", () =>
-        approved
-          ? sql`SELECT COUNT(*)::int AS n FROM myeongun_reopen_access WHERE approved_at IS NULL`
-          : sql`SELECT COUNT(*)::int AS n FROM myeongun_reopen_access`
-      ),
-      expiredGenerationLocks: await count("myeongun_premium_generation_lock", () => sql`
-        SELECT COUNT(*)::int AS n FROM myeongun_premium_generation_lock WHERE locked_until <= NOW()
-      `),
-      expiredReportLocks: await count("myeongun_premium_report_locks", () => sql`
-        SELECT COUNT(*)::int AS n FROM myeongun_premium_report_locks WHERE locked_until <= NOW()
-      `),
-      expiredRateLimits: await count("myeongun_reopen_rate_limit", () => sql`
-        SELECT COUNT(*)::int AS n FROM myeongun_reopen_rate_limit WHERE window_ends_at <= NOW()
-      `),
+      pendingOlderThan24HoursAfterExpiry: has("myeongun_payment_pending", "expires_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_payment_pending
+            WHERE expires_at <= NOW() - INTERVAL '24 hours'
+          `)
+        : null,
+      approvedOrdersOlderThan30Days: has("myeongun_reopen_access", "approved_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_reopen_access
+            WHERE approved_at IS NOT NULL
+              AND approved_at <= NOW() - INTERVAL '30 days'
+          `)
+        : null,
+      ordersMissingApprovalDate: has("myeongun_reopen_access", "approved_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_reopen_access
+            WHERE approved_at IS NULL
+          `)
+        : null,
+      expiredCompatibilityReports: has("myeongun_compatibility_premium_reports", "expires_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_compatibility_premium_reports
+            WHERE expires_at <= NOW()
+          `)
+        : null,
+      expiredCompatibilityUsage: has("myeongun_compatibility_premium_usage", "expires_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_compatibility_premium_usage
+            WHERE expires_at <= NOW()
+          `)
+        : null,
+      expiredGenerationLocks: has("myeongun_premium_generation_lock", "locked_until")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_premium_generation_lock
+            WHERE locked_until <= NOW()
+          `)
+        : null,
+      expiredReportLocks: has("myeongun_premium_report_locks", "locked_until")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_premium_report_locks
+            WHERE locked_until <= NOW()
+          `)
+        : null,
+      expiredRateLimits: has("myeongun_reopen_rate_limit", "window_ends_at")
+        ? await count(() => sql`
+            SELECT COUNT(*)::int AS n FROM myeongun_reopen_rate_limit
+            WHERE window_ends_at <= NOW()
+          `)
+        : null,
     };
-
-    if (!execute) {
-      return NextResponse.json(
-        {
-          mode: "preview",
-          deletionPerformed: false,
-          approvalDateColumnPresent: approved,
-          counts: before,
-          message: "읽기 전용 점검입니다. 승인일이 확인되지 않은 주문은 삭제하지 않습니다.",
-        },
-        { headers: { "Cache-Control": "no-store" } }
-      );
-    }
-
-    // Neon HTTP 드라이버의 트랜잭션에 모든 DELETE를 함께 전달합니다.
-    const statements: Array<ReturnType<typeof sql>> = [];
-
-    if (approved) {
-      if (exists("myeongun_premium_results")) statements.push(sql`
-        DELETE FROM myeongun_premium_results p
-        WHERE EXISTS (
-          SELECT 1 FROM myeongun_reopen_access r
-          WHERE r.order_id = p.order_id
-            AND r.approved_at IS NOT NULL
-            AND r.approved_at <= NOW() - INTERVAL '30 days'
-        )
-      `);
-      if (exists("myeongun_premium_reports")) statements.push(sql`
-        DELETE FROM myeongun_premium_reports p
-        WHERE EXISTS (
-          SELECT 1 FROM myeongun_reopen_access r
-          WHERE r.order_id = p.order_id
-            AND r.approved_at IS NOT NULL
-            AND r.approved_at <= NOW() - INTERVAL '30 days'
-        )
-      `);
-      if (exists("myeongun_compatibility_premium_usage")) statements.push(sql`
-        DELETE FROM myeongun_compatibility_premium_usage p
-        WHERE EXISTS (
-          SELECT 1 FROM myeongun_reopen_access r
-          WHERE r.order_id = p.order_id
-            AND r.approved_at IS NOT NULL
-            AND r.approved_at <= NOW() - INTERVAL '30 days'
-        )
-      `);
-      if (exists("myeongun_premium_report_locks")) statements.push(sql`
-        DELETE FROM myeongun_premium_report_locks p
-        WHERE p.locked_until <= NOW()
-          AND EXISTS (
-            SELECT 1 FROM myeongun_reopen_access r
-            WHERE r.order_id = p.order_id
-              AND r.approved_at IS NOT NULL
-              AND r.approved_at <= NOW() - INTERVAL '30 days'
-          )
-      `);
-      if (exists("myeongun_premium_generation_lock")) statements.push(sql`
-        DELETE FROM myeongun_premium_generation_lock p
-        WHERE p.locked_until <= NOW()
-          AND EXISTS (
-            SELECT 1 FROM myeongun_reopen_access r
-            WHERE r.order_id = p.order_id
-              AND r.approved_at IS NOT NULL
-              AND r.approved_at <= NOW() - INTERVAL '30 days'
-          )
-      `);
-      statements.push(sql`
-        DELETE FROM myeongun_reopen_access
-        WHERE approved_at IS NOT NULL
-          AND approved_at <= NOW() - INTERVAL '30 days'
-      `);
-    }
-
-    if (exists("myeongun_payment_pending")) statements.push(sql`
-      DELETE FROM myeongun_payment_pending
-      WHERE expires_at <= NOW() - INTERVAL '24 hours'
-    `);
-    if (exists("myeongun_premium_generation_lock")) statements.push(sql`
-      DELETE FROM myeongun_premium_generation_lock WHERE locked_until <= NOW()
-    `);
-    if (exists("myeongun_premium_report_locks")) statements.push(sql`
-      DELETE FROM myeongun_premium_report_locks WHERE locked_until <= NOW()
-    `);
-    if (exists("myeongun_reopen_rate_limit")) statements.push(sql`
-      DELETE FROM myeongun_reopen_rate_limit WHERE window_ends_at <= NOW()
-    `);
-
-    if (statements.length > 0) {
-      await sql.transaction(statements);
-    }
 
     return NextResponse.json(
       {
-        mode: "execute",
-        deletionPerformed: statements.length > 0,
-        approvalDateColumnPresent: approved,
-        countsBefore: before,
-        message: "트랜잭션 처리가 완료되었습니다. 승인일 미확인 주문은 보존했습니다.",
+        mode: "preview-only",
+        deletionPerformed: false,
+        cleanupExecuteSettingIgnored: true,
+        counts,
+        notes: [
+          "조회 전용입니다. 개인정보를 삭제하지 않습니다.",
+          "null은 테이블 또는 필요한 컬럼이 확인되지 않아 집계하지 못했다는 뜻입니다.",
+          "30일 경과 주문 수는 삭제 승인 수가 아닙니다. 보관 정책과 법적 예외 검토가 필요합니다.",
+          "만료된 심화 궁합 결과와 이용 기록을 별도 집계합니다.",
+          "결제 거래 기록은 조회하거나 삭제하지 않습니다.",
+        ],
       },
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch {
     return NextResponse.json(
-      { error: "Cleanup failed; transaction not confirmed" },
+      { error: "Cleanup preview failed" },
       { status: 500, headers: { "Cache-Control": "no-store" } }
     );
   }
