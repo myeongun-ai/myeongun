@@ -121,6 +121,8 @@ export default function RootLayout({
               <h3>고객지원</h3>
               <Link href="/mypage">나의 명운</Link>
               <Link href="/payment/reopen">결제 사주 재열람</Link>
+              <Link href="/privacy">개인정보처리방침</Link>
+              <Link href="/terms">이용약관</Link>
               <Link href="/refund">환불정책</Link>
               <span>고객센터 평일 10:00 - 16:00</span>
               <span>대표전화 02-6085-5868</span>
@@ -675,4 +677,3 @@ export default function RootLayout({
     </html>
   );
 }
-
